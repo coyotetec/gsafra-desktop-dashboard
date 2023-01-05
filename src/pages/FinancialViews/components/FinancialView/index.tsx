@@ -7,7 +7,7 @@ import { UserContext } from '../../../../components/App';
 import { DateInput } from '../../../../components/DateInput';
 import { NotAllowed } from '../../../../components/NotAllowed';
 import FinancialViewsService from '../../../../services/FinancialViewsService';
-import { View } from '../../../../types/FinancialViews';
+import { View, ViewTotal, ViewTotalizer } from '../../../../types/FinancialViews';
 import { FinancialViewChart } from '../FinancialViewChart';
 import { Container } from './styles';
 
@@ -18,9 +18,11 @@ interface RangeDates {
 
 type FinancialViewProps = View
 
-export function FinancialView({ id, nome, }: FinancialViewProps) {
+export function FinancialView({ id, nome }: FinancialViewProps) {
   const [labels, setLabels] = useState<string[]>([]);
   const [total, setTotal] = useState<number[]>([]);
+  const [data, setData] = useState<ViewTotal[]>([]);
+  const [totalizers, setTotalizers] = useState<ViewTotalizer[]>([]);
   const [rangeDates, setRangeDates] = useState<RangeDates>({
     startDate: subMonths(new Date(), 12),
     endDate: new Date(),
@@ -49,8 +51,10 @@ export function FinancialView({ id, nome, }: FinancialViewProps) {
           endDateParsed
         );
 
-        setLabels(viewTotalData.map((item) => item.nome));
-        setTotal(viewTotalData.map((item) => item.total));
+        setLabels(viewTotalData.data.map((item) => item.nome));
+        setTotal(viewTotalData.data.map((item) => item.total));
+        setData(viewTotalData.data);
+        setTotalizers(viewTotalData.totalizadores);
       }
     }
 
@@ -103,7 +107,19 @@ export function FinancialView({ id, nome, }: FinancialViewProps) {
       </header>
       <div className="card" ref={chartRef}>
         {!hasPermission('indicadores_financeiros') && <NotAllowed />}
-        <FinancialViewChart labels={labels} data={total} />
+        <FinancialViewChart allData={data} labels={labels} data={total} />
+        <div className="totalizers">
+          {totalizers.map((totalizer) => (
+            <div key={totalizer.nome} className={`totalizer-item ${totalizer.error && 'has-error'}`}>
+              <strong>{totalizer.nome}: </strong>
+              <span>{totalizer.total || totalizer.error || ''}</span>
+            </div>
+          ))}
+          <div className={'totalizer-item'}>
+            <strong>Somatória Geral: </strong>
+            <span>R$ 71.281,67</span>
+          </div>
+        </div>
         <footer data-html2canvas-ignore>
           <Link
             to={`${id}?startDate=${format(rangeDates.startDate, 'dd-MM-yyyy')

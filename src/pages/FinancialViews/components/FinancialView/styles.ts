@@ -36,6 +36,37 @@ export const Container = styled.div`
     margin-top: 8px;
     position: relative;
 
+    .totalizers {
+      margin-top: 8px;
+
+      .totalizer-item {
+        width: 100%;
+        background: #506167;
+        padding: 12px;
+        border-radius: 8px;
+        font-size: 14px;
+
+        & + .totalizer-item {
+          margin-top: 8px;
+        }
+
+        &.has-error span {
+          color: #FF5555;
+          font-size: 14px;
+        }
+
+        strong {
+          font-weight: 500;
+          /* display: block; */
+        }
+
+        span {
+          font-weight: 600;
+          font-size: 16px;
+        }
+      }
+    }
+
     > footer {
       display: flex;
       justify-content: space-between;

@@ -7,13 +7,15 @@ import { currencyFormat } from '../../../../utils/currencyFormat';
 import emptyIllustration from '../../../../assets/images/empty.svg';
 import { ArrowLeft, ArrowRight } from 'phosphor-react';
 import { useEffect, useMemo, useState } from 'react';
+import { ViewTotal } from '../../../../types/FinancialViews';
 
 interface FinancialViewChartProps {
   labels: string[];
   data: number[];
+  allData: ViewTotal[];
 }
 
-export function FinancialViewChart({ labels, data }: FinancialViewChartProps) {
+export function FinancialViewChart({ allData, labels, data }: FinancialViewChartProps) {
   const [currentPage, setCurrentPage] = useState(0);
   const dataToShow = useMemo(() => ({
     labels: labels.slice(currentPage * 7, (currentPage * 7) + 7),
@@ -99,7 +101,9 @@ export function FinancialViewChart({ labels, data }: FinancialViewChartProps) {
                     weight: 600
                   },
                   formatter(value) {
-                    return currencyFormat(value);
+                    const item = allData.find((i) => i.total === value);
+
+                    return currencyFormat(item?.totalReal || 0);
                   },
                 }
               },

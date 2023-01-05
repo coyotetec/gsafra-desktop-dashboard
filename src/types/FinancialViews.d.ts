@@ -5,8 +5,16 @@ export interface View {
 }
 
 export interface ViewTotal {
+  id: number;
   nome: string;
   total: number;
+  totalReal: number;
+}
+
+export interface ViewTotalizer {
+  nome: string;
+  total?: string;
+  error?: string;
 }
 
 export interface ViewDetail {
