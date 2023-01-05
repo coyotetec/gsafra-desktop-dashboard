@@ -115,10 +115,6 @@ export function FinancialView({ id, nome }: FinancialViewProps) {
               <span>{totalizer.total || totalizer.error || ''}</span>
             </div>
           ))}
-          <div className={'totalizer-item'}>
-            <strong>Somatória Geral: </strong>
-            <span>R$ 71.281,67</span>
-          </div>
         </div>
         <footer data-html2canvas-ignore>
           <Link

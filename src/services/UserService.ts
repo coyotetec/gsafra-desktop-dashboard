@@ -1,10 +1,11 @@
 import HttpClient from './utils/HttpClient';
+import { PORT } from './utils/info';
 
 class SafraService {
   private httpClient: HttpClient;
 
   constructor() {
-    this.httpClient = new HttpClient('http://localhost:3001');
+    this.httpClient = new HttpClient(`http://localhost:${PORT}`);
   }
 
   findPermissions(userId: number): Promise<PermissionType[]> {

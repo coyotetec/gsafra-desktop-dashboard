@@ -1,11 +1,12 @@
 import { PlanoContas, PlanoContasTotal } from '../types/PlanoContas';
 import HttpClient from './utils/HttpClient';
+import { PORT } from './utils/info';
 
 class PlanoContasService {
   private httpClient: HttpClient;
 
   constructor() {
-    this.httpClient = new HttpClient('http://localhost:3001');
+    this.httpClient = new HttpClient(`http://localhost:${PORT}`);
   }
 
   findPlanoContas(type?: 'receita' | 'despesa', category?: 'sintetica' | 'analitica'): Promise<PlanoContas[]> {

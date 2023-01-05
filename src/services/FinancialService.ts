@@ -1,11 +1,12 @@
 import HttpClient from './utils/HttpClient';
 import { CashFlow, Total } from '../types/Financial';
+import { PORT } from './utils/info';
 
 class FinancialService {
   private httpClient: HttpClient;
 
   constructor() {
-    this.httpClient = new HttpClient('http://localhost:3001');
+    this.httpClient = new HttpClient(`http://localhost:${PORT}`);
   }
 
   findPayableTotal(safraId?: string): Promise<Total> {

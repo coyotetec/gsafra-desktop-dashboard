@@ -1,5 +1,6 @@
 import { View, ViewDetail, ViewTotal, ViewTotalizer } from '../types/FinancialViews';
 import HttpClient from './utils/HttpClient';
+import { PORT } from './utils/info';
 
 interface ViewTotalReturn {
   data: ViewTotal[],
@@ -10,7 +11,7 @@ class FinancialViewsService {
   private httpClient: HttpClient;
 
   constructor() {
-    this.httpClient = new HttpClient('http://localhost:3001');
+    this.httpClient = new HttpClient(`http://localhost:${PORT}`);
   }
 
   findViews(): Promise<View[]> {
