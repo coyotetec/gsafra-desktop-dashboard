@@ -69,6 +69,7 @@ export function FinancialViewsDetails() {
         'NOME DA SEÇÃO': i.nome,
         'DATA': format(new Date(i.data), 'dd/MM/yyyy'),
         'VALOR': i.valor,
+        'TIPO DE LANCAMENTO': i.tipoLancamento,
         'DESCRIÇÃO': i.descricao,
         'CONTA BANCÁRIA': i.contaBancaria,
         'PESSOA': i.pessoa,
@@ -162,6 +163,7 @@ export function FinancialViewsDetails() {
         <Column field="data" header="Data" body={(rowData) => format(new Date(rowData.data), 'dd/MM/yyyy')} />
         <Column field="descricao" header="Descricao" />
         <Column field="valor" header="Valor" body={(rowData) => currencyFormat(rowData.valor)} />
+        <Column field="tipoLancamento" header="D/C" />
         <Column field="pessoa" header="Pessoa" />
         <Column field="contaBancaria" header="Conta Bancaria" />
         <Column field="documento" header="Documento" />

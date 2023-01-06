@@ -8,6 +8,7 @@ import { DateInput } from '../../../../components/DateInput';
 import { NotAllowed } from '../../../../components/NotAllowed';
 import FinancialViewsService from '../../../../services/FinancialViewsService';
 import { View, ViewTotal, ViewTotalizer } from '../../../../types/FinancialViews';
+import { currencyFormat } from '../../../../utils/currencyFormat';
 import { FinancialViewChart } from '../FinancialViewChart';
 import { Container } from './styles';
 
@@ -112,7 +113,7 @@ export function FinancialView({ id, nome }: FinancialViewProps) {
           {totalizers.map((totalizer) => (
             <div key={totalizer.nome} className={`totalizer-item ${totalizer.error && 'has-error'}`}>
               <strong>{totalizer.nome}: </strong>
-              <span>{totalizer.total || totalizer.error || ''}</span>
+              <span>{totalizer.error || currencyFormat(Number(totalizer.total))}</span>
             </div>
           ))}
         </div>

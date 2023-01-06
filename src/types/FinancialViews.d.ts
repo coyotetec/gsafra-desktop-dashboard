@@ -21,6 +21,7 @@ export interface ViewDetail {
   nome: string;
   data: Date;
   valor: number;
+  tipoLancamento?: string;
   descricao: string;
   contaBancaria: string;
   pessoa: string;
