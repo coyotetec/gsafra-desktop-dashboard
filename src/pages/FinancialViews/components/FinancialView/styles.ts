@@ -55,6 +55,10 @@ export const Container = styled.div`
           font-size: 14px;
         }
 
+        &.negative span {
+          color: #FF5555;
+        }
+
         strong {
           font-weight: 500;
           /* display: block; */

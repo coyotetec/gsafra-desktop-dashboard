@@ -139,7 +139,10 @@ export function FinancialView({ id, nome, periodoPadraoMeses }: FinancialViewPro
         <FinancialViewChart allData={data} labels={labels} data={total} />
         <div className="totalizers">
           {totalizers.map((totalizer) => (
-            <div key={totalizer.nome} className={`totalizer-item ${totalizer.error && 'has-error'}`}>
+            <div
+              key={totalizer.nome}
+              className={`totalizer-item ${totalizer.error && 'has-error'} ${Number(totalizer.total) < 0 && 'negative'}`}
+            >
               <strong>{totalizer.nome}: </strong>
               {totalizer.error && <span>{totalizer.error}</span>}
               {totalizer.formato === 1 && <span>{currencyFormat(Number(totalizer.total))}</span>}

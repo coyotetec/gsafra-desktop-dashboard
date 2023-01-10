@@ -97,8 +97,13 @@ export function FinancialViewChart({ allData, labels, data }: FinancialViewChart
                   align: 'end',
                   textAlign: 'left',
                   anchor: 'end',
+                  color(context) {
+                    const item = allData[context.dataIndex];
+
+                    return item.totalReal < 0 ? '#FF5555' : '#CFD4D6';
+                  },
                   font: {
-                    weight: 600
+                    weight: 600,
                   },
                   formatter(value) {
                     const item = allData.find((i) => i.total === value);
