@@ -2,6 +2,7 @@ export interface View {
   id: number;
   nome: string;
   situacao: number;
+  periodoPadraoMeses: number;
 }
 
 export interface ViewTotal {
@@ -15,6 +16,7 @@ export interface ViewTotalizer {
   nome: string;
   total?: string;
   error?: string;
+  formato?: number;
 }
 
 export interface ViewDetail {

@@ -20,7 +20,7 @@ export const Container = styled.main`
   .views-grid {
     margin-top: 32px;
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
+    grid-template-columns: 1fr;
+    gap: 24px;
   }
 `;

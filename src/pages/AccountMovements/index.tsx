@@ -18,8 +18,8 @@ import { FileXls } from 'phosphor-react';
 import { WorkBook } from 'xlsx';
 
 interface RangeDates {
-  startDate: Date;
-  endDate: Date;
+  startDate: Date | null;
+  endDate: Date | null;
 }
 
 export function AccountMovements() {
@@ -37,23 +37,21 @@ export function AccountMovements() {
   const [selectedSafra, setSelectedSafra] = useState(safraId);
   const [selectedChartAccount, setSelectedChartAccount] = useState<TreeSelectSelectionKeys>(codigo);
   const [rangeDates, setRangeDate] = useState<RangeDates>({
-    startDate: parse(startDate, 'dd-MM-yyyy', new Date()),
-    endDate: parse(endDate, 'dd-MM-yyyy', new Date()),
+    startDate: startDate === '_' ? null : parse(startDate, 'dd-MM-yyyy', new Date()),
+    endDate: endDate === '_' ? null : parse(endDate, 'dd-MM-yyyy', new Date()),
   });
 
   useEffect(() => {
     async function loadData() {
       setIsLoading(true);
-      if (!rangeDates.startDate || !rangeDates.endDate) {
+
+      if (rangeDates.endDate && rangeDates.startDate && rangeDates.endDate < rangeDates.startDate) {
+        setIsLoading(false);
         return;
       }
 
-      if (rangeDates.endDate < rangeDates.startDate) {
-        return;
-      }
-
-      const startDateParsed = format(rangeDates.startDate, 'dd-MM-yyyy');
-      const endDateParsed = format(rangeDates.endDate, 'dd-MM-yyyy');
+      const startDateParsed = rangeDates.startDate ? format(rangeDates.startDate, 'dd-MM-yyyy') : '';
+      const endDateParsed = rangeDates.endDate ? format(rangeDates.endDate, 'dd-MM-yyyy') : '';
 
       const accountMovementsData = await MovimentoContaService.findMovimentoContas(
         String(selectedChartAccount),
@@ -82,7 +80,7 @@ export function AccountMovements() {
         'TIPO DE DOCUMENTO': i.tipoDocumento
       })));
 
-      for(let i = 2; i <= accountMovements.length + 1; i++) {
+      for (let i = 2; i <= accountMovements.length + 1; i++) {
         worksheet[`B${i}`].z = 'dd"/"mm"/"yyyy';
         worksheet[`C${i}`].z = '[$R$]#,##0.00';
         worksheet[`D${i}`].z = '[$R$]#,##0.00';
@@ -98,7 +96,8 @@ export function AccountMovements() {
       const excelBuffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'array' });
       saveAsExcelFile(
         excelBuffer,
-        `MOVIMENTOS DE CONTA ${format(rangeDates.startDate, 'dd-MM-yyyy')} À ${format(rangeDates.endDate, 'dd-MM-yyyy')}`
+        `MOVIMENTOS DE CONTA ${rangeDates.startDate ? format(rangeDates.startDate, 'dd-MM-yyyy') : '-'
+        } À ${rangeDates.endDate ? format(rangeDates.endDate, 'dd-MM-yyyy') : '-'}`
       );
     });
   }
@@ -141,7 +140,7 @@ export function AccountMovements() {
                 startDate: date
               }))}
               placeholder='Data Inicial'
-              defaultDate={parse(startDate, 'dd-MM-yyyy', new Date())}
+              defaultDate={startDate === '_' ? null : parse(startDate, 'dd-MM-yyyy', new Date())}
             />
             <strong>à</strong>
             <DateInput
@@ -150,7 +149,7 @@ export function AccountMovements() {
                 endDate: date
               }))}
               placeholder='Data Final'
-              defaultDate={parse(endDate, 'dd-MM-yyyy', new Date())}
+              defaultDate={endDate === '_' ? null : parse(endDate, 'dd-MM-yyyy', new Date())}
             />
           </div>
           <button className="export-button" onClick={handleExportExcel}>

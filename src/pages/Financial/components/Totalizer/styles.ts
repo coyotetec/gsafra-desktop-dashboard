@@ -27,9 +27,26 @@ interface DetailProps {
 export const Container = styled.section`
   margin-top: 32px;
 
-  h3 {
-    font-size: 14px;
-    font-weight: 600;
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+
+    h3 {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    > div {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      strong {
+        font-size: 14px;
+        font-weight: 500;
+      }
+    }
   }
 `;
 

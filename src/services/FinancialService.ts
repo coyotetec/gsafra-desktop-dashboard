@@ -9,17 +9,17 @@ class FinancialService {
     this.httpClient = new HttpClient(`http://localhost:${PORT}`);
   }
 
-  findPayableTotal(safraId?: string): Promise<Total> {
+  findPayableTotal(startDate: string, endDate: string, safraId?: string): Promise<Total> {
     return this.httpClient.get(safraId
-      ? `/financeiro/pagar/total?idSafra=${safraId}`
-      : '/financeiro/pagar/total'
+      ? `/financeiro/pagar/total?startDate=${startDate}&endDate=${endDate}&idSafra=${safraId}`
+      : `/financeiro/pagar/total?startDate=${startDate}&endDate=${endDate}`
     );
   }
 
-  findReceivableTotal(safraId?: string): Promise<Total> {
+  findReceivableTotal(startDate: string, endDate: string, safraId?: string): Promise<Total> {
     return this.httpClient.get(safraId
-      ? `/financeiro/receber/total?idSafra=${safraId}`
-      : '/financeiro/receber/total'
+      ? `/financeiro/receber/total?startDate=${startDate}&endDate=${endDate}&idSafra=${safraId}`
+      : `/financeiro/receber/total?startDate=${startDate}&endDate=${endDate}`
     );
   }
 

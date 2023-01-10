@@ -44,7 +44,7 @@ export function FinancialViewChart({ allData, labels, data }: FinancialViewChart
         <ChartContainer>
           <Bar
             data={{
-              labels: dataToShow.labels.map(i => `${i.slice(0, 20)}${i.length > 20 ? '...' : ''}`),
+              labels: dataToShow.labels.map(i => `${i.slice(0, 40)}${i.length > 40 ? '...' : ''}`),
               datasets: [
                 {
                   data: dataToShow.data,
@@ -75,7 +75,7 @@ export function FinancialViewChart({ allData, labels, data }: FinancialViewChart
                   },
                   stacked: true,
                   min: 0,
-                  max: dataToShow ? getHigherValue(dataToShow.data) * 1.55 : 0
+                  max: dataToShow ? getHigherValue(dataToShow.data) * 1.5 : 0
                 },
                 y: {
                   beginAtZero: true,
@@ -91,7 +91,7 @@ export function FinancialViewChart({ allData, labels, data }: FinancialViewChart
                   display: false,
                 },
                 tooltip: {
-                  enabled: false,
+                  // enabled: false,
                 },
                 datalabels: {
                   align: 'end',

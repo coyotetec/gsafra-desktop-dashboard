@@ -5,8 +5,8 @@ import { Wrapper } from './styles';
 interface DateInputProps {
   label?: string;
   placeholder?: string;
-  defaultDate?: Date;
-  onChangeDate?: (_params: Date) => void;
+  defaultDate?: Date | null;
+  onChangeDate?: (_params: Date | null) => void;
 }
 
 export function DateInput({
@@ -15,7 +15,7 @@ export function DateInput({
   defaultDate,
   onChangeDate
 }: DateInputProps) {
-  const { ref, typedValue } = useIMask({
+  const { ref, typedValue, unmaskedValue } = useIMask({
     mask: Date,
     pattern: 'dd/MM/yyyy',
     blocks: {
@@ -40,8 +40,14 @@ export function DateInput({
   });
 
   function handleInputChange() {
-    if (typedValue && onChangeDate) {
-      onChangeDate(typedValue);
+    if (onChangeDate) {
+      if (typedValue) {
+        onChangeDate(typedValue);
+      }
+
+      if (unmaskedValue === '') {
+        onChangeDate(null);
+      }
     }
   }
 

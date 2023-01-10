@@ -14,8 +14,8 @@ import { format } from 'date-fns';
 interface CashFlowChartProps {
   labels: string[];
   cashFlow: CashFlow;
-  startDate: Date;
-  endDate: Date;
+  startDate: Date | null;
+  endDate: Date | null;
 }
 
 export function CashFlowChart({ labels, cashFlow, startDate, endDate }: CashFlowChartProps) {
@@ -42,7 +42,9 @@ export function CashFlowChart({ labels, cashFlow, startDate, endDate }: CashFlow
       const a = document.createElement('a');
       a.href = canvas.toDataURL('image/png');
       a.target = '_blank';
-      a.download = `FLUXO DE CAIXA ${format(startDate, 'dd-MM-yyyy')} À ${format(endDate, 'dd-MM-yyyy')}`;
+      a.download = `FLUXO DE CAIXA ${
+        startDate ? format(startDate, 'dd-MM-yyyy') : '-'
+      } À ${endDate ? format(endDate, 'dd-MM-yyyy') : '-'}`;
       a.click();
     });
   }

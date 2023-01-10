@@ -9,10 +9,10 @@ class CheckService {
     this.httpClient = new HttpClient(`http://localhost:${PORT}`);
   }
 
-  findTotal(safraId?: string): Promise<CreditCardTotal> {
+  findTotal(startDate: string, endDate: string, safraId?: string): Promise<CreditCardTotal> {
     return this.httpClient.get(safraId
-      ? `/financeiro/cartao/total?idSafra=${safraId}`
-      : '/financeiro/cartao/total'
+      ? `/financeiro/cartao/total?startDate=${startDate}&endDate=${endDate}&idSafra=${safraId}`
+      : `/financeiro/cartao/total?startDate=${startDate}&endDate=${endDate}`
     );
   }
 }

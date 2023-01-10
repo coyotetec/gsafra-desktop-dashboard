@@ -19,6 +19,8 @@ import FinancialService from '../../../../services/FinancialService';
 import useAnimatedUnmount from '../../../../hooks/useAnimatedUnmount';
 import { NotAllowed } from '../../../../components/NotAllowed';
 import { UserContext } from '../../../../components/App';
+import { addMonths, format } from 'date-fns';
+import { DateInput } from '../../../../components/DateInput';
 
 interface TotalizerProps {
   safraId?: string;
@@ -35,6 +37,8 @@ export function Totalizer({ safraId, setIsLoading }: TotalizerProps) {
   const [creditCardTotal, setCreditCardTotal] = useState<CreditCardTotal>();
   const [showPayableDetails, setShowPayableDetails] = useState(false);
   const [showReceivableDetails, setShowReceivableDetails] = useState(false);
+  const [startDate, setStartDate] = useState<Date | null>(new Date());
+  const [endDate, setEndDate] = useState<Date | null>(addMonths(new Date(), 6));
 
   const { hasPermission } = useContext(UserContext);
 
@@ -51,12 +55,22 @@ export function Totalizer({ safraId, setIsLoading }: TotalizerProps) {
   useEffect(() => {
     async function loadTotal() {
       setIsLoading(true);
+      const startDateParsed = startDate ? format(startDate, 'dd-MM-yyyy') : '';
+      const endDateParsed = endDate ? format(endDate, 'dd-MM-yyyy') : '';
 
       if (hasPermission('resumo_pendentes_pagamento')) {
         const payableTotalData = await FinancialService
-          .findPayableTotal(safraId !== '_' ? safraId : undefined);
+          .findPayableTotal(
+            startDateParsed,
+            endDateParsed,
+            safraId !== '_' ? safraId : undefined
+          );
         const payableCheckTotalData = await CheckService
-          .findPayableCheckTotal(safraId !== '_' ? safraId : undefined);
+          .findPayableCheckTotal(
+            startDateParsed,
+            endDateParsed,
+            safraId !== '_' ? safraId : undefined
+          );
         const sumPayableTotalData = sumTotal(
           [payableTotalData, payableCheckTotalData]
         );
@@ -68,9 +82,17 @@ export function Totalizer({ safraId, setIsLoading }: TotalizerProps) {
 
       if (hasPermission('resumo_pendentes_recebimento')) {
         const receivableTotalData = await FinancialService
-          .findReceivableTotal(safraId !== '_' ? safraId : undefined);
+          .findReceivableTotal(
+            startDateParsed,
+            endDateParsed,
+            safraId !== '_' ? safraId : undefined
+          );
         const receivableCheckTotalData = await CheckService
-          .findReceivableCheckTotal(safraId !== '_' ? safraId : undefined);
+          .findReceivableCheckTotal(
+            startDateParsed,
+            endDateParsed,
+            safraId !== '_' ? safraId : undefined
+          );
         const sumReceivableTotalData = sumTotal(
           [receivableTotalData, receivableCheckTotalData]
         );
@@ -82,7 +104,11 @@ export function Totalizer({ safraId, setIsLoading }: TotalizerProps) {
 
       if (hasPermission('resumo_cartao_credito')) {
         const creditCardTotalData = await CreditCardService
-          .findTotal(safraId !== '_' ? safraId : undefined);
+          .findTotal(
+            startDateParsed,
+            endDateParsed,
+            safraId !== '_' ? safraId : undefined
+          );
 
         setCreditCardTotal(creditCardTotalData);
       }
@@ -91,11 +117,26 @@ export function Totalizer({ safraId, setIsLoading }: TotalizerProps) {
     }
 
     loadTotal();
-  }, [hasPermission, safraId, setIsLoading]);
+  }, [hasPermission, startDate, endDate, safraId, setIsLoading]);
 
   return (
     <Container>
-      <h3>RESUMO</h3>
+      <header>
+        <h3>RESUMO</h3>
+        <div>
+          <DateInput
+            onChangeDate={(date) => setStartDate(date)}
+            placeholder='Data Inicial'
+            defaultDate={new Date()}
+          />
+          <strong>à</strong>
+          <DateInput
+            onChangeDate={(date) => setEndDate(date)}
+            placeholder='Data Final'
+            defaultDate={addMonths(new Date(), 6)}
+          />
+        </div>
+      </header>
 
       <CardsList>
         <div className="card">

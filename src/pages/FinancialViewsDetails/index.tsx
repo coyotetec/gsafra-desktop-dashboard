@@ -15,8 +15,8 @@ import { currencyFormat } from '../../utils/currencyFormat';
 import { Container, Table } from './styles';
 
 interface RangeDates {
-  startDate: Date;
-  endDate: Date;
+  startDate: Date | null;
+  endDate: Date | null;
 }
 
 export function FinancialViewsDetails() {
@@ -31,23 +31,21 @@ export function FinancialViewsDetails() {
   const name = query.get('name') as string;
 
   const [rangeDates, setRangeDate] = useState<RangeDates>({
-    startDate: parse(startDate, 'dd-MM-yyyy', new Date()),
-    endDate: parse(endDate, 'dd-MM-yyyy', new Date()),
+    startDate: startDate === '_' ? null : parse(startDate, 'dd-MM-yyyy', new Date()),
+    endDate: endDate === '_' ? null : parse(endDate, 'dd-MM-yyyy', new Date()),
   });
 
   useEffect(() => {
     async function loadData() {
       setIsLoading(true);
-      if (!rangeDates.startDate || !rangeDates.endDate) {
+
+      if (rangeDates.endDate && rangeDates.startDate && rangeDates.endDate < rangeDates.startDate) {
+        setIsLoading(false);
         return;
       }
 
-      if (rangeDates.endDate < rangeDates.startDate) {
-        return;
-      }
-
-      const startDateParsed = format(rangeDates.startDate, 'dd-MM-yyyy');
-      const endDateParsed = format(rangeDates.endDate, 'dd-MM-yyyy');
+      const startDateParsed = rangeDates.startDate ? format(rangeDates.startDate, 'dd-MM-yyyy') : '';
+      const endDateParsed = rangeDates.endDate ? format(rangeDates.endDate, 'dd-MM-yyyy') : '';
 
       const viewDetailsData = await FinancialViewsService.findViewDetails(
         Number(id),
@@ -92,7 +90,9 @@ export function FinancialViewsDetails() {
       const excelBuffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'array' });
       saveAsExcelFile(
         excelBuffer,
-        `INDICADOR FINANCEIRO ${format(rangeDates.startDate, 'dd-MM-yyyy')} À ${format(rangeDates.endDate, 'dd-MM-yyyy')}`
+        `INDICADOR FINANCEIRO ${
+          rangeDates.startDate ? format(rangeDates.startDate, 'dd-MM-yyyy') : '-'
+        } À ${rangeDates.endDate ? format(rangeDates.endDate, 'dd-MM-yyyy') : '-'}`
       );
     });
   }
@@ -128,7 +128,7 @@ export function FinancialViewsDetails() {
               startDate: date
             }))}
             placeholder='Data Inicial'
-            defaultDate={parse(startDate, 'dd-MM-yyyy', new Date())}
+            defaultDate={startDate === '_' ? null : parse(startDate, 'dd-MM-yyyy', new Date())}
           />
           <strong>à</strong>
           <DateInput
@@ -137,7 +137,7 @@ export function FinancialViewsDetails() {
               endDate: date
             }))}
             placeholder='Data Final'
-            defaultDate={parse(endDate, 'dd-MM-yyyy', new Date())}
+            defaultDate={endDate === '_' ? null : parse(endDate, 'dd-MM-yyyy', new Date())}
           />
         </div>
         <button className="export-button" onClick={handleExportExcel}>

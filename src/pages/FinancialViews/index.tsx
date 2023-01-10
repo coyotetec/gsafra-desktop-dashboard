@@ -42,7 +42,7 @@ export function FinancialViews() {
             <FinancialView key={view.id} {...view} />
           ))
           : (
-            <FinancialView id={1} nome="Indicador" situacao={1} />
+            <FinancialView id={1} nome="Indicador" situacao={1} periodoPadraoMeses={12} />
           )}
       </div>
     </Container>

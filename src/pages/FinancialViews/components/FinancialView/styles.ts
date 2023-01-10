@@ -88,3 +88,17 @@ export const Container = styled.div`
     }
   }
 `;
+
+export const Loader = styled.div`
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: rgba(48, 69, 76, 0.7);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+`;

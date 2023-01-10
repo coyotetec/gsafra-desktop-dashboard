@@ -9,17 +9,17 @@ class CheckService {
     this.httpClient = new HttpClient(`http://localhost:${PORT}`);
   }
 
-  findPayableCheckTotal(safraId?: string): Promise<Total> {
+  findPayableCheckTotal(startDate: string, endDate: string, safraId?: string): Promise<Total> {
     return this.httpClient.get(safraId
-      ? `/financeiro/cheque/pagar/total?idSafra=${safraId}`
-      : '/financeiro/cheque/pagar/total'
+      ? `/financeiro/cheque/pagar/total?startDate=${startDate}&endDate=${endDate}&idSafra=${safraId}`
+      : `/financeiro/cheque/pagar/total?startDate=${startDate}&endDate=${endDate}`
     );
   }
 
-  findReceivableCheckTotal(safraId?: string): Promise<Total> {
+  findReceivableCheckTotal(startDate: string, endDate: string, safraId?: string): Promise<Total> {
     return this.httpClient.get(safraId
-      ? `/financeiro/cheque/receber/total?idSafra=${safraId}`
-      : '/financeiro/cheque/receber/total'
+      ? `/financeiro/cheque/receber/total?startDate=${startDate}&endDate=${endDate}&idSafra=${safraId}`
+      : `/financeiro/cheque/receber/total?startDate=${startDate}&endDate=${endDate}`
     );
   }
 }

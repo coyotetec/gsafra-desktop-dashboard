@@ -16,8 +16,8 @@ interface CashFlowProps {
 }
 
 export function CashFlow({ safraId, setIsLoading }: CashFlowProps) {
-  const [startDate, setStartDate] = useState<Date>(new Date());
-  const [endDate, setEndDate] = useState<Date>(addMonths(new Date(), 6));
+  const [startDate, setStartDate] = useState<Date | null>(new Date());
+  const [endDate, setEndDate] = useState<Date | null>(addMonths(new Date(), 6));
   const [labels, setLabels] = useState<string[]>([]);
   const [cashFlow, setCashFlow] = useState<CashFlowType>({} as CashFlowType);
 
@@ -26,16 +26,19 @@ export function CashFlow({ safraId, setIsLoading }: CashFlowProps) {
   const loadData = useCallback(async () => {
     if (hasPermission('fluxo_caixa')) {
       setIsLoading(true);
-      const startDateParsed = format(startDate, 'dd-MM-yyyy');
-      const endDateParsed = format(endDate, 'dd-MM-yyyy');
 
       if (!startDate || !endDate) {
+        setIsLoading(false);
         return;
       }
 
       if (startDate > endDate) {
+        setIsLoading(false);
         return;
       }
+
+      const startDateParsed = format(startDate, 'dd-MM-yyyy');
+      const endDateParsed = format(endDate, 'dd-MM-yyyy');
 
       const cashFlowData = await FinancialService.findCashFlow(
         startDateParsed,

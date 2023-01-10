@@ -21,8 +21,8 @@ interface ChartAccountsProps {
 }
 
 interface RangeDates {
-  startDate: Date;
-  endDate: Date;
+  startDate: Date | null;
+  endDate: Date | null;
 }
 
 export function ChartAccounts({ safraId }: ChartAccountsProps) {
@@ -57,16 +57,13 @@ export function ChartAccounts({ safraId }: ChartAccountsProps) {
           return;
         }
 
-        if (!creditRangeDates.startDate || !creditRangeDates.endDate) {
+        if (creditRangeDates.endDate && creditRangeDates.startDate && creditRangeDates.endDate < creditRangeDates.startDate) {
+          setCreditTotalIsLoading(false);
           return;
         }
 
-        if (creditRangeDates.endDate < creditRangeDates.startDate) {
-          return;
-        }
-
-        const startDateParsed = format(creditRangeDates.startDate, 'dd-MM-yyyy');
-        const endDateParsed = format(creditRangeDates.endDate, 'dd-MM-yyyy');
+        const startDateParsed = creditRangeDates.startDate ? format(creditRangeDates.startDate, 'dd-MM-yyyy') : '';
+        const endDateParsed = creditRangeDates.endDate ? format(creditRangeDates.endDate, 'dd-MM-yyyy') : '';
 
         const creditTotalData = await PlanoContaService
           .findPlanoContasTotal(
@@ -94,16 +91,13 @@ export function ChartAccounts({ safraId }: ChartAccountsProps) {
           return;
         }
 
-        if (!debitRangeDates.startDate || !debitRangeDates.endDate) {
+        if (debitRangeDates.endDate && debitRangeDates.startDate && debitRangeDates.endDate < debitRangeDates.startDate) {
+          setDebitTotalIsLoading(false);
           return;
         }
 
-        if (debitRangeDates.endDate < debitRangeDates.startDate) {
-          return;
-        }
-
-        const startDateParsed = format(debitRangeDates.startDate, 'dd-MM-yyyy');
-        const endDateParsed = format(debitRangeDates.endDate, 'dd-MM-yyyy');
+        const startDateParsed = debitRangeDates.startDate ? format(debitRangeDates.startDate, 'dd-MM-yyyy') : '';
+        const endDateParsed = debitRangeDates.endDate ? format(debitRangeDates.endDate, 'dd-MM-yyyy') : '';
 
         const debitTotalData = await PlanoContaService
           .findPlanoContasTotal(
@@ -125,8 +119,12 @@ export function ChartAccounts({ safraId }: ChartAccountsProps) {
   function handleSaveChart(type: 'credit' | 'debit') {
     const chartElement = type === 'credit' ? creditChartRef.current : debitChartRef.current;
     const fileName = type === 'credit'
-      ? `CRÉDITOS COMPENSADOS ${format(creditRangeDates.startDate, 'dd-MM-yyyy')} À ${format(creditRangeDates.endDate, 'dd-MM-yyyy')}`
-      : `DÉBITOS COMPENSADOS ${format(debitRangeDates.startDate, 'dd-MM-yyyy')} À ${format(debitRangeDates.endDate, 'dd-MM-yyyy')}`;
+      ? `CRÉDITOS COMPENSADOS ${
+        creditRangeDates.startDate ? format(creditRangeDates.startDate, 'dd-MM-yyyy') : '-'
+      } À ${creditRangeDates.endDate ? format(creditRangeDates.endDate, 'dd-MM-yyyy') : '-'}`
+      : `DÉBITOS COMPENSADOS ${
+        debitRangeDates.startDate ? format(debitRangeDates.startDate, 'dd-MM-yyyy') : '-'
+      } À ${debitRangeDates.endDate ? format(debitRangeDates.endDate, 'dd-MM-yyyy') : '-'}`;
 
     if (!chartElement) {
       return;
@@ -192,8 +190,8 @@ export function ChartAccounts({ safraId }: ChartAccountsProps) {
             <footer data-html2canvas-ignore>
               <Link
                 to={`movimento-contas/analitica?type=debit&codigo=${(selectedDebit)
-                }&startDate=${format(debitRangeDates.startDate, 'dd-MM-yyyy')
-                }&endDate=${format(debitRangeDates.endDate, 'dd-MM-yyyy')
+                }&startDate=${debitRangeDates.startDate ? format(debitRangeDates.startDate, 'dd-MM-yyyy') : '_'
+                }&endDate=${debitRangeDates.endDate ? format(debitRangeDates.endDate, 'dd-MM-yyyy') : '_'
                 }&safraId=${safraId}`}
               >
                 Visão Detalhada
@@ -251,8 +249,8 @@ export function ChartAccounts({ safraId }: ChartAccountsProps) {
             <footer data-html2canvas-ignore>
               <Link
                 to={`movimento-contas/analitica?type=credit&codigo=${(selectedCredit)
-                }&startDate=${format(creditRangeDates.startDate, 'dd-MM-yyyy')
-                }&endDate=${format(creditRangeDates.endDate, 'dd-MM-yyyy')
+                }&startDate=${creditRangeDates.startDate ? format(creditRangeDates.startDate, 'dd-MM-yyyy') : '_'
+                }&endDate=${creditRangeDates.endDate ? format(creditRangeDates.endDate, 'dd-MM-yyyy') : '_'
                 }&safraId=${safraId}`}
               >
                 Visão Detalhada
