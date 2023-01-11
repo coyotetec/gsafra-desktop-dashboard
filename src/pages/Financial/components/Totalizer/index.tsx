@@ -3,6 +3,7 @@ import {
   ArrowCircleDown,
   ArrowCircleRight,
   ArrowCircleUp,
+  ArrowSquareOut,
   CreditCard,
   X,
 } from 'phosphor-react';
@@ -19,12 +20,18 @@ import FinancialService from '../../../../services/FinancialService';
 import useAnimatedUnmount from '../../../../hooks/useAnimatedUnmount';
 import { NotAllowed } from '../../../../components/NotAllowed';
 import { UserContext } from '../../../../components/App';
-import { addMonths, format } from 'date-fns';
+import { addDays, addMonths, format } from 'date-fns';
 import { DateInput } from '../../../../components/DateInput';
+import { useSearchParams } from 'react-router-dom';
 
 interface TotalizerProps {
   safraId?: string;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+interface DetailsModalArgs {
+  type: 'CP' | 'CR' | 'CHP' | 'CHR' | 'CA';
+  period: 0 | 7 | 15;
 }
 
 export function Totalizer({ safraId, setIsLoading }: TotalizerProps) {
@@ -41,6 +48,8 @@ export function Totalizer({ safraId, setIsLoading }: TotalizerProps) {
   const [endDate, setEndDate] = useState<Date | null>(addMonths(new Date(), 6));
 
   const { hasPermission } = useContext(UserContext);
+
+  const [, setQuery] = useSearchParams();
 
   const {
     shouldRender: shouldPayableRender,
@@ -118,6 +127,30 @@ export function Totalizer({ safraId, setIsLoading }: TotalizerProps) {
 
     loadTotal();
   }, [hasPermission, startDate, endDate, safraId, setIsLoading]);
+
+  function handleOpenDetailsModal({ type, period }: DetailsModalArgs) {
+    if (period === 0) {
+      setQuery((prevValue) => {
+        prevValue.set('tela', type);
+        prevValue.set('dataInicial', startDate ? format(startDate, 'dd-MM-yyyy') : '_');
+        prevValue.set('dataFinal', endDate ? format(endDate, 'dd-MM-yyyy') : '_');
+
+        return prevValue;
+      });
+
+      return;
+    }
+
+    if (startDate) {
+      setQuery((prevValue) => {
+        prevValue.set('tela', type);
+        prevValue.set('dataInicial', format(startDate, 'dd-MM-yyyy'));
+        prevValue.set('dataFinal', format(addDays(startDate, period), 'dd-MM-yyyy'));
+
+        return prevValue;
+      });
+    }
+  }
 
   return (
     <Container>
@@ -207,6 +240,18 @@ export function Totalizer({ safraId, setIsLoading }: TotalizerProps) {
           </strong>
           <span>
             {currencyFormat(creditCardTotal?.total || 0)}
+            <button
+              type="button"
+              className="modal-button"
+              style={{
+                transform: 'translateY(0)'
+              }}
+              onClick={() => handleOpenDetailsModal({
+                type: 'CA',
+                period: 0
+              })}>
+              <ArrowSquareOut size={24} color="#00D47E" weight="fill" />
+            </button>
           </span>
           <small>{creditCardTotal?.quantity} itens</small>
           <footer>
@@ -247,18 +292,45 @@ export function Totalizer({ safraId, setIsLoading }: TotalizerProps) {
                 {currencyFormat(payableTotal?.total || 0)}
               </span>
               <small>({payableTotal?.quantity} itens)</small>
+              <button
+                type="button"
+                className="modal-button"
+                onClick={() => handleOpenDetailsModal({
+                  type: 'CP',
+                  period: 0
+                })}>
+                <ArrowSquareOut size={24} color="#00D47E" weight="fill" />
+              </button>
               <ul>
                 <li>
                   Próximos 7 dias:
                   <small>
                     {currencyFormat(payableTotal?.totalNextSeven.total || 0)}
                   </small>
+                  {startDate && (<button
+                    type="button"
+                    className="modal-button"
+                    onClick={() => handleOpenDetailsModal({
+                      type: 'CP',
+                      period: 7
+                    })}>
+                    <ArrowSquareOut size={20} color="#00D47E" weight="fill" />
+                  </button>)}
                 </li>
                 <li>
                   Próximos 15 dias:
                   <small>
                     {currencyFormat(payableTotal?.totalNextSeven.total || 0)}
                   </small>
+                  {startDate && (<button
+                    type="button"
+                    className="modal-button"
+                    onClick={() => handleOpenDetailsModal({
+                      type: 'CP',
+                      period: 15
+                    })}>
+                    <ArrowSquareOut size={20} color="#00D47E" weight="fill" />
+                  </button>)}
                 </li>
               </ul>
             </section>
@@ -271,18 +343,45 @@ export function Totalizer({ safraId, setIsLoading }: TotalizerProps) {
                 {currencyFormat(payableCheckTotal?.total || 0)}
               </span>
               <small>({payableCheckTotal?.quantity} itens)</small>
+              <button
+                type="button"
+                className="modal-button"
+                onClick={() => handleOpenDetailsModal({
+                  type: 'CHP',
+                  period: 0
+                })}>
+                <ArrowSquareOut size={24} color="#00D47E" weight="fill" />
+              </button>
               <ul>
                 <li>
                   Próximos 7 dias:
                   <small>
                     {currencyFormat(payableCheckTotal?.totalNextSeven.total || 0)}
                   </small>
+                  {startDate && (<button
+                    type="button"
+                    className="modal-button"
+                    onClick={() => handleOpenDetailsModal({
+                      type: 'CHP',
+                      period: 7
+                    })}>
+                    <ArrowSquareOut size={20} color="#00D47E" weight="fill" />
+                  </button>)}
                 </li>
                 <li>
                   Próximos 15 dias:
                   <small>
                     {currencyFormat(payableCheckTotal?.totalNextSeven.total || 0)}
                   </small>
+                  {startDate && (<button
+                    type="button"
+                    className="modal-button"
+                    onClick={() => handleOpenDetailsModal({
+                      type: 'CHP',
+                      period: 15
+                    })}>
+                    <ArrowSquareOut size={20} color="#00D47E" weight="fill" />
+                  </button>)}
                 </li>
               </ul>
             </section>
@@ -308,18 +407,45 @@ export function Totalizer({ safraId, setIsLoading }: TotalizerProps) {
                 {currencyFormat(receivableTotal?.total || 0)}
               </span>
               <small>({receivableTotal?.quantity} itens)</small>
+              <button
+                type="button"
+                className="modal-button"
+                onClick={() => handleOpenDetailsModal({
+                  type: 'CR',
+                  period: 0
+                })}>
+                <ArrowSquareOut size={24} color="#00D47E" weight="fill" />
+              </button>
               <ul>
                 <li>
                   Próximos 7 dias:
                   <small>
                     {currencyFormat(receivableTotal?.totalNextSeven.total || 0)}
                   </small>
+                  {startDate && (<button
+                    type="button"
+                    className="modal-button"
+                    onClick={() => handleOpenDetailsModal({
+                      type: 'CR',
+                      period: 7
+                    })}>
+                    <ArrowSquareOut size={20} color="#00D47E" weight="fill" />
+                  </button>)}
                 </li>
                 <li>
                   Próximos 15 dias:
                   <small>
                     {currencyFormat(receivableTotal?.totalNextSeven.total || 0)}
                   </small>
+                  {startDate && (<button
+                    type="button"
+                    className="modal-button"
+                    onClick={() => handleOpenDetailsModal({
+                      type: 'CR',
+                      period: 15
+                    })}>
+                    <ArrowSquareOut size={20} color="#00D47E" weight="fill" />
+                  </button>)}
                 </li>
               </ul>
             </section>
@@ -332,18 +458,45 @@ export function Totalizer({ safraId, setIsLoading }: TotalizerProps) {
                 {currencyFormat(receivableCheckTotal?.total || 0)}
               </span>
               <small>({receivableCheckTotal?.quantity} itens)</small>
+              <button
+                type="button"
+                className="modal-button"
+                onClick={() => handleOpenDetailsModal({
+                  type: 'CHR',
+                  period: 0
+                })}>
+                <ArrowSquareOut size={24} color="#00D47E" weight="fill" />
+              </button>
               <ul>
                 <li>
                   Próximos 7 dias:
                   <small>
                     {currencyFormat(receivableCheckTotal?.totalNextSeven.total || 0)}
                   </small>
+                  {startDate && (<button
+                    type="button"
+                    className="modal-button"
+                    onClick={() => handleOpenDetailsModal({
+                      type: 'CHR',
+                      period: 7
+                    })}>
+                    <ArrowSquareOut size={20} color="#00D47E" weight="fill" />
+                  </button>)}
                 </li>
                 <li>
                   Próximos 15 dias:
                   <small>
                     {currencyFormat(receivableCheckTotal?.totalNextSeven.total || 0)}
                   </small>
+                  {startDate && (<button
+                    type="button"
+                    className="modal-button"
+                    onClick={() => handleOpenDetailsModal({
+                      type: 'CHR',
+                      period: 15
+                    })}>
+                    <ArrowSquareOut size={20} color="#00D47E" weight="fill" />
+                  </button>)}
                 </li>
               </ul>
             </section>

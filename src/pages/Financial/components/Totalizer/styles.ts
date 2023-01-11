@@ -48,6 +48,16 @@ export const Container = styled.section`
       }
     }
   }
+
+  .modal-button {
+    background: transparent;
+    border: 0;
+    margin-left: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transform: translateY(4px);
+  }
 `;
 
 export const CardsList = styled.div`
