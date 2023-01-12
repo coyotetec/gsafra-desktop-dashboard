@@ -5,7 +5,7 @@ interface StyledTreeSelectProps {
   isSecondary: boolean;
 }
 
-export const StyledTreeSelect = styled(TreeSelect) <StyledTreeSelectProps>`
+export const StyledTreeSelect = styled(TreeSelect)<StyledTreeSelectProps>`
   height: 48px;
   background: #30454C;
   border: 1px solid #506167;

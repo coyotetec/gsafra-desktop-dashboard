@@ -10,6 +10,7 @@ export interface ViewTotal {
   nome: string;
   total: number;
   totalReal: number;
+  visivel: boolean;
 }
 
 export interface ViewTotalizer {

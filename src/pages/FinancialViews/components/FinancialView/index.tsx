@@ -59,8 +59,18 @@ export function FinancialView({ id, nome, periodoPadraoMeses }: FinancialViewPro
           endDateParsed
         );
 
-        setLabels(viewTotalData.data.map((item) => item.nome));
-        setTotal(viewTotalData.data.map((item) => item.total));
+        setLabels(viewTotalData.data.reduce((result, item) => {
+          if (item.visivel) {
+            result.push(item.nome);
+          }
+          return result;
+        }, [] as string[]));
+        setTotal(viewTotalData.data.reduce((result, item) => {
+          if (item.visivel) {
+            result.push(item.total);
+          }
+          return result;
+        }, [] as number[]));
         setData(viewTotalData.data);
         setTotalizers(viewTotalData.totalizadores);
 
