@@ -14,7 +14,12 @@ export function Financial() {
   return (
     <Container>
       <Loader isLoading={isLoading} />
-      <Header selectedSafra={selectedSafra} setChangeSafra={setSelectedSafra} title='Financeiro' />
+      <Header
+        hasSafraFilter
+        selectedSafra={selectedSafra}
+        setChangeSafra={setSelectedSafra}
+        title='Financeiro'
+      />
       <Totalizer safraId={selectedSafra} setIsLoading={setIsLoading} />
       <CashFlow safraId={selectedSafra} setIsLoading={setIsLoading} />
       <ChartAccounts safraId={selectedSafra} setIsLoading={setIsLoading} />

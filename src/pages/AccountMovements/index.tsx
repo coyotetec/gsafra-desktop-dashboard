@@ -120,6 +120,7 @@ export function AccountMovements() {
     <Container>
       <Loader isLoading={isLoading} />
       <Header
+        hasSafraFilter
         selectedSafra={selectedSafra}
         setChangeSafra={setSelectedSafra}
         title={`${type === 'credit' ? 'Créditos' : 'Debitos'} Compensados`}

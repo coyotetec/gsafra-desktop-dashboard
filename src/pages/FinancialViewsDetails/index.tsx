@@ -117,7 +117,6 @@ export function FinancialViewsDetails() {
       <Header
         title={name}
         subtitle="VISÃO ANALÍTICA"
-        hasSafraFilter
         canGoBack
       />
       <div className="filters">

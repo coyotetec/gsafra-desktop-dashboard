@@ -33,6 +33,7 @@ export const Container = styled.main`
       background: #00D47E;
       border-radius: 8px;
       margin-left: 8px;
+      border: none;
     }
   }
 `;

@@ -24,7 +24,7 @@ type optionType = {
 export function Header({
   title,
   subtitle,
-  hasSafraFilter = true,
+  hasSafraFilter = false,
   setChangeSafra,
   selectedSafra,
   canGoBack = false
@@ -34,7 +34,7 @@ export function Header({
 
   useEffect(() => {
     async function loadSafras() {
-      if (!hasSafraFilter) {
+      if (hasSafraFilter) {
         const safrasData = await SafraService.findSafras();
 
         const options = safrasData.map((safra) => ({ value: String(safra.id), label: safra.nome }));
@@ -64,7 +64,7 @@ export function Header({
           <h2>{subtitle}</h2>
         )}
       </div>
-      {!hasSafraFilter && (
+      {hasSafraFilter && (
         <Select
           options={safrasOptions}
           placeholder="Safra"

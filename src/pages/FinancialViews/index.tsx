@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import { UserContext } from '../../components/App';
+import { Header } from '../../components/Header';
 import { Loader } from '../../components/Loader';
 import FinancialViewsService from '../../services/FinancialViewsService';
 import { View } from '../../types/FinancialViews';
@@ -29,12 +30,10 @@ export function FinancialViews() {
   return (
     <Container>
       <Loader isLoading={isLoading} />
-      <header>
-        <h1>Indicadores Financeiros</h1>
-        <span>
-          {`${views.length} ${views.length === 1 ? 'indicador encontrado' : 'indicadores encontrados'}`}
-        </span>
-      </header>
+      <Header
+        title='Indicadores Financeiros'
+        subtitle={`${views.length} ${views.length === 1 ? 'INDICADOR ENCONTRADO' : 'INDICADORES ENCONTRADOS'}`}
+      />
 
       <div className="views-grid">
         {hasPermission('indicadores_financeiros') ?
