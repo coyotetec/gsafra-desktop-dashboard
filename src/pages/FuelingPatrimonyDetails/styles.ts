@@ -4,37 +4,39 @@ import styled from 'styled-components';
 export const Container = styled.main`
   .filters {
     margin-top: 40px;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
 
-    .date-inputs {
-      display: flex;
-      align-items: center;
-      gap: 8px;
+    .date-filter {
+      display: grid;
+      grid-template-columns: 1fr 24px 1fr;
+      place-items: center;
 
       strong {
-        font-size: 14px;
+        font-size: 16px;
         font-weight: 500;
+        margin-top: 16px;
       }
     }
+  }
 
-    .export-button {
-      height: 40px;
-      width: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #00D47E;
-      border-radius: 8px;
-      margin-left: 8px;
-      border: none;
-    }
+  .export-button {
+    height: 40px;
+    width: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #00D47E;
+    border-radius: 8px;
+    border: none;
+    margin-top: 24px;
+    margin-left: auto;
   }
 `;
 
 export const Table = styled(DataTable)`
-  margin-top: 12px;
+  margin-top: 8px;
   font-family: 'Montserrat', sans-serif;
   color: #CFD4D6 !important;
   font-size: 14px;

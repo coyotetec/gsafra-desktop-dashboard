@@ -11,6 +11,8 @@ import {
   LineController,
   BarController,
   Colors,
+  ArcElement,
+  PieController
 } from 'chart.js';
 
 import { GlobalStyles } from '../../styles/GlobalStyles';
@@ -30,6 +32,7 @@ import UserService from '../../services/UserService';
 ChartJS.register(
   LinearScale,
   CategoryScale,
+  ArcElement,
   BarElement,
   PointElement,
   LineElement,
@@ -38,6 +41,7 @@ ChartJS.register(
   Colors,
   LineController,
   BarController,
+  PieController,
 );
 
 ChartJS.defaults.color = '#CFD4D6';

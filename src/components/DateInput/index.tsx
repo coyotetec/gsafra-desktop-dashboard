@@ -7,13 +7,21 @@ interface DateInputProps {
   placeholder?: string;
   defaultDate?: Date | null;
   onChangeDate?: (_params: Date | null) => void;
+  height?: string;
+  width?: string;
+  fontSize?: string;
+  horizontalPadding?: string;
 }
 
 export function DateInput({
   label,
   placeholder,
   defaultDate,
-  onChangeDate
+  onChangeDate,
+  height,
+  width,
+  fontSize,
+  horizontalPadding,
 }: DateInputProps) {
   const { ref, typedValue, unmaskedValue } = useIMask({
     mask: Date,
@@ -52,7 +60,12 @@ export function DateInput({
   }
 
   return (
-    <Wrapper>
+    <Wrapper
+      height={height}
+      width={width}
+      fontSize={fontSize}
+      horizontalPadding={horizontalPadding}
+    >
       {label && <label>{label}</label>}
 
       <input

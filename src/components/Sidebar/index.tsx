@@ -27,6 +27,16 @@ export function Sidebar() {
           <p>FINANCEIRO</p>
           <NavLink to="/financeiro">Principal</NavLink>
           <NavLink to="/indicadores">Indicadores</NavLink>
+          <p>ABATECIMENTO</p>
+          <NavLink to="/abastecimento/resumo-mensal">
+            Mensal
+          </NavLink>
+          <NavLink to="/abastecimento/resumo-patrimonio">
+            Tipo de Patrimonio
+          </NavLink>
+          <NavLink to="/abastecimento/resumo-combustivel">
+            Combustível
+          </NavLink>
         </nav>
         <button type='button' onClick={handleExit}>
           Sair

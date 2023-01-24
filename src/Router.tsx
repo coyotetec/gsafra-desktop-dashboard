@@ -4,6 +4,12 @@ import { Financial } from './pages/Financial';
 import { AccountMovements } from './pages/AccountMovements';
 import { FinancialViews } from './pages/FinancialViews';
 import { FinancialViewsDetails } from './pages/FinancialViewsDetails';
+import { FuelingMonthlyReview } from './pages/FuelingMonthlyReview';
+import { FuelingPatrimonyReview } from './pages/FuelingPatrimonyReview';
+import { FuelingFuelReview } from './pages/FuelingFuelReview';
+import { FuelingMonthlyDetails } from './pages/FuelingMonthlyDetails';
+import { FuelingPatrimonyDetails } from './pages/FuelingPatrimonyDetails';
+import { FuelingFuelDetails } from './pages/FuelingFuelDetails';
 
 export function Router() {
   return (
@@ -13,6 +19,12 @@ export function Router() {
       <Route path="/financeiro/movimento-contas/analitica" element={<AccountMovements />} />
       <Route path="/indicadores" element={<FinancialViews />} />
       <Route path="/indicadores/:id" element={<FinancialViewsDetails />} />
+      <Route path="/abastecimento/resumo-mensal" element={<FuelingMonthlyReview />} />
+      <Route path="/abastecimento/resumo-mensal/analitica" element={<FuelingMonthlyDetails />} />
+      <Route path="/abastecimento/resumo-patrimonio" element={<FuelingPatrimonyReview />} />
+      <Route path="/abastecimento/resumo-patrimonio/analitica" element={<FuelingPatrimonyDetails />} />
+      <Route path="/abastecimento/resumo-combustivel" element={<FuelingFuelReview />} />
+      <Route path="/abastecimento/resumo-combustivel/analitica" element={<FuelingFuelDetails />} />
     </Routes>
   );
 }

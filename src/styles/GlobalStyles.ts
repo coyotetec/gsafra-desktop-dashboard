@@ -133,7 +133,7 @@ export const GlobalStyles = createGlobalStyle`
     border: 1px solid #748990;
 
     .p-dropdown-items-wrapper {
-      max-width: 280px;
+      max-width: 320px;
       max-height: 280px !important;
 
       &::-webkit-scrollbar {

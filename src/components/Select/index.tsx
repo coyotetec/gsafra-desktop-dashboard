@@ -1,4 +1,4 @@
-import { StyledSelect } from './styles';
+import { Wrapper, StyledSelect } from './styles';
 
 interface SelectProps {
   options: {
@@ -9,6 +9,8 @@ interface SelectProps {
   onChange: (_optionValue: string) => void;
   value: string;
   noOptionsMessage?: string;
+  width?: string;
+  label?: string;
 }
 
 export function Select({
@@ -17,14 +19,20 @@ export function Select({
   noOptionsMessage = 'Sem opções',
   onChange,
   value,
+  width,
+  label,
 }: SelectProps) {
   return (
-    <StyledSelect
-      value={value}
-      placeholder={placeholder}
-      emptyMessage={noOptionsMessage}
-      options={options}
-      onChange={(e) => onChange(e.value)}
-    />
+    <Wrapper>
+      {label && <span>{label}</span>}
+      <StyledSelect
+        width={width}
+        value={value}
+        placeholder={placeholder}
+        emptyMessage={noOptionsMessage}
+        options={options}
+        onChange={(e) => onChange(e.value)}
+      />
+    </Wrapper>
   );
 }

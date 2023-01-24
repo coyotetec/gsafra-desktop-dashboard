@@ -6,4 +6,7 @@ type PermissionType =
   | 'debitos_compensados'
   | 'creditos_compensados'
   | 'indicadores_financeiros'
+  | 'resumo_mensal_abastecimento'
+  | 'resumo_patrimonio_abastecimento'
+  | 'resumo_combustivel_abastecimento'
 

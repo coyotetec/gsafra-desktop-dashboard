@@ -1,22 +1,18 @@
 import { Dropdown } from 'primereact/dropdown';
-
 import styled from 'styled-components';
 
 export const Wrapper = styled.div`
-  position: relative;
-
-  svg {
-    position: absolute;
-    right: 16px;
-    top: 50%;
-    transform: translateY(-50%);
-    cursor: pointer;
-    pointer-events: none;
+  > span {
+    font-size: 12px;
+    font-weight: 500;
+    color: #9FA9AC;
+    margin-bottom: 4px;
+    display: block;
   }
 `;
 
 export const StyledSelect = styled(Dropdown)`
-  width: 280px;
+  width: ${({width}) => width ? width : '280px'};
   height: 48px;
   background: #30454C;
   border-radius: 8px;
