@@ -8,8 +8,12 @@ class SafraService {
     this.httpClient = new HttpClient(`http://localhost:${PORT}`);
   }
 
-  findPermissions(userId: number): Promise<PermissionType[]> {
-    return this.httpClient.get(`/usuario/${userId}/permissoes`);
+  findPermissions(userId: number, databaseName?: string): Promise<PermissionType[]> {
+    return this.httpClient.get(`/usuario/${userId}/permissoes`, {
+      headers: {
+        ...(databaseName && {'X-Database-Name': databaseName})
+      }
+    });
   }
 }
 

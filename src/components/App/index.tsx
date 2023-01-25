@@ -65,17 +65,21 @@ export function App() {
 
   const [query] = useSearchParams();
   const idUsuario = query.get('idUsuario');
+  const databaseName = query.get('dbNome');
 
   useEffect(() => {
     async function loadData() {
       if (isFirstRender && idUsuario) {
-        const permissionsData = await UserService.findPermissions(Number(idUsuario));
+        const permissionsData = await UserService.findPermissions(
+          Number(idUsuario),
+          databaseName ? databaseName : undefined
+        );
         setPermissions([...permissionsData]);
       }
     }
 
     loadData();
-  }, [idUsuario, isFirstRender]);
+  }, [idUsuario, isFirstRender, databaseName]);
 
   function hasPermission(permissionCode: PermissionType) {
     return permissions.includes(permissionCode);
