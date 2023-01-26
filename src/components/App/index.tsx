@@ -28,6 +28,7 @@ import { useSearchParams } from 'react-router-dom';
 import { createContext, useEffect, useState } from 'react';
 import { useFirstRender } from '../../hooks/useFirstRender';
 import UserService from '../../services/UserService';
+import { ToastContainer } from '../Toast/ToastContainer';
 
 ChartJS.register(
   LinearScale,
@@ -94,6 +95,7 @@ export function App() {
           <Router />
         </Content>
       </Container>
+      <ToastContainer />
     </UserContext.Provider>
   );
 }
