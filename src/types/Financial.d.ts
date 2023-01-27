@@ -24,4 +24,5 @@ export interface CashFlow {
   cashFlowCreditsPlan: CashFlowPattern[];
   cashFlowDebits: CashFlowPattern[];
   cashFlowDebitsPlan: CashFlowPattern[];
+  hasError?: boolean;
 }

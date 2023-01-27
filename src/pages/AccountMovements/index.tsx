@@ -16,6 +16,7 @@ import { ChartAccountsSelect } from '../../components/ChartAccoutsSelect';
 import { TreeSelectSelectionKeys } from 'primereact/treeselect';
 import { FileXls } from 'phosphor-react';
 import { WorkBook } from 'xlsx';
+import { toast } from '../../utils/toast';
 
 interface RangeDates {
   startDate: Date | null;
@@ -47,6 +48,10 @@ export function AccountMovements() {
 
       if (rangeDates.endDate && rangeDates.startDate && rangeDates.endDate < rangeDates.startDate) {
         setIsLoading(false);
+        toast({
+          type: 'danger',
+          text: 'Data final precisa ser maior que inicial!'
+        });
         return;
       }
 

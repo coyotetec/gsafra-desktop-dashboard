@@ -14,10 +14,10 @@ import { UserContext } from '../../../../components/App';
 import { NotAllowed } from '../../../../components/NotAllowed';
 import html2canvas from 'html2canvas';
 import { DownloadSimple } from 'phosphor-react';
+import { toast } from '../../../../utils/toast';
 
 interface ChartAccountsProps {
   safraId: string;
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 interface RangeDates {
@@ -59,6 +59,11 @@ export function ChartAccounts({ safraId }: ChartAccountsProps) {
 
         if (creditRangeDates.endDate && creditRangeDates.startDate && creditRangeDates.endDate < creditRangeDates.startDate) {
           setCreditTotalIsLoading(false);
+          setCreditTotal([]);
+          toast({
+            type: 'danger',
+            text: 'Data final precisa ser maior que inicial!'
+          });
           return;
         }
 
@@ -93,6 +98,11 @@ export function ChartAccounts({ safraId }: ChartAccountsProps) {
 
         if (debitRangeDates.endDate && debitRangeDates.startDate && debitRangeDates.endDate < debitRangeDates.startDate) {
           setDebitTotalIsLoading(false);
+          setDebitTotal([]);
+          toast({
+            type: 'danger',
+            text: 'Data final precisa ser maior que inicial!'
+          });
           return;
         }
 

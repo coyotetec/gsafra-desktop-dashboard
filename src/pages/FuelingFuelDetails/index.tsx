@@ -16,6 +16,7 @@ import PatrimonioService from '../../services/PatrimonioService';
 import TipoPatrimonioService from '../../services/TipoPatrimonioService';
 import { DetailsData } from '../../types/Abastecimento';
 import { currencyFormat } from '../../utils/currencyFormat';
+import { toast } from '../../utils/toast';
 import { Container, Table } from './styles';
 
 type optionType = {
@@ -90,6 +91,15 @@ export function FuelingFuelDetails() {
   useEffect(() => {
     async function loadData() {
       setIsLoading(true);
+
+      if (endDate && startDate && endDate < startDate) {
+        setIsLoading(false);
+        toast({
+          type: 'danger',
+          text: 'Data final precisa ser maior que inicial!'
+        });
+        return;
+      }
 
       const fuelDetailsData = await AbastecimentoService.findDetails({
         custo: selectedCusto,

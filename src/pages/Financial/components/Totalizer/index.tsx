@@ -7,7 +7,7 @@ import {
   CreditCard,
   X,
 } from 'phosphor-react';
-import { CardsList, Container, Detail, DetailTitle } from './styles';
+import { CardsList, Container, Detail, DetailTitle, Loader } from './styles';
 
 import { CreditCardTotal } from '../../../../types/CreditCard';
 import { Total } from '../../../../types/Financial';
@@ -23,10 +23,11 @@ import { UserContext } from '../../../../components/App';
 import { addDays, addMonths, format } from 'date-fns';
 import { DateInput } from '../../../../components/DateInput';
 import { useSearchParams } from 'react-router-dom';
+import { toast } from '../../../../utils/toast';
+import { Spinner } from '../../../../components/Spinner';
 
 interface TotalizerProps {
   safraId?: string;
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 interface DetailsModalArgs {
@@ -34,7 +35,7 @@ interface DetailsModalArgs {
   period: 0 | 7 | 15;
 }
 
-export function Totalizer({ safraId, setIsLoading }: TotalizerProps) {
+export function Totalizer({ safraId }: TotalizerProps) {
   const [payableTotal, setPayableTotal] = useState<Total>();
   const [receivableTotal, setReceivableTotal] = useState<Total>();
   const [payableCheckTotal, setPayableCheckTotal] = useState<Total>();
@@ -46,6 +47,20 @@ export function Totalizer({ safraId, setIsLoading }: TotalizerProps) {
   const [showReceivableDetails, setShowReceivableDetails] = useState(false);
   const [startDate, setStartDate] = useState<Date | null>(new Date());
   const [endDate, setEndDate] = useState<Date | null>(addMonths(new Date(), 6));
+  const [isLoading, setIsLoading] = useState(true);
+
+  const zeroTotal: Total = {
+    quantity: 0,
+    total: 0,
+    totalNextSeven: {
+      quantity: 0,
+      total: 0,
+    },
+    totalNextFifteen: {
+      quantity: 0,
+      total: 0
+    }
+  };
 
   const { hasPermission } = useContext(UserContext);
 
@@ -64,6 +79,29 @@ export function Totalizer({ safraId, setIsLoading }: TotalizerProps) {
   useEffect(() => {
     async function loadTotal() {
       setIsLoading(true);
+
+      if (endDate && startDate && endDate < startDate) {
+        setIsLoading(false);
+        setSumPayableTotal(zeroTotal);
+        setPayableTotal(zeroTotal);
+        setPayableCheckTotal(zeroTotal);
+        setSumReceivableTotal(zeroTotal);
+        setReceivableTotal(zeroTotal);
+        setReceivableCheckTotal(zeroTotal);
+        setCreditCardTotal({
+          quantity: 0,
+          total: 0,
+          availableLimit: 0,
+          totalLimit: 0,
+          usagePercentage: 0,
+        });
+        toast({
+          type: 'danger',
+          text: 'Data final precisa ser maior que inicial!'
+        });
+        return;
+      }
+
       const startDateParsed = startDate ? format(startDate, 'dd-MM-yyyy') : '';
       const endDateParsed = endDate ? format(endDate, 'dd-MM-yyyy') : '';
 
@@ -174,6 +212,11 @@ export function Totalizer({ safraId, setIsLoading }: TotalizerProps) {
       <CardsList>
         <div className="card">
           {!hasPermission('resumo_pendentes_pagamento') && <NotAllowed />}
+          {isLoading && (
+            <Loader>
+              <Spinner size={48} />
+            </Loader>
+          )}
           <strong>
             <ArrowCircleUp size={24} color="#00D47E" weight="duotone" />
             Pendentes de Pagamento
@@ -204,6 +247,11 @@ export function Totalizer({ safraId, setIsLoading }: TotalizerProps) {
 
         <div className="card">
           {!hasPermission('resumo_pendentes_recebimento') && <NotAllowed />}
+          {isLoading && (
+            <Loader>
+              <Spinner size={48} />
+            </Loader>
+          )}
           <strong>
             <ArrowCircleDown size={24} color="#00D47E" weight="duotone" />
             Pendentes de Recebimento
@@ -234,6 +282,11 @@ export function Totalizer({ safraId, setIsLoading }: TotalizerProps) {
 
         <div className="card">
           {!hasPermission('resumo_cartao_credito') && <NotAllowed />}
+          {isLoading && (
+            <Loader>
+              <Spinner size={48} />
+            </Loader>
+          )}
           <strong>
             <CreditCard size={24} color="#00D47E" weight="duotone" />
             Fatura do Cartão de Crédito

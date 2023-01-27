@@ -10,6 +10,7 @@ import { Spinner } from '../../../../components/Spinner';
 import FinancialViewsService from '../../../../services/FinancialViewsService';
 import { View, ViewTotal, ViewTotalizer } from '../../../../types/FinancialViews';
 import { currencyFormat } from '../../../../utils/currencyFormat';
+import { toast } from '../../../../utils/toast';
 import { FinancialViewChart } from '../FinancialViewChart';
 import { Container, Loader } from './styles';
 
@@ -47,6 +48,12 @@ export function FinancialView({ id, nome, periodoPadraoMeses }: FinancialViewPro
 
         if (rangeDates.endDate && rangeDates.startDate && rangeDates.endDate < rangeDates.startDate) {
           setIsLoading(false);
+          setTotal([]);
+          setTotalizers([]);
+          toast({
+            type: 'danger',
+            text: 'Data final precisa ser maior que inicial!'
+          });
           return;
         }
 

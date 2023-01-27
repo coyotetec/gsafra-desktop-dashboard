@@ -11,6 +11,7 @@ import AlmoxarifadoService from '../../services/AlmoxarifadoService';
 import PatrimonioService from '../../services/PatrimonioService';
 import ProdutoAlmoxarifadoService from '../../services/ProdutoAlmoxarifadoService';
 import TipoPatrimonioService from '../../services/TipoPatrimonioService';
+import { toast } from '../../utils/toast';
 import { MonthlyReview } from './components/MonthlyReview';
 import { Container } from './styles';
 
@@ -91,6 +92,19 @@ export function FuelingMonthlyReview() {
     async function loadData() {
       if (hasPermission('resumo_mensal_abastecimento')) {
         setIsDataLoading(true);
+
+        if (endDate && startDate && endDate < startDate) {
+          setIsDataLoading(false);
+          setMonthlyValuesData([]);
+          setMonthlyValuesTotal(0);
+          setMonthlyQtysData([]);
+          setMonthlyQtysTotal(0);
+          toast({
+            type: 'danger',
+            text: 'Data final precisa ser maior que inicial!'
+          });
+          return;
+        }
 
         const monthlyReviewData = await AbastecimentoService.findMonthlyReview({
           custo: selectedCusto,

@@ -10,6 +10,7 @@ import AbastecimentoService from '../../services/AbastecimentoService';
 import AlmoxarifadoService from '../../services/AlmoxarifadoService';
 import PatrimonioService from '../../services/PatrimonioService';
 import ProdutoAlmoxarifadoService from '../../services/ProdutoAlmoxarifadoService';
+import { toast } from '../../utils/toast';
 import { PatrimonyReview } from './components/PatrimonyReview';
 import { Container } from './styles';
 
@@ -80,6 +81,19 @@ export function FuelingPatrimonyReview() {
     async function loadData() {
       if (hasPermission('resumo_patrimonio_abastecimento')) {
         setIsDataLoading(true);
+
+        if (endDate && startDate && endDate < startDate) {
+          setIsDataLoading(false);
+          setPatrimonyValuesData([]);
+          setPatrimonyValuesTotal(0);
+          setPatrimonyQtysData([]);
+          setPatrimonyQtysTotal(0);
+          toast({
+            type: 'danger',
+            text: 'Data final precisa ser maior que inicial!'
+          });
+          return;
+        }
 
         const patrimonyReviewData = await AbastecimentoService.findPatrimonyReview({
           custo: selectedCusto,

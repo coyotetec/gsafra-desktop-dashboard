@@ -10,6 +10,7 @@ import AbastecimentoService from '../../services/AbastecimentoService';
 import AlmoxarifadoService from '../../services/AlmoxarifadoService';
 import PatrimonioService from '../../services/PatrimonioService';
 import TipoPatrimonioService from '../../services/TipoPatrimonioService';
+import { toast } from '../../utils/toast';
 import { FuelReview } from './components/FuelReview';
 import { Container } from './styles';
 
@@ -80,6 +81,19 @@ export function FuelingFuelReview() {
     async function loadData() {
       if (hasPermission('resumo_combustivel_abastecimento')) {
         setIsDataLoading(true);
+
+        if (endDate && startDate && endDate < startDate) {
+          setIsDataLoading(false);
+          setFuelValuesData([]);
+          setFuelValuesTotal(0);
+          setFuelQtysData([]);
+          setFuelQtysTotal(0);
+          toast({
+            type: 'danger',
+            text: 'Data final precisa ser maior que inicial!'
+          });
+          return;
+        }
 
         const fuelReviewData = await AbastecimentoService.findFuelReview({
           custo: selectedCusto,

@@ -12,6 +12,7 @@ import { Loader } from '../../components/Loader';
 import FinancialViewsService from '../../services/FinancialViewsService';
 import { ViewDetail } from '../../types/FinancialViews';
 import { currencyFormat } from '../../utils/currencyFormat';
+import { toast } from '../../utils/toast';
 import { Container, Table } from './styles';
 
 interface RangeDates {
@@ -41,6 +42,10 @@ export function FinancialViewsDetails() {
 
       if (rangeDates.endDate && rangeDates.startDate && rangeDates.endDate < rangeDates.startDate) {
         setIsLoading(false);
+        toast({
+          type: 'danger',
+          text: 'Data final precisa ser maior que inicial!'
+        });
         return;
       }
 

@@ -46,6 +46,12 @@ export const Container = styled.div<ContainerProps>`
     margin-top: 8px;
   }
 
+  strong {
+    font-weight: 600;
+    font-size: 14px;
+    max-width: 280px;
+  }
+
   svg {
     margin-right: 4px;
   }

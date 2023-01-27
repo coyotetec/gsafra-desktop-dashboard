@@ -74,6 +74,7 @@ export const CardsList = styled.div`
     border-radius: 8px;
     border: 1px solid #506167;
     position: relative;
+    overflow: hidden;
 
     > strong {
       display: flex;
@@ -227,4 +228,18 @@ export const Detail = styled.div<DetailProps>`
     height: 100%;
     background: #506167;
   }
+`;
+
+export const Loader = styled.div`
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: rgba(48, 69, 76, 0.7);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
 `;

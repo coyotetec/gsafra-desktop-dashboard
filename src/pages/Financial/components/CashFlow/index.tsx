@@ -9,17 +9,18 @@ import FinancialService from '../../../../services/FinancialService';
 import { CashFlow as CashFlowType } from '../../../../types/Financial';
 import { CashFlowChart } from '../CashFlowChart';
 import { UserContext } from '../../../../components/App';
+import { toast } from '../../../../utils/toast';
 
 interface CashFlowProps {
   safraId: string;
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export function CashFlow({ safraId, setIsLoading }: CashFlowProps) {
+export function CashFlow({ safraId }: CashFlowProps) {
   const [startDate, setStartDate] = useState<Date | null>(new Date());
   const [endDate, setEndDate] = useState<Date | null>(addMonths(new Date(), 6));
   const [labels, setLabels] = useState<string[]>([]);
   const [cashFlow, setCashFlow] = useState<CashFlowType>({} as CashFlowType);
+  const [isLoading, setIsLoading] = useState(true);
 
   const { hasPermission } = useContext(UserContext);
 
@@ -29,11 +30,29 @@ export function CashFlow({ safraId, setIsLoading }: CashFlowProps) {
 
       if (!startDate || !endDate) {
         setIsLoading(false);
+        setCashFlow((prevState) => ({
+          ...prevState,
+          hasError: true,
+          currentBalance: 0,
+        }));
+        toast({
+          type: 'danger',
+          text: 'Datas inicial e final são obrigatórias!'
+        });
         return;
       }
 
       if (startDate > endDate) {
         setIsLoading(false);
+        setCashFlow((prevState) => ({
+          ...prevState,
+          hasError: true,
+          currentBalance: 0,
+        }));
+        toast({
+          type: 'danger',
+          text: 'Data final precisa ser maior que inicial!'
+        });
         return;
       }
 
@@ -81,6 +100,7 @@ export function CashFlow({ safraId, setIsLoading }: CashFlowProps) {
         cashFlow={cashFlow}
         startDate={startDate}
         endDate={endDate}
+        isLoading={isLoading}
       />
     </Container>
   );

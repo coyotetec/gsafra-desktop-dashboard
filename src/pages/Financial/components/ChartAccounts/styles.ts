@@ -41,6 +41,7 @@ export const Content = styled.header`
     border: 1px solid #506167;
     margin-top: 8px;
     position: relative;
+    overflow: hidden;
 
     > footer {
       display: flex;

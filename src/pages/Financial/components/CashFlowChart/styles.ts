@@ -8,6 +8,7 @@ export const Container = styled.div`
   margin-top: 8px;
   position: relative;
   width: 100%;
+  overflow: hidden;
 
   > header {
     margin-bottom: 16px;
@@ -32,9 +33,44 @@ export const Container = styled.div`
     }
   }
 
+  .empty {
+    width: 100%;
+    height: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    img {
+      width: 160px;
+    }
+
+    strong {
+      margin-top: 12px;
+    }
+
+    span {
+      font-size: 14px;
+    }
+  }
+
   .chart-container {
     width: 100%;
     height: 400px;
     position: relative
   }
+`;
+
+export const Loader = styled.div`
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: rgba(48, 69, 76, 0.7);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
 `;
