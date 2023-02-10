@@ -25,7 +25,7 @@ import 'primeicons/primeicons.css';                                //icons
 import { Router } from '../../Router';
 import { Sidebar } from '../Sidebar';
 import { useSearchParams } from 'react-router-dom';
-import { createContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useEffect, useState } from 'react';
 import { useFirstRender } from '../../hooks/useFirstRender';
 import UserService from '../../services/UserService';
 import { ToastContainer } from '../Toast/ToastContainer';
@@ -82,9 +82,9 @@ export function App() {
     loadData();
   }, [idUsuario, isFirstRender, databaseName]);
 
-  function hasPermission(permissionCode: PermissionType) {
+  const hasPermission = useCallback((permissionCode: PermissionType) => {
     return permissions.includes(permissionCode);
-  }
+  }, [permissions]);
 
   return (
     <UserContext.Provider value={{ hasPermission }}>

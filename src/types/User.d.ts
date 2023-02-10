@@ -9,4 +9,11 @@ type PermissionType =
   | 'resumo_mensal_abastecimento'
   | 'resumo_patrimonio_abastecimento'
   | 'resumo_combustivel_abastecimento'
+  | 'producao_produtividade'
+  | 'descontos_producao'
+  | 'custo_producao_categoria'
+  | 'custo_producao_talhao'
+  | 'custo_producao_insumo_atividade'
+  | 'custo_producao_insumo_manutencao'
+  | 'custo_producao_insumo_abastecimento'
 

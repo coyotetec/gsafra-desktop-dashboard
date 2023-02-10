@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import {
   ArrowCircleDown,
   ArrowCircleRight,
@@ -49,7 +49,7 @@ export function Totalizer({ safraId }: TotalizerProps) {
   const [endDate, setEndDate] = useState<Date | null>(addMonths(new Date(), 6));
   const [isLoading, setIsLoading] = useState(true);
 
-  const zeroTotal: Total = {
+  const zeroTotal = useMemo<Total>(() => ({
     quantity: 0,
     total: 0,
     totalNextSeven: {
@@ -60,7 +60,7 @@ export function Totalizer({ safraId }: TotalizerProps) {
       quantity: 0,
       total: 0
     }
-  };
+  }), []);
 
   const { hasPermission } = useContext(UserContext);
 
@@ -164,7 +164,7 @@ export function Totalizer({ safraId }: TotalizerProps) {
     }
 
     loadTotal();
-  }, [hasPermission, startDate, endDate, safraId, setIsLoading]);
+  }, [hasPermission, startDate, endDate, safraId, setIsLoading, zeroTotal]);
 
   function handleOpenDetailsModal({ type, period }: DetailsModalArgs) {
     if (period === 0) {

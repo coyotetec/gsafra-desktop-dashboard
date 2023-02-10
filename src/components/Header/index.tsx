@@ -6,6 +6,7 @@ import { Select } from '../Select';
 import SafraService from '../../services/SafraService';
 import { ArrowLeft } from 'phosphor-react';
 import { useNavigate } from 'react-router-dom';
+import TalhaoService from '../../services/TalhaoService';
 
 interface HeaderProps {
   title: string;
@@ -13,7 +14,11 @@ interface HeaderProps {
   hasSafraFilter?: boolean;
   setChangeSafra?: React.Dispatch<React.SetStateAction<string>>;
   selectedSafra?: string;
-  canGoBack?: boolean
+  canGoBack?: boolean;
+  allSafras?: boolean;
+  hasTalhaoFilter?: boolean;
+  setChangeTalhao?: React.Dispatch<React.SetStateAction<string>>;
+  selectedTalhao?: string;
 }
 
 type optionType = {
@@ -27,29 +32,58 @@ export function Header({
   hasSafraFilter = false,
   setChangeSafra,
   selectedSafra,
-  canGoBack = false
+  hasTalhaoFilter = false,
+  setChangeTalhao,
+  selectedTalhao,
+  canGoBack = false,
+  allSafras = true,
 }: HeaderProps) {
   const [safrasOptions, setSafrasOptions] = useState<optionType>([]);
+  const [talhoesOptions, setTalhoesOptions] = useState<optionType>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
     async function loadSafras() {
-      if (hasSafraFilter) {
+      if (hasSafraFilter && setChangeSafra) {
         const safrasData = await SafraService.findSafras();
 
-        const options = safrasData.map((safra) => ({ value: String(safra.id), label: safra.nome }));
+        const options: optionType = safrasData.map((safra) => ({ value: String(safra.id), label: safra.nome }));
 
-        options.unshift({
-          value: '_',
-          label: 'Todos os Lançamentos'
-        });
+        if (allSafras) {
+          options.unshift({
+            value: '_',
+            label: 'Todos os Lançamentos'
+          });
+        }
 
         setSafrasOptions(options);
+        setChangeSafra(options[0].value || '_');
       }
     }
 
     loadSafras();
-  }, [hasSafraFilter]);
+  }, [hasSafraFilter, allSafras, setChangeSafra]);
+
+  useEffect(() => {
+    async function loadTalhoes() {
+      if (hasTalhaoFilter && setChangeTalhao && selectedSafra && selectedSafra !== '_') {
+        setChangeTalhao('_');
+
+        const talhoesData = await TalhaoService.findTalhoes(selectedSafra);
+        const talhoesOptions = talhoesData.map((talhao) => ({
+          value: String(talhao.id),
+          label: `${talhao.talhao} (${talhao.variedade})`
+        }));
+        talhoesOptions.unshift({
+          value: '_', label: 'Todos os Talhões'
+        });
+
+        setTalhoesOptions(talhoesOptions);
+      }
+    }
+
+    loadTalhoes();
+  }, [hasTalhaoFilter, setChangeTalhao, selectedSafra]);
 
   return (
     <Container>
@@ -70,9 +104,23 @@ export function Header({
           placeholder="Safra"
           noOptionsMessage="0 safras encontrada"
           value={selectedSafra || ''}
-          onChange={(safra) => {
+          onChange={(safra: string) => {
             if (setChangeSafra) {
               setChangeSafra(safra);
+            }
+          }
+          }
+        />
+      )}
+      {(hasTalhaoFilter && selectedSafra !== '_') && (
+        <Select
+          options={talhoesOptions}
+          placeholder="Talhão"
+          noOptionsMessage="0 talhões encontrada"
+          value={selectedTalhao || ''}
+          onChange={(talhao: string) => {
+            if (setChangeTalhao) {
+              setChangeTalhao(talhao);
             }
           }
           }

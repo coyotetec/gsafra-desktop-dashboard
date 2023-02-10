@@ -29,6 +29,22 @@ export const Content = styled.div`
     display: flex;
     flex-direction: column;
     flex: 1;
+    overflow-y: auto;
+
+    &::-webkit-scrollbar {
+      width: 12px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: #30454C;
+      border-radius: 999px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background-color: #506167;
+      border-radius: 999px;
+      border: 3px solid #30454C;
+    }
 
     p {
       font-size: 12px;

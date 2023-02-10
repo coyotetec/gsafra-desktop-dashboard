@@ -1,4 +1,4 @@
-import { Dropdown } from 'primereact/dropdown';
+import { MultiSelect } from 'primereact/multiselect';
 import styled from 'styled-components';
 
 export const Wrapper = styled.div`
@@ -11,11 +11,7 @@ export const Wrapper = styled.div`
   }
 `;
 
-interface StyledSelectProps {
-  labelMargin?: string;
-}
-
-export const StyledSelect = styled(Dropdown)<StyledSelectProps>`
+export const StyledMultiSelect = styled(MultiSelect)`
   width: ${({ width }) => width ? width : '280px'};
   height: ${({ height }) => height ? height : '48px'};
   background: #30454C;
@@ -34,24 +30,17 @@ export const StyledSelect = styled(Dropdown)<StyledSelectProps>`
     box-shadow: none;
   }
 
-  .p-dropdown-label {
+  .p-multiselect-label-container {
     width: 100px;
     color: #CFD4D6;
     font-family: 'Montserrat', sans-serif !important;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    margin-top: ${({ labelMargin }) => labelMargin ? labelMargin : '2px'};
+    margin-top: 2px;
   }
 
-  .p-dropdown-trigger {
+  .p-multiselect-trigger {
     color: #CFD4D6;
   }
-`;
-
-export const OptionGroup = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #F7FBFE;
 `;
