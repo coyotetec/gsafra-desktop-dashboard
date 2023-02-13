@@ -1,6 +1,10 @@
-import { View, ViewDetail, ViewTotal, ViewTotalizer } from '../types/FinancialViews';
-import HttpClient from './utils/HttpClient';
-import { PORT } from './utils/info';
+import { api } from './utils/api';
+import {
+  View,
+  ViewDetail,
+  ViewTotal,
+  ViewTotalizer
+} from '../types/FinancialViews';
 
 interface ViewTotalReturn {
   data: ViewTotal[],
@@ -8,22 +12,16 @@ interface ViewTotalReturn {
 }
 
 class FinancialViewsService {
-  private httpClient: HttpClient;
-
-  constructor() {
-    this.httpClient = new HttpClient(`http://localhost:${PORT}`);
-  }
-
   findViews(): Promise<View[]> {
-    return this.httpClient.get('/financeiro-views');
+    return api.get('/financeiro-views');
   }
 
   findViewTotal(viewId: number, startDate: string, endDate: string): Promise<ViewTotalReturn> {
-    return this.httpClient.get(`/financeiro-views/${viewId}?startDate=${startDate}&endDate=${endDate}`);
+    return api.get(`/financeiro-views/${viewId}?startDate=${startDate}&endDate=${endDate}`);
   }
 
   findViewDetails(viewId: number, startDate: string, endDate: string): Promise<ViewDetail[]> {
-    return this.httpClient.get(`/financeiro-views/${viewId}/detalhes?startDate=${startDate}&endDate=${endDate}`);
+    return api.get(`/financeiro-views/${viewId}/detalhes?startDate=${startDate}&endDate=${endDate}`);
   }
 }
 

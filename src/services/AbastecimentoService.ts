@@ -1,6 +1,10 @@
-import { DetailsData, FuelReviewData, MonthlyReviewData, PatrimonyReviewData } from '../types/Abastecimento';
-import HttpClient from './utils/HttpClient';
-import { PORT } from './utils/info';
+import { api } from './utils/api';
+import {
+  DetailsData,
+  FuelReviewData,
+  MonthlyReviewData,
+  PatrimonyReviewData
+} from '../types/Abastecimento';
 
 interface FindReviewArgs {
   startDate: string;
@@ -13,12 +17,6 @@ interface FindReviewArgs {
 }
 
 class AbastecimentoService {
-  private httpClient: HttpClient;
-
-  constructor() {
-    this.httpClient = new HttpClient(`http://localhost:${PORT}`);
-  }
-
   findMonthlyReview({
     custo,
     startDate,
@@ -28,7 +26,7 @@ class AbastecimentoService {
     idAlmoxarifado,
     idTipoPatrimonio,
   }: FindReviewArgs): Promise<MonthlyReviewData> {
-    return this.httpClient.get(`
+    return api.get(`
       /abastecimento/resumo-mensal?custo=${custo}&startDate=${startDate}&endDate=${endDate}
       ${idPatrimonio ? `&idPatrimonio=${idPatrimonio}` : ''}
       ${idProdutoAlmoxarifado ? `&idProdutoAlmoxarifado=${idProdutoAlmoxarifado}` : ''}
@@ -46,7 +44,7 @@ class AbastecimentoService {
     idAlmoxarifado,
     idTipoPatrimonio,
   }: FindReviewArgs): Promise<DetailsData[]> {
-    return this.httpClient.get(`
+    return api.get(`
       /abastecimento/detalhes?custo=${custo}&startDate=${startDate}&endDate=${endDate}
       ${idPatrimonio ? `&idPatrimonio=${idPatrimonio}` : ''}
       ${idProdutoAlmoxarifado ? `&idProdutoAlmoxarifado=${idProdutoAlmoxarifado}` : ''}
@@ -63,7 +61,7 @@ class AbastecimentoService {
     idProdutoAlmoxarifado,
     idAlmoxarifado,
   }: FindReviewArgs): Promise<PatrimonyReviewData> {
-    return this.httpClient.get(`
+    return api.get(`
       /abastecimento/resumo-patrimonio?custo=${custo}&startDate=${startDate}&endDate=${endDate}
       ${idPatrimonio ? `&idPatrimonio=${idPatrimonio}` : ''}
       ${idProdutoAlmoxarifado ? `&idProdutoAlmoxarifado=${idProdutoAlmoxarifado}` : ''}
@@ -79,7 +77,7 @@ class AbastecimentoService {
     idAlmoxarifado,
     idTipoPatrimonio,
   }: FindReviewArgs): Promise<FuelReviewData> {
-    return this.httpClient.get(`
+    return api.get(`
       /abastecimento/resumo-combustivel?custo=${custo}&startDate=${startDate}&endDate=${endDate}
       ${idPatrimonio ? `&idPatrimonio=${idPatrimonio}` : ''}
       ${idAlmoxarifado ? `&idAlmoxarifado=${idAlmoxarifado}` : ''}

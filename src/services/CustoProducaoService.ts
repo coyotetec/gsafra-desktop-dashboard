@@ -1,6 +1,5 @@
+import { api } from './utils/api';
 import { CustoIndividual, CustoCategoria, CustoTalhao } from '../types/CustoProducao';
-import HttpClient from './utils/HttpClient';
-import { PORT } from './utils/info';
 
 interface FindCustoCategoriaArgs {
   safraId: string | number;
@@ -10,42 +9,36 @@ interface FindCustoCategoriaArgs {
 }
 
 class CustoProducaoService {
-  private httpClient: HttpClient;
-
-  constructor() {
-    this.httpClient = new HttpClient(`http://localhost:${PORT}`);
-  }
-
   findCustoCategoria({ safraId, talhaoId, startDate, endDate }: FindCustoCategoriaArgs): Promise<CustoCategoria> {
-    return this.httpClient.get(`
+    return api.get(`
       /custo-producao/categoria?idSafra=${safraId}&startDate=${startDate}&endDate=${endDate}
       ${talhaoId ? `&idTalhao=${talhaoId}` : ''}
     `.replace(/(\r\n|\n|\r)/gm, '').replace(/\s+/g, ''));
   }
 
   findCustoTalhao({ safraId, talhaoId, startDate, endDate }: FindCustoCategoriaArgs): Promise<CustoTalhao> {
-    return this.httpClient.get(`
+    return api.get(`
       /custo-producao/talhao?idSafra=${safraId}&startDate=${startDate}&endDate=${endDate}
       ${talhaoId ? `&idTalhao=${talhaoId}` : ''}
     `.replace(/(\r\n|\n|\r)/gm, '').replace(/\s+/g, ''));
   }
 
   findCustoAtividade({ safraId, talhaoId, startDate, endDate }: FindCustoCategoriaArgs): Promise<CustoIndividual> {
-    return this.httpClient.get(`
+    return api.get(`
       /atividade-agricola/custo-producao?idSafra=${safraId}&startDate=${startDate}&endDate=${endDate}
       ${talhaoId ? `&idTalhao=${talhaoId}` : ''}
     `.replace(/(\r\n|\n|\r)/gm, '').replace(/\s+/g, ''));
   }
 
   findCustoManutencao({ safraId, talhaoId, startDate, endDate }: FindCustoCategoriaArgs): Promise<CustoIndividual> {
-    return this.httpClient.get(`
+    return api.get(`
       /manutencao/custo-producao?idSafra=${safraId}&startDate=${startDate}&endDate=${endDate}
       ${talhaoId ? `&idTalhao=${talhaoId}` : ''}
     `.replace(/(\r\n|\n|\r)/gm, '').replace(/\s+/g, ''));
   }
 
   findCustoAbastecimento({ safraId, talhaoId, startDate, endDate }: FindCustoCategoriaArgs): Promise<CustoIndividual> {
-    return this.httpClient.get(`
+    return api.get(`
       /abastecimento/custo-producao?idSafra=${safraId}&startDate=${startDate}&endDate=${endDate}
       ${talhaoId ? `&idTalhao=${talhaoId}` : ''}
     `.replace(/(\r\n|\n|\r)/gm, '').replace(/\s+/g, ''));

@@ -1,19 +1,12 @@
-import HttpClient from './utils/HttpClient';
-import { PORT } from './utils/info';
+import { api } from './utils/api';
 
 class SafraService {
-  private httpClient: HttpClient;
-
-  constructor() {
-    this.httpClient = new HttpClient(`http://localhost:${PORT}`);
-  }
-
   findPermissions(userId: number, databaseName?: string): Promise<PermissionType[]> {
-    return this.httpClient.get(`/usuario/${userId}/permissoes`, {
-      headers: {
-        ...(databaseName && {'X-Database-Name': databaseName})
-      }
+    api.setDefaultHeaders({
+      'X-Database-Name': databaseName ? databaseName : 'default'
     });
+
+    return api.get(`/usuario/${userId}/permissoes`);
   }
 }
 

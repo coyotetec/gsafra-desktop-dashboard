@@ -13,9 +13,17 @@ interface ReqOptions {
 
 class HttpClient {
   private baseURL: string;
+  private defaultHeaders: object = {};
 
   constructor(baseURL: string) {
     this.baseURL = baseURL;
+  }
+
+  setDefaultHeaders(headers: object) {
+    this.defaultHeaders = {
+      ...this.defaultHeaders,
+      ...headers,
+    };
   }
 
   get(path: string, options?: ReqOptions) {
@@ -57,6 +65,12 @@ class HttpClient {
 
     if (options.headers) {
       Object.entries(options.headers).forEach(([name, value]) => {
+        headers.append(name, value);
+      });
+    }
+
+    if (Object.keys(this.defaultHeaders).length > 0) {
+      Object.entries(this.defaultHeaders).forEach(([name, value]) => {
         headers.append(name, value);
       });
     }
