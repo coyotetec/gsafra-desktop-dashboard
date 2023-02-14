@@ -30,10 +30,4 @@ export const Container = styled.main`
     font-weight: 600;
     text-align: right;
   }
-
-  .cards {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-  }
 `;

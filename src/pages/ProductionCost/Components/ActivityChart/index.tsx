@@ -80,7 +80,7 @@ export function ActivityChart({ labels, data, units, unit }: ActivityChartProps)
                     display: false
                   },
                   min: 0,
-                  max: getHigherValue(dataToShow.data) * 1.2,
+                  max: getHigherValue(dataToShow.data) * 1.5,
                 },
                 y: {
                   beginAtZero: true,

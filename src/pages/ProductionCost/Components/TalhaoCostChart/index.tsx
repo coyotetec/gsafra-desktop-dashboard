@@ -80,7 +80,7 @@ export function TalhaoCostChart({ labels, safras, data, unit }: TalhaoCostChartP
                     display: false
                   },
                   min: 0,
-                  max: getHigherValue(dataToShow.data) * 1.2,
+                  max: getHigherValue(dataToShow.data) * 1.5,
                 },
                 y: {
                   beginAtZero: true,

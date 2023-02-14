@@ -68,7 +68,6 @@ export function PatrimonyReview({ title, total, labels, data, isCurrency, isLoad
           labels={labels}
           data={data}
           isCurrency={isCurrency}
-          total={total}
         />
       </div>
     </Container>

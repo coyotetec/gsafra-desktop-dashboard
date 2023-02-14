@@ -193,23 +193,21 @@ export function FuelingPatrimonyReview() {
       >
         {hasPermission('resumo_patrimonio_abastecimento') && 'Visão Detalhada'}
       </Link>
-      <div className="cards">
-        <PatrimonyReview
-          isLoading={isDataLoading}
-          title='VALORES ABASTECIDOS'
-          total={patrimonyValuesTotal}
-          labels={patrimonyValuesLabels}
-          data={patrimonyValuesData}
-          isCurrency
-        />
-        <PatrimonyReview
-          isLoading={isDataLoading}
-          title='LITROS ABASTECIDOS'
-          total={patrimonyQtysTotal}
-          labels={patrimonyQtysLabels}
-          data={patrimonyQtysData}
-        />
-      </div>
+      <PatrimonyReview
+        isLoading={isDataLoading}
+        title='VALORES ABASTECIDOS'
+        total={patrimonyValuesTotal}
+        labels={patrimonyValuesLabels}
+        data={patrimonyValuesData}
+        isCurrency
+      />
+      <PatrimonyReview
+        isLoading={isDataLoading}
+        title='LITROS ABASTECIDOS'
+        total={patrimonyQtysTotal}
+        labels={patrimonyQtysLabels}
+        data={patrimonyQtysData}
+      />
     </Container>
   );
 }

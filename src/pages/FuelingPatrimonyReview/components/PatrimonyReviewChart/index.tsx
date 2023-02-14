@@ -1,22 +1,38 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
-import { Pie } from 'react-chartjs-2';
+import { Bar } from 'react-chartjs-2';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
-import { Container } from './styles';
-import { currencyFormat } from '../../../../utils/currencyFormat';
-
+import { ChartContainer, Container } from './styles';
+import { ArrowLeft, ArrowRight } from 'phosphor-react';
+import { useEffect, useMemo, useState } from 'react';
 import emptyIllustration from '../../../../assets/images/empty.svg';
+import { currencyFormat } from '../../../../utils/currencyFormat';
 
 interface PatrimonyReviewChartProps {
   labels: string[];
   data: number[];
   isCurrency?: boolean;
-  total: number;
 }
 
-export function PatrimonyReviewChart({ labels, data, isCurrency = false, total }: PatrimonyReviewChartProps) {
-  function formatNumber(number: number) {
-    return `${new Intl.NumberFormat('id').format(number)} lts`;
+const ITEMS_PER_PAGE = 7;
+
+export function PatrimonyReviewChart({ labels, data, isCurrency }: PatrimonyReviewChartProps) {
+  const [currentPage, setCurrentPage] = useState(0);
+  const dataToShow = useMemo(() => ({
+    labels: labels.slice(currentPage * ITEMS_PER_PAGE, (currentPage * ITEMS_PER_PAGE) + ITEMS_PER_PAGE),
+    data: data.slice(currentPage * ITEMS_PER_PAGE, (currentPage * ITEMS_PER_PAGE) + ITEMS_PER_PAGE),
+  }), [currentPage, labels, data]);
+
+  useEffect(() => {
+    setCurrentPage(0);
+  }, [data]);
+
+  function getHigherValue(arr: number[]) {
+    return arr.reduce((a, b) => {
+      return Math.max(a, b);
+    }, -Infinity);
+  }
+
+  function formatNumber(number: number, sufix?: string) {
+    return `${new Intl.NumberFormat('id').format(number)}${sufix ? sufix : ''}`;
   }
 
   return (
@@ -28,76 +44,94 @@ export function PatrimonyReviewChart({ labels, data, isCurrency = false, total }
           <span>Tente inserir outro intervalo de datas.</span>
         </div>
       ) : (
-        <Pie
-          data={{
-            labels,
-            datasets: [
-              {
-                data,
-                backgroundColor: [
-                  'rgba(0, 230, 118, 0.5)',
-                  'rgba(41, 121, 255, 0.5)',
-                  'rgba(255, 196, 0, 0.5)',
-                  'rgba(255, 61, 0, 0.5)',
-                  'rgba(233, 30, 99, 0.5)',
-                  'rgba(156, 39, 176, 0.5)',
-                  'rgba(92, 107, 192, 0.5)',
-                ],
-                borderColor: [
-                  '#00e676',
-                  '#2979ff',
-                  '#ffc400',
-                  '#ff3d00',
-                  '#e91e63',
-                  '#9c27b0',
-                  '#5C6BC0',
-                ],
-                borderWidth: 2
-              }
-            ]
-          }}
-          plugins={[ChartDataLabels]}
-          options={{
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                align: 'center',
-                position: 'bottom',
-              },
-              tooltip: {
-                callbacks: {
-                  label: function (context) {
-                    let label = context.dataset.label || '';
-
-                    if (label) {
-                      label += ': ';
-                    }
-                    if (context.parsed !== null) {
-                      label += isCurrency ? currencyFormat(context.parsed, 3) : formatNumber(context.parsed);
-                    }
-                    return label;
-                  }
+        <ChartContainer>
+          <Bar
+            data={{
+              labels: dataToShow.labels.map(i => `${i.slice(0, 40)}${i.length > 40 ? '...' : ''}`),
+              datasets: [
+                {
+                  label: 'Total',
+                  data: dataToShow.data,
+                  backgroundColor: [
+                    '#00e676',
+                    '#2979ff',
+                    '#ffc400',
+                    '#ff3d00',
+                    '#e91e63',
+                    '#9c27b0',
+                    '#5C6BC0',
+                  ],
+                  barThickness: 12,
+                },
+              ]
+            }}
+            plugins={[ChartDataLabels]}
+            options={{
+              indexAxis: 'y',
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                x: {
+                  beginAtZero: true,
+                  display: false,
+                  grid: {
+                    display: false
+                  },
+                  min: 0,
+                  max: getHigherValue(dataToShow.data) * 1.5,
+                },
+                y: {
+                  beginAtZero: true,
+                  ticks: {
+                    font: {
+                      size: 12,
+                    },
+                  },
                 }
               },
-              datalabels: {
-                font: {
-                  weight: 600,
-                  size: 16
+              plugins: {
+                legend: {
+                  display: false,
                 },
-                formatter(value) {
-                  const percentage = (value * 100) / total;
-                  const parsedPercentage = new Intl.NumberFormat('id', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
-                  }).format(percentage);
+                tooltip: {
+                  enabled: false,
+                },
+                datalabels: {
+                  align: 'end',
+                  textAlign: 'left',
+                  anchor: 'end',
+                  font: {
+                    weight: 600,
+                  },
+                  formatter(value) {
+                    return isCurrency ? currencyFormat(value) : formatNumber(value, ' lts');
+                  },
+                }
+              },
+            }}
+          />
+        </ChartContainer>
+      )}
+      {data.length > 5 && (
+        <footer>
+          {currentPage > 0 && (
+            <button
+              aria-label='página anterior'
+              onClick={() => setCurrentPage((prevState) => prevState - 1)}
+            >
+              <ArrowLeft size={20} color="#F7FBFE" weight='regular' />
+            </button>
+          )}
 
-                  return `${parsedPercentage}%`;
-                },
-              }
-            },
-          }}
-        />
+          {((currentPage * ITEMS_PER_PAGE) + ITEMS_PER_PAGE) < data.length && (
+            <button
+              aria-label='próxima página'
+              onClick={() => setCurrentPage((prevState) => prevState + 1)}
+            >
+              <ArrowRight size={20} color="#F7FBFE" weight='regular' />
+            </button>
+          )}
+        </footer>
       )}
     </Container>
   );
