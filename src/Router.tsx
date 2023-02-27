@@ -12,6 +12,9 @@ import { FuelingPatrimonyDetails } from './pages/FuelingPatrimonyDetails';
 import { FuelingFuelDetails } from './pages/FuelingFuelDetails';
 import { Production } from './pages/Production';
 import { ProductionCost } from './pages/ProductionCost';
+import { Contracts } from './pages/Contracts';
+import { Sales } from './pages/Sales';
+import { SalesPackingList } from './pages/SalesPackingList';
 
 export function Router() {
   return (
@@ -29,6 +32,9 @@ export function Router() {
       <Route path="/abastecimento/resumo-combustivel/analitica" element={<FuelingFuelDetails />} />
       <Route path="/producao" element={<Production />} />
       <Route path="/custo-producao" element={<ProductionCost />} />
+      <Route path="/contratos" element={<Contracts />} />
+      <Route path="/vendas" element={<Sales />} />
+      <Route path="/vendas/romaneios" element={<SalesPackingList />} />
     </Routes>
   );
 }

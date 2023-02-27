@@ -113,7 +113,7 @@ export function DiscountChart({ labels, data, unit }: DiscountChartProps) {
           />
         </ChartContainer>
       )}
-      {data.length > 5 && (
+      {data.length > ITEMS_PER_PAGE && (
         <footer>
           {currentPage > 0 && (
             <button

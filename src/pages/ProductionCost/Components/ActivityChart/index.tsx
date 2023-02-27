@@ -123,7 +123,7 @@ export function ActivityChart({ labels, data, units, unit }: ActivityChartProps)
           />
         </ChartContainer>
       )}
-      {data.length > 5 && (
+      {data.length > ITEMS_PER_PAGE && (
         <footer>
           {currentPage > 0 && (
             <button

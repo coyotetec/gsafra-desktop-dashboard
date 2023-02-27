@@ -6,15 +6,15 @@ import { useEffect, useMemo, useState } from 'react';
 import emptyIllustration from '../../../../assets/images/empty.svg';
 import { currencyFormat } from '../../../../utils/currencyFormat';
 
-interface PatrimonyReviewChartProps {
+interface ClientAvarageChartProps {
   labels: string[];
   data: number[];
-  isCurrency?: boolean;
+  unit: string;
 }
 
 const ITEMS_PER_PAGE = 7;
 
-export function PatrimonyReviewChart({ labels, data, isCurrency }: PatrimonyReviewChartProps) {
+export function ClientAvarageChart({ labels, data, unit }: ClientAvarageChartProps) {
   const [currentPage, setCurrentPage] = useState(0);
   const dataToShow = useMemo(() => ({
     labels: labels.slice(currentPage * ITEMS_PER_PAGE, (currentPage * ITEMS_PER_PAGE) + ITEMS_PER_PAGE),
@@ -31,17 +31,13 @@ export function PatrimonyReviewChart({ labels, data, isCurrency }: PatrimonyRevi
     }, -Infinity);
   }
 
-  function formatNumber(number: number, sufix?: string) {
-    return `${new Intl.NumberFormat('id').format(number)}${sufix ? sufix : ''}`;
-  }
-
   return (
     <Container>
       {data.length === 0 ? (
         <div className='empty'>
           <img src={emptyIllustration} alt="Ilustração de vazio" />
           <strong>Nenhum dado encontrado</strong>
-          <span>Tente inserir outro intervalo de datas.</span>
+          <span>Tente selecionar outra safra.</span>
         </div>
       ) : (
         <ChartContainer>
@@ -104,7 +100,7 @@ export function PatrimonyReviewChart({ labels, data, isCurrency }: PatrimonyRevi
                     weight: 600,
                   },
                   formatter(value) {
-                    return isCurrency ? currencyFormat(value) : formatNumber(value, ' lts');
+                    return `${currencyFormat(value)}/${unit === 'sacks' ? 'Saca' : 'Kg'}`;
                   },
                 }
               },

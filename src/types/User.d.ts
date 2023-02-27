@@ -16,4 +16,9 @@ type PermissionType =
   | 'custo_producao_insumo_atividade'
   | 'custo_producao_insumo_manutencao'
   | 'custo_producao_insumo_abastecimento'
+  | 'contratos'
+  | 'contratos_romaneios'
+  | 'vendas_por_cliente'
+  | 'vendas_preco_medio_por_cliente'
+  | 'vendas_preco_medio_por_mes'
 

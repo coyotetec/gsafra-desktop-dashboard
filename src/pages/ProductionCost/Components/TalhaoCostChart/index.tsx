@@ -128,7 +128,7 @@ export function TalhaoCostChart({ labels, safras, data, unit }: TalhaoCostChartP
           />
         </ChartContainer>
       )}
-      {data.length > 5 && (
+      {data.length > ITEMS_PER_PAGE && (
         <footer>
           {currentPage > 0 && (
             <button
