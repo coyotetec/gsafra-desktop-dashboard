@@ -42,6 +42,7 @@ export function Sidebar() {
           <NavLink to="/custo-producao">Custo Produção</NavLink>
           <NavLink to="/contratos">Contratos</NavLink>
           <NavLink to="/vendas">Vendas</NavLink>
+          <NavLink to="/estoque-graos">Estoque de Grãos</NavLink>
         </nav>
         <button type='button' onClick={handleExit}>
           Sair

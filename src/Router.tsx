@@ -15,6 +15,7 @@ import { ProductionCost } from './pages/ProductionCost';
 import { Contracts } from './pages/Contracts';
 import { Sales } from './pages/Sales';
 import { SalesPackingList } from './pages/SalesPackingList';
+import { BeanStock } from './pages/BeanStock';
 
 export function Router() {
   return (
@@ -35,6 +36,7 @@ export function Router() {
       <Route path="/contratos" element={<Contracts />} />
       <Route path="/vendas" element={<Sales />} />
       <Route path="/vendas/romaneios" element={<SalesPackingList />} />
+      <Route path="/estoque-graos" element={<BeanStock />} />
     </Routes>
   );
 }
