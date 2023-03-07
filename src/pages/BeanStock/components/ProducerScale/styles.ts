@@ -26,7 +26,7 @@ export const Container = styled.div`
     }
   }
 
-  .card {
+  > .card {
     width: 100%;
     padding: 16px;
     display: flex;

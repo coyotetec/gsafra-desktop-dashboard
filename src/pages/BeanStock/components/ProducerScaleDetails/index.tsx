@@ -1,5 +1,9 @@
+import html2canvas from 'html2canvas';
+import { DownloadSimple } from 'phosphor-react';
 import { Column } from 'primereact/column';
-import { useMemo, useState } from 'react';
+import { useContext, useMemo, useRef, useState } from 'react';
+import { UserContext } from '../../../../components/App';
+import { NotAllowed } from '../../../../components/NotAllowed';
 import { Select } from '../../../../components/Select';
 import { EstoqueGraosProdutor } from '../../../../types/EstoqueGraos';
 import { Container, Table } from './styles';
@@ -15,6 +19,7 @@ type optionType = {
 
 export function ProducerScaleDetails({ producersBeansStock }: ProducerScaleDetailsProps) {
   const [selectedProducer, setSelectedProducer] = useState('_');
+  const chartRef = useRef(null);
   const producersOptions = useMemo<optionType>(() => {
     setSelectedProducer(String(producersBeansStock[0].idProdutor));
 
@@ -54,10 +59,32 @@ export function ProducerScaleDetails({ producersBeansStock }: ProducerScaleDetai
     return beanStock;
   }, [producersBeansStock, selectedProducer]);
 
+  const { hasPermission } = useContext(UserContext);
+
   function formatNumber(number: number, sufix?: string) {
     return `${new Intl.NumberFormat('id', {
       maximumFractionDigits: 2,
     }).format(number)}${sufix ? sufix : ''}`;
+  }
+
+  function handleSaveChart() {
+    const chartElement = chartRef.current;
+
+    if (!chartElement) {
+      return;
+    }
+
+    html2canvas(chartElement, {
+      backgroundColor: null,
+      imageTimeout: 0,
+      scale: 2,
+    }).then((canvas) => {
+      const a = document.createElement('a');
+      a.href = canvas.toDataURL('image/png');
+      a.target = '_blank';
+      a.download = `SALDO ${producersOptions.find((i) => i.value === selectedProducer)?.label || ''} - VISÃO DETALHADA`;
+      a.click();
+    });
   }
 
   return (
@@ -74,16 +101,23 @@ export function ProducerScaleDetails({ producersBeansStock }: ProducerScaleDetai
           height="40px"
         />
       </header>
-      <div className="card">
-        <span>
-          <strong>Saldo Anterior: </strong>
-          {formatNumber(selectedProducerBeansStock.saldoAnterior || 0, ' Kg')}
-        </span>
-        <span>
-          <strong>Saldo Final: </strong>
-          {formatNumber(selectedProducerBeansStock.saldoFinal || 0, ' Kg')}
-        </span>
-
+      <div className="card" ref={chartRef}>
+        {!hasPermission('estoque_graos_produtor') && <NotAllowed />}
+        <header>
+          <div className="total">
+            <span>
+              <strong>Saldo Anterior: </strong>
+              {formatNumber(selectedProducerBeansStock.saldoAnterior || 0, ' Kg')}
+            </span>
+            <span>
+              <strong>Saldo Final: </strong>
+              {formatNumber(selectedProducerBeansStock.saldoFinal || 0, ' Kg')}
+            </span>
+          </div>
+          <button onClick={handleSaveChart} data-html2canvas-ignore>
+            <DownloadSimple size={24} color="#F7FBFE" weight='regular' />
+          </button>
+        </header>
         <section>
           <h4>Entradas</h4>
           <Table

@@ -1,7 +1,9 @@
 import { format } from 'date-fns';
 import { ArrowCircleDown, ArrowCircleRight, ArrowCircleUp, ChartLine, Scales, X } from 'phosphor-react';
 import { Column } from 'primereact/column';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
+import { UserContext } from '../../../../components/App';
+import { NotAllowed } from '../../../../components/NotAllowed';
 import { Spinner } from '../../../../components/Spinner';
 import useAnimatedUnmount from '../../../../hooks/useAnimatedUnmount';
 import EstoqueGraosService from '../../../../services/EstoqueGraosService';
@@ -44,6 +46,8 @@ export function Totalizers({ cropId, rangeDates, producerId, storageId, safraId 
     saldoFinal: 0,
   });
 
+  const { hasPermission } = useContext(UserContext);
+
   const {
     shouldRender: entriesShouldRender,
     animatedElementRef: entriesRef
@@ -56,34 +60,36 @@ export function Totalizers({ cropId, rangeDates, producerId, storageId, safraId 
 
   useEffect(() => {
     async function loadData() {
-      setIsLoading(true);
+      if (hasPermission('resumo_estoque_graos')) {
+        setIsLoading(true);
 
-      if (cropId === '_') {
-        setIsLoading(false);
-        return;
+        if (cropId === '_') {
+          setIsLoading(false);
+          return;
+        }
+
+        const produtorIdParsed = producerId !== '_' ? Number(producerId) : undefined;
+        const armazenamentoIdParsed = storageId !== '_' ? Number(storageId) : undefined;
+        const safraIdParsed = safraId !== '_' ? Number(safraId) : undefined;
+        const startDateParsed = rangeDates.startDate ? format(rangeDates.startDate, 'dd-MM-yyyy') : '';
+        const endDateParsed = rangeDates.endDate ? format(rangeDates.endDate, 'dd-MM-yyyy') : '';
+
+        const beanStockTotalData = await EstoqueGraosService.findTotal({
+          culturaId: Number(cropId),
+          startDate: startDateParsed,
+          endDate: endDateParsed,
+          produtorId: produtorIdParsed,
+          armazenamentoId: armazenamentoIdParsed,
+          safraId: safraIdParsed
+        });
+
+        setBeanStock(beanStockTotalData);
       }
-
-      const produtorIdParsed = producerId !== '_' ? Number(producerId) : undefined;
-      const armazenamentoIdParsed = storageId !== '_' ? Number(storageId) : undefined;
-      const safraIdParsed = safraId !== '_' ? Number(safraId) : undefined;
-      const startDateParsed = rangeDates.startDate ? format(rangeDates.startDate, 'dd-MM-yyyy') : '';
-      const endDateParsed = rangeDates.endDate ? format(rangeDates.endDate, 'dd-MM-yyyy') : '';
-
-      const beanStockTotalData = await EstoqueGraosService.findTotal({
-        culturaId: Number(cropId),
-        startDate: startDateParsed,
-        endDate: endDateParsed,
-        produtorId: produtorIdParsed,
-        armazenamentoId: armazenamentoIdParsed,
-        safraId: safraIdParsed
-      });
-
-      setBeanStock(beanStockTotalData);
       setIsLoading(false);
     }
 
     loadData();
-  }, [cropId, rangeDates, producerId, storageId, safraId]);
+  }, [cropId, rangeDates, producerId, storageId, safraId, hasPermission]);
 
   function formatNumber(number: number, sufix?: string) {
     return `${new Intl.NumberFormat('id', {
@@ -98,6 +104,7 @@ export function Totalizers({ cropId, rangeDates, producerId, storageId, safraId 
       </header>
       <div className="cards">
         <div className="card">
+          {!hasPermission('resumo_estoque_graos') && <NotAllowed />}
           {isLoading && (
             <Loader>
               <Spinner size={48} />
@@ -111,6 +118,7 @@ export function Totalizers({ cropId, rangeDates, producerId, storageId, safraId 
           <small>{formatNumber(beanStock.saldoAnterior / 60, ' Sacas')}</small>
         </div>
         <div className="card">
+          {!hasPermission('resumo_estoque_graos') && <NotAllowed />}
           {isLoading && (
             <Loader>
               <Spinner size={48} />
@@ -134,6 +142,7 @@ export function Totalizers({ cropId, rangeDates, producerId, storageId, safraId 
           </small>
         </div>
         <div className="card">
+          {!hasPermission('resumo_estoque_graos') && <NotAllowed />}
           {isLoading && (
             <Loader>
               <Spinner size={48} />
@@ -155,6 +164,12 @@ export function Totalizers({ cropId, rangeDates, producerId, storageId, safraId 
           <small>{formatNumber(beanStock.saidas.pesoLiquido / 60, ' Sacas')}</small>
         </div>
         <div className="card">
+          {!hasPermission('resumo_estoque_graos') && <NotAllowed />}
+          {isLoading && (
+            <Loader>
+              <Spinner size={48} />
+            </Loader>
+          )}
           <strong>
             <Scales size={24} color="#00D47E" weight="duotone" />
             Saldo Final

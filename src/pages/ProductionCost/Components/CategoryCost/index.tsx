@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { Spinner } from '../../../../components/Spinner';
 import { Container, Loader } from './styles';
 import CustoProducaoService from '../../../../services/CustoProducaoService';
@@ -9,6 +9,8 @@ import { currencyFormat } from '../../../../utils/currencyFormat';
 import { CategoryCostChart } from '../CategoryCostChart';
 import { NotAllowed } from '../../../../components/NotAllowed';
 import { UserContext } from '../../../../components/App';
+import html2canvas from 'html2canvas';
+import { DownloadSimple } from 'phosphor-react';
 
 interface CategoryCostProps {
   safraIds: string[];
@@ -27,6 +29,7 @@ export function CategoryCost({ safraIds, talhaoId, rangeDates, unit }: CategoryC
     totalCustoPorHectare: 0,
     totalCustoCategoria: []
   });
+  const chartRef = useRef(null);
 
   const { hasPermission } = useContext(UserContext);
 
@@ -67,12 +70,32 @@ export function CategoryCost({ safraIds, talhaoId, rangeDates, unit }: CategoryC
     loadData();
   }, [safraIds, talhaoId, rangeDates, hasPermission]);
 
+  function handleSaveChart() {
+    const chartElement = chartRef.current;
+
+    if (!chartElement) {
+      return;
+    }
+
+    html2canvas(chartElement, {
+      backgroundColor: null,
+      imageTimeout: 0,
+      scale: 2,
+    }).then((canvas) => {
+      const a = document.createElement('a');
+      a.href = canvas.toDataURL('image/png');
+      a.target = '_blank';
+      a.download = 'CUSTO PRODUÇÃO';
+      a.click();
+    });
+  }
+
   return (
     <Container>
       <header>
         <h3>CUSTOS POR CATEGORIA</h3>
       </header>
-      <div className="card">
+      <div className="card" ref={chartRef}>
         {!hasPermission('custo_producao_categoria') && <NotAllowed />}
         {isLoading && (
           <Loader>
@@ -88,6 +111,9 @@ export function CategoryCost({ safraIds, talhaoId, rangeDates, unit }: CategoryC
               {unit === 'percent' && currencyFormat(categoryCost.totalCusto)}
             </span>
           </div>
+          <button onClick={handleSaveChart} data-html2canvas-ignore>
+            <DownloadSimple size={24} color="#F7FBFE" weight='regular' />
+          </button>
         </header>
         <CategoryCostChart
           labels={categoryCost.totalCustoCategoria.map((i) => i.categoria)}

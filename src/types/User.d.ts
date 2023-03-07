@@ -21,4 +21,6 @@ type PermissionType =
   | 'vendas_por_cliente'
   | 'vendas_preco_medio_por_cliente'
   | 'vendas_preco_medio_por_mes'
+  | 'resumo_estoque_graos'
+  | 'estoque_graos_produtor'
 

@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { format } from 'date-fns';
 import { Container, Loader } from './styles';
 
@@ -13,6 +13,8 @@ import { CustoTalhao } from '../../../../types/CustoProducao';
 import { Select } from '../../../../components/Select';
 import { UserContext } from '../../../../components/App';
 import { NotAllowed } from '../../../../components/NotAllowed';
+import { DownloadSimple } from 'phosphor-react';
+import html2canvas from 'html2canvas';
 
 type optionType = {
   value: string;
@@ -37,6 +39,7 @@ export function TalhaoCost({ safraIds, unit, rangeDates, safraOptions }: TalhaoC
     totalCustoPorHectare: 0,
     totalCustoTalhao: []
   });
+  const chartRef = useRef(null);
 
   const { hasPermission } = useContext(UserContext);
 
@@ -80,6 +83,26 @@ export function TalhaoCost({ safraIds, unit, rangeDates, safraOptions }: TalhaoC
     loadData();
   }, [selectedSafra, safraIds, rangeDates, hasPermission]);
 
+  function handleSaveChart() {
+    const chartElement = chartRef.current;
+
+    if (!chartElement) {
+      return;
+    }
+
+    html2canvas(chartElement, {
+      backgroundColor: null,
+      imageTimeout: 0,
+      scale: 2,
+    }).then((canvas) => {
+      const a = document.createElement('a');
+      a.href = canvas.toDataURL('image/png');
+      a.target = '_blank';
+      a.download = 'CUSTO PRODUÇÃO';
+      a.click();
+    });
+  }
+
   return (
     <Container>
       <header>
@@ -97,7 +120,7 @@ export function TalhaoCost({ safraIds, unit, rangeDates, safraOptions }: TalhaoC
           />
         )}
       </header>
-      <div className="card">
+      <div className="card" ref={chartRef}>
         {!hasPermission('custo_producao_talhao') && <NotAllowed />}
         {isLoading && (
           <Loader>
@@ -113,6 +136,9 @@ export function TalhaoCost({ safraIds, unit, rangeDates, safraOptions }: TalhaoC
               {unit === 'percent' && currencyFormat(talhaoCost.totalCusto)}
             </span>
           </div>
+          <button onClick={handleSaveChart} data-html2canvas-ignore>
+            <DownloadSimple size={24} color="#F7FBFE" weight='regular' />
+          </button>
         </header>
         <TalhaoCostChart
           labels={talhaoCost.totalCustoTalhao.map(i => i.talhaoVariedade)}

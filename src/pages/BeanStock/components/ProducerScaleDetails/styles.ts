@@ -28,7 +28,7 @@ export const Container = styled.div`
     }
   }
 
-  .producer-card {
+  .card {
     width: 100%;
     padding: 16px;
     display: flex;
@@ -49,15 +49,28 @@ export const Container = styled.div`
       cursor: pointer;
     }
 
-    > span {
-      font-weight: 600;
-      font-size: 16px;
-      display: block;
-      margin-top: 2px;
+    header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 0;
 
-      strong {
-        font-size: 14px;
-        font-weight: 500;
+      span {
+        font-weight: 600;
+        font-size: 16px;
+        display: block;
+        margin-top: 2px;
+
+        strong {
+          font-size: 14px;
+          font-weight: 500;
+        }
+      }
+
+      button {
+        background: transparent;
+        border: none;
+        display: flex;
       }
     }
 

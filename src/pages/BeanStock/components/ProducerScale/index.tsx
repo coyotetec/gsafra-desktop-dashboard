@@ -1,7 +1,9 @@
 import { format } from 'date-fns';
 import html2canvas from 'html2canvas';
 import { DownloadSimple } from 'phosphor-react';
-import { useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
+import { UserContext } from '../../../../components/App';
+import { NotAllowed } from '../../../../components/NotAllowed';
 import { Spinner } from '../../../../components/Spinner';
 import { Switch } from '../../../../components/Switch';
 import EstoqueGraosService from '../../../../services/EstoqueGraosService';
@@ -34,47 +36,49 @@ export function ProducerScale({ cropId, rangeDates, producerId, storageId, safra
     saldoFinal: []
   });
 
+  const { hasPermission } = useContext(UserContext);
+
   useEffect(() => {
     async function loadData() {
       setIsLoading(true);
+      if (hasPermission('estoque_graos_produtor')) {
+        if (cropId === '_') {
+          setIsLoading(false);
+          return;
+        }
 
-      if (cropId === '_') {
-        setIsLoading(false);
-        return;
-      }
+        if (rangeDates.endDate && rangeDates.startDate && rangeDates.endDate < rangeDates.startDate) {
+          setIsLoading(false);
+          toast({
+            type: 'danger',
+            text: 'Data final precisa ser maior que inicial!'
+          });
+          return;
+        }
 
-      if (rangeDates.endDate && rangeDates.startDate && rangeDates.endDate < rangeDates.startDate) {
-        setIsLoading(false);
-        toast({
-          type: 'danger',
-          text: 'Data final precisa ser maior que inicial!'
+        const produtorIdParsed = producerId !== '_' ? Number(producerId) : undefined;
+        const armazenamentoIdParsed = storageId !== '_' ? Number(storageId) : undefined;
+        const safraIdParsed = safraId !== '_' ? Number(safraId) : undefined;
+        const startDateParsed = rangeDates.startDate ? format(rangeDates.startDate, 'dd-MM-yyyy') : '';
+        const endDateParsed = rangeDates.endDate ? format(rangeDates.endDate, 'dd-MM-yyyy') : '';
+
+        const beanStockProducerData = await EstoqueGraosService.findProducerTotal({
+          culturaId: Number(cropId),
+          startDate: startDateParsed,
+          endDate: endDateParsed,
+          produtorId: produtorIdParsed,
+          armazenamentoId: armazenamentoIdParsed,
+          safraId: safraIdParsed
         });
-        return;
+
+        setBeanStockProducer(beanStockProducerData);
+        setRequestId((prevState) => prevState + 1);
       }
-
-      const produtorIdParsed = producerId !== '_' ? Number(producerId) : undefined;
-      const armazenamentoIdParsed = storageId !== '_' ? Number(storageId) : undefined;
-      const safraIdParsed = safraId !== '_' ? Number(safraId) : undefined;
-      const startDateParsed = rangeDates.startDate ? format(rangeDates.startDate, 'dd-MM-yyyy') : '';
-      const endDateParsed = rangeDates.endDate ? format(rangeDates.endDate, 'dd-MM-yyyy') : '';
-
-      const beanStockProducerData = await EstoqueGraosService.findProducerTotal({
-        culturaId: Number(cropId),
-        startDate: startDateParsed,
-        endDate: endDateParsed,
-        produtorId: produtorIdParsed,
-        armazenamentoId: armazenamentoIdParsed,
-        safraId: safraIdParsed
-      });
-
-      setBeanStockProducer(beanStockProducerData);
-      setRequestId((prevState) => prevState + 1);
-
       setIsLoading(false);
     }
 
     loadData();
-  }, [cropId, producerId, rangeDates, safraId, storageId]);
+  }, [cropId, producerId, rangeDates, safraId, storageId, hasPermission]);
 
   function handleSaveChart() {
     const chartElement = chartRef.current;
@@ -102,6 +106,7 @@ export function ProducerScale({ cropId, rangeDates, producerId, storageId, safra
         <h3>ESTOQUE POR PRODUTOR</h3>
       </header>
       <div className="card" ref={chartRef}>
+        {!hasPermission('estoque_graos_produtor') && <NotAllowed />}
         {isLoading && (
           <Loader>
             <Spinner size={48} />
