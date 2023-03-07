@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { addMonths, format } from 'date-fns';
 
 import { Container, Header } from './styles';
@@ -8,8 +8,8 @@ import { DateInput } from '../../../../components/DateInput';
 import FinancialService from '../../../../services/FinancialService';
 import { CashFlow as CashFlowType } from '../../../../types/Financial';
 import { CashFlowChart } from '../CashFlowChart';
-import { UserContext } from '../../../../components/App';
 import { toast } from '../../../../utils/toast';
+import { useUserContext } from '../../../../contexts/UserContext';
 
 interface CashFlowProps {
   safraId: string;
@@ -22,7 +22,7 @@ export function CashFlow({ safraId }: CashFlowProps) {
   const [cashFlow, setCashFlow] = useState<CashFlowType>({} as CashFlowType);
   const [isLoading, setIsLoading] = useState(true);
 
-  const { hasPermission } = useContext(UserContext);
+  const { hasPermission } = useUserContext();
 
   const loadData = useCallback(async () => {
     if (hasPermission('fluxo_caixa')) {

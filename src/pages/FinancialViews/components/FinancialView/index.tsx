@@ -1,12 +1,12 @@
 import { format, startOfMonth, startOfYear, subMonths } from 'date-fns';
 import html2canvas from 'html2canvas';
 import { DownloadSimple } from 'phosphor-react';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { UserContext } from '../../../../components/App';
 import { DateInput } from '../../../../components/DateInput';
 import { NotAllowed } from '../../../../components/NotAllowed';
 import { Spinner } from '../../../../components/Spinner';
+import { useUserContext } from '../../../../contexts/UserContext';
 import FinancialViewsService from '../../../../services/FinancialViewsService';
 import { View, ViewTotal, ViewTotalizer } from '../../../../types/FinancialViews';
 import { currencyFormat } from '../../../../utils/currencyFormat';
@@ -39,7 +39,7 @@ export function FinancialView({ id, nome, periodoPadraoMeses }: FinancialViewPro
   });
   const chartRef = useRef(null);
 
-  const { hasPermission } = useContext(UserContext);
+  const { hasPermission } = useUserContext();
 
   useEffect(() => {
     async function loadData() {

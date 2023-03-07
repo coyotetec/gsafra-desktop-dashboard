@@ -1,10 +1,10 @@
 import { format } from 'date-fns';
 import { ArrowCircleDown, ArrowCircleRight, ArrowCircleUp, ChartLine, Scales, X } from 'phosphor-react';
 import { Column } from 'primereact/column';
-import { useContext, useEffect, useState } from 'react';
-import { UserContext } from '../../../../components/App';
+import { useEffect, useState } from 'react';
 import { NotAllowed } from '../../../../components/NotAllowed';
 import { Spinner } from '../../../../components/Spinner';
+import { useUserContext } from '../../../../contexts/UserContext';
 import useAnimatedUnmount from '../../../../hooks/useAnimatedUnmount';
 import EstoqueGraosService from '../../../../services/EstoqueGraosService';
 import { EstoqueGraosTotal } from '../../../../types/EstoqueGraos';
@@ -46,7 +46,7 @@ export function Totalizers({ cropId, rangeDates, producerId, storageId, safraId 
     saldoFinal: 0,
   });
 
-  const { hasPermission } = useContext(UserContext);
+  const { hasPermission } = useUserContext();
 
   const {
     shouldRender: entriesShouldRender,

@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Spinner } from '../../../../components/Spinner';
 import { Container, Loader } from './styles';
 import { ActivityChart } from '../ActivityChart';
@@ -9,7 +9,7 @@ import { toast } from '../../../../utils/toast';
 import { currencyFormat } from '../../../../utils/currencyFormat';
 import { Switch } from '../../../../components/Switch';
 import { NotAllowed } from '../../../../components/NotAllowed';
-import { UserContext } from '../../../../components/App';
+import { useUserContext } from '../../../../contexts/UserContext';
 
 interface FuelingProps {
   safraIds: string[];
@@ -30,7 +30,7 @@ export function Fueling({ safraIds, talhaoId, rangeDates, unit: parentUnit }: Fu
     inputsTotal: []
   });
 
-  const { hasPermission } = useContext(UserContext);
+  const { hasPermission } = useUserContext();
 
   useEffect(() => {
     async function loadData() {

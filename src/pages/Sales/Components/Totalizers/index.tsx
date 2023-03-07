@@ -1,6 +1,6 @@
 import { format } from 'date-fns';
 import { ArrowLeft, ArrowRight, DownloadSimple } from 'phosphor-react';
-import { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import VendaService from '../../../../services/VendaService';
 import { Venda } from '../../../../types/Venda';
 import { toast } from '../../../../utils/toast';
@@ -10,7 +10,7 @@ import { Spinner } from '../../../../components/Spinner';
 import { Link } from 'react-router-dom';
 import html2canvas from 'html2canvas';
 import { NotAllowed } from '../../../../components/NotAllowed';
-import { UserContext } from '../../../../components/App';
+import { useUserContext } from '../../../../contexts/UserContext';
 
 interface RangeDates {
   startDate: Date | null;
@@ -36,7 +36,7 @@ export function Totalizers({ safraId, safraName, deliveryStatus, rangeDates }: T
     sales.slice(currentPage * ITEMS_PER_PAGE, (currentPage * ITEMS_PER_PAGE) + ITEMS_PER_PAGE)
   ), [sales, currentPage]);
 
-  const { hasPermission } = useContext(UserContext);
+  const { hasPermission } = useUserContext();
 
   useEffect(() => {
     setCurrentPage(0);

@@ -1,11 +1,11 @@
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import { Spinner } from '../../../../components/Spinner';
 import { Container, Loader } from './styles';
 import { ColheitaTotalTalhao } from '../../../../types/Colheita';
 import { HarvestChart } from '../HarvestChart';
 import { Switch } from '../../../../components/Switch';
-import { UserContext } from '../../../../components/App';
 import { NotAllowed } from '../../../../components/NotAllowed';
+import { useUserContext } from '../../../../contexts/UserContext';
 
 interface HarvestProps {
   isLoading: boolean;
@@ -17,7 +17,7 @@ interface HarvestProps {
 export function Harvest({ isLoading, totalSafra, totalSacasSafra, talhoesTotal }: HarvestProps) {
   const [unit, setUnit] = useState<'kg' | 'sacks'>('sacks');
 
-  const { hasPermission } = useContext(UserContext);
+  const { hasPermission } = useUserContext();
 
   function formatNumber(number: number, sufix?: string) {
     return `${new Intl.NumberFormat('id').format(number)}${sufix ? sufix : ''}`;

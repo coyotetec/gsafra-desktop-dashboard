@@ -1,10 +1,10 @@
 import html2canvas from 'html2canvas';
 import { DownloadSimple } from 'phosphor-react';
 import { Column } from 'primereact/column';
-import { useContext, useMemo, useRef, useState } from 'react';
-import { UserContext } from '../../../../components/App';
+import { useMemo, useRef, useState } from 'react';
 import { NotAllowed } from '../../../../components/NotAllowed';
 import { Select } from '../../../../components/Select';
+import { useUserContext } from '../../../../contexts/UserContext';
 import { EstoqueGraosProdutor } from '../../../../types/EstoqueGraos';
 import { Container, Table } from './styles';
 
@@ -59,7 +59,7 @@ export function ProducerScaleDetails({ producersBeansStock }: ProducerScaleDetai
     return beanStock;
   }, [producersBeansStock, selectedProducer]);
 
-  const { hasPermission } = useContext(UserContext);
+  const { hasPermission } = useUserContext();
 
   function formatNumber(number: number, sufix?: string) {
     return `${new Intl.NumberFormat('id', {

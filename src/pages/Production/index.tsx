@@ -1,6 +1,6 @@
-import { useContext, useEffect, useState } from 'react';
-import { UserContext } from '../../components/App';
+import { useEffect, useState } from 'react';
 import { Header } from '../../components/Header';
+import { useUserContext } from '../../contexts/UserContext';
 import ColheitaService from '../../services/ColheitaService';
 import { ColheitaTotal } from '../../types/Colheita';
 import { Discount } from './Components/Discount';
@@ -19,7 +19,7 @@ export function Production() {
     talhoesTotal: []
   });
 
-  const { hasPermission } = useContext(UserContext);
+  const { hasPermission } = useUserContext();
 
   useEffect(() => {
     async function loadData() {

@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Spinner } from '../../../../components/Spinner';
 import { Container, Loader } from './styles';
 import CustoProducaoService from '../../../../services/CustoProducaoService';
@@ -8,9 +8,9 @@ import { CustoCategoria } from '../../../../types/CustoProducao';
 import { currencyFormat } from '../../../../utils/currencyFormat';
 import { CategoryCostChart } from '../CategoryCostChart';
 import { NotAllowed } from '../../../../components/NotAllowed';
-import { UserContext } from '../../../../components/App';
 import html2canvas from 'html2canvas';
 import { DownloadSimple } from 'phosphor-react';
+import { useUserContext } from '../../../../contexts/UserContext';
 
 interface CategoryCostProps {
   safraIds: string[];
@@ -31,7 +31,7 @@ export function CategoryCost({ safraIds, talhaoId, rangeDates, unit }: CategoryC
   });
   const chartRef = useRef(null);
 
-  const { hasPermission } = useContext(UserContext);
+  const { hasPermission } = useUserContext();
 
   useEffect(() => {
     async function loadData() {

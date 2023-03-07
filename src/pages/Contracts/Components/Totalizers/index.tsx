@@ -1,11 +1,11 @@
 import { ArrowLeft, ArrowRight } from 'phosphor-react';
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Contrato } from '../../../../types/Contrato';
 import { Container, Loader } from './styles';
 import emptyIllustration from '../../../../assets/images/empty.svg';
 import { NotAllowed } from '../../../../components/NotAllowed';
-import { UserContext } from '../../../../components/App';
 import { Spinner } from '../../../../components/Spinner';
+import { useUserContext } from '../../../../contexts/UserContext';
 
 interface TotalizersProps {
   contracts: Contrato[];
@@ -16,7 +16,7 @@ const ITEMS_PER_PAGE = 4;
 
 export function Totalizers({ contracts, isLoading }: TotalizersProps) {
   const [currentPage, setCurrentPage] = useState(0);
-  const { hasPermission } = useContext(UserContext);
+  const { hasPermission } = useUserContext();
 
   const contractsToShow = useMemo(() => (
     contracts.slice(currentPage * ITEMS_PER_PAGE, (currentPage * ITEMS_PER_PAGE) + ITEMS_PER_PAGE)

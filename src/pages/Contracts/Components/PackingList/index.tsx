@@ -2,12 +2,12 @@ import { format } from 'date-fns';
 import { Column } from 'primereact/column';
 import { DataTablePFSEvent } from 'primereact/datatable';
 import { PaginatorTemplate } from 'primereact/paginator';
-import { useContext, useEffect, useState } from 'react';
-import { UserContext } from '../../../../components/App';
+import { useEffect, useState } from 'react';
 import { DateInput } from '../../../../components/DateInput';
 import { NotAllowed } from '../../../../components/NotAllowed';
 import { Select } from '../../../../components/Select';
 import { Spinner } from '../../../../components/Spinner';
+import { useUserContext } from '../../../../contexts/UserContext';
 import ContratoService from '../../../../services/ContratoService';
 import { Romaneio } from '../../../../types/Contrato';
 import { toast } from '../../../../utils/toast';
@@ -37,7 +37,8 @@ export function PackingList({ contracts }: PackingListProps) {
   });
   const [first, setFirst] = useState(0);
   const [rows, setRows] = useState(10);
-  const { hasPermission } = useContext(UserContext);
+
+  const { hasPermission } = useUserContext();
 
   useEffect(() => {
     if (contracts.length > 0) {

@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Spinner } from '../../../../components/Spinner';
 import ColheitaService, { descontoType } from '../../../../services/ColheitaService';
 import { Container, Loader } from './styles';
@@ -6,8 +6,8 @@ import { ColheitaDescontoTotal } from '../../../../types/Colheita';
 import { Switch } from '../../../../components/Switch';
 import { Select } from '../../../../components/Select';
 import { DiscountChart } from '../DiscountChart';
-import { UserContext } from '../../../../components/App';
 import { NotAllowed } from '../../../../components/NotAllowed';
+import { useUserContext } from '../../../../contexts/UserContext';
 
 interface DiscountProps {
   safraId: string;
@@ -39,7 +39,7 @@ export function Discount({ safraId }: DiscountProps) {
     { value: 'cota', label: 'Cota' },
   ];
 
-  const { hasPermission } = useContext(UserContext);
+  const { hasPermission } = useUserContext();
 
   useEffect(() => {
     async function loadData() {

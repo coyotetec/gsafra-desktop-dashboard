@@ -6,12 +6,12 @@ import { Container, Loader } from './styles';
 import { currencyFormat } from '../../../../utils/currencyFormat';
 import { CashFlow, CashFlowPattern } from '../../../../types/Financial';
 import { NotAllowed } from '../../../../components/NotAllowed';
-import { useContext, useRef } from 'react';
-import { UserContext } from '../../../../components/App';
+import { useRef } from 'react';
 import { DownloadSimple } from 'phosphor-react';
 import { format } from 'date-fns';
 import { Spinner } from '../../../../components/Spinner';
 import emptyIllustration from '../../../../assets/images/empty.svg';
+import { useUserContext } from '../../../../contexts/UserContext';
 
 interface CashFlowChartProps {
   labels: string[];
@@ -24,7 +24,7 @@ interface CashFlowChartProps {
 export function CashFlowChart({ labels, cashFlow, startDate, endDate, isLoading }: CashFlowChartProps) {
   const chartRef = useRef(null);
 
-  const { hasPermission } = useContext(UserContext);
+  const { hasPermission } = useUserContext();
 
   function getCashFlowItemData(data: CashFlowPattern[]) {
     return data ? data.map((i) => i.value) : [];

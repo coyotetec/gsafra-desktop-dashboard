@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Spinner } from '../../../../components/Spinner';
 import { Container, Loader } from './styles';
 import { Switch } from '../../../../components/Switch';
@@ -10,8 +10,8 @@ import { MonthlyAvarageChart } from '../MonthlyAvarageChart';
 import { DownloadSimple } from 'phosphor-react';
 import html2canvas from 'html2canvas';
 import { currencyFormat } from '../../../../utils/currencyFormat';
-import { UserContext } from '../../../../components/App';
 import { NotAllowed } from '../../../../components/NotAllowed';
+import { useUserContext } from '../../../../contexts/UserContext';
 
 interface RangeDates {
   startDate: Date | null;
@@ -35,7 +35,7 @@ export function MonthlyAvarage({ safraId, safraName, deliveryStatus, rangeDates 
   });
   const chartRef = useRef(null);
 
-  const { hasPermission } = useContext(UserContext);
+  const { hasPermission } = useUserContext();
 
   useEffect(() => {
     async function loadData() {

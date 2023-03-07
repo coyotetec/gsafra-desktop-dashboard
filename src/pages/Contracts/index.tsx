@@ -1,6 +1,6 @@
-import { useContext, useEffect, useState } from 'react';
-import { UserContext } from '../../components/App';
+import { useEffect, useState } from 'react';
 import { Header } from '../../components/Header';
+import { useUserContext } from '../../contexts/UserContext';
 import ContratoService from '../../services/ContratoService';
 import { Contrato } from '../../types/Contrato';
 import { PackingList } from './Components/PackingList';
@@ -17,7 +17,8 @@ export function Contracts() {
   const [selectedSafra, setSelectedSafra] = useState('_');
   const [contracts, setContracts] = useState<Contrato[]>([]);
   const [contractOptions, setContractOptions] = useState<optionType>([]);
-  const { hasPermission } = useContext(UserContext);
+
+  const { hasPermission } = useUserContext();
 
   useEffect(() => {
     async function loadData() {

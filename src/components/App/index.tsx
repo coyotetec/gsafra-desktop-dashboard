@@ -24,11 +24,8 @@ import 'primeicons/primeicons.css';                                //icons
 
 import { Router } from '../../Router';
 import { Sidebar } from '../Sidebar';
-import { useSearchParams } from 'react-router-dom';
-import { createContext, useCallback, useEffect, useState } from 'react';
-import { useFirstRender } from '../../hooks/useFirstRender';
-import UserService from '../../services/UserService';
 import { ToastContainer } from '../Toast/ToastContainer';
+import { UserContextProvider } from '../../contexts/UserContext';
 
 ChartJS.register(
   LinearScale,
@@ -53,41 +50,9 @@ ChartJS.defaults.font = {
   weight: '500',
 };
 
-interface UserContextType {
-  hasPermission: (_params: PermissionType) => boolean;
-}
-
-export const UserContext: React.Context<UserContextType> = createContext({}) as any;
-
 export function App() {
-  const [permissions, setPermissions] = useState<PermissionType[]>([]);
-
-  const isFirstRender = useFirstRender();
-
-  const [query] = useSearchParams();
-  const idUsuario = query.get('idUsuario');
-  const databaseName = query.get('dbNome');
-
-  useEffect(() => {
-    async function loadData() {
-      if (isFirstRender && idUsuario) {
-        const permissionsData = await UserService.findPermissions(
-          Number(idUsuario),
-          databaseName ? databaseName : undefined
-        );
-        setPermissions([...permissionsData]);
-      }
-    }
-
-    loadData();
-  }, [idUsuario, isFirstRender, databaseName]);
-
-  const hasPermission = useCallback((permissionCode: PermissionType) => {
-    return permissions.includes(permissionCode);
-  }, [permissions]);
-
   return (
-    <UserContext.Provider value={{ hasPermission }}>
+    <UserContextProvider>
       <Container>
         <GlobalStyles />
         <Sidebar />
@@ -96,6 +61,6 @@ export function App() {
         </Content>
       </Container>
       <ToastContainer />
-    </UserContext.Provider>
+    </UserContextProvider>
   );
 }

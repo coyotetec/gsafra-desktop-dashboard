@@ -1,11 +1,11 @@
 import { format, subMonths } from 'date-fns';
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { UserContext } from '../../components/App';
 import { DateInput } from '../../components/DateInput';
 import { Header } from '../../components/Header';
 import { Loader } from '../../components/Loader';
 import { Select } from '../../components/Select';
+import { useUserContext } from '../../contexts/UserContext';
 import AbastecimentoService from '../../services/AbastecimentoService';
 import AlmoxarifadoService from '../../services/AlmoxarifadoService';
 import PatrimonioService from '../../services/PatrimonioService';
@@ -42,7 +42,7 @@ export function FuelingFuelReview() {
   const [isDataLoading, setIsDataLoading] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
 
-  const { hasPermission } = useContext(UserContext);
+  const { hasPermission } = useUserContext();
 
   useEffect(() => {
     async function loadData() {

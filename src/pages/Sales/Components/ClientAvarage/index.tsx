@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Spinner } from '../../../../components/Spinner';
 import { Container, Loader } from './styles';
 import { Switch } from '../../../../components/Switch';
@@ -9,8 +9,8 @@ import { MediaCliente } from '../../../../types/Venda';
 import { ClientAvarageChart } from '../ClientAvarageChart';
 import { DownloadSimple } from 'phosphor-react';
 import html2canvas from 'html2canvas';
-import { UserContext } from '../../../../components/App';
 import { NotAllowed } from '../../../../components/NotAllowed';
+import { useUserContext } from '../../../../contexts/UserContext';
 
 interface RangeDates {
   startDate: Date | null;
@@ -30,7 +30,7 @@ export function ClientAvarage({ safraId, safraName, deliveryStatus, rangeDates }
   const [clientAvarage, setClientAvarage] = useState<MediaCliente[]>([]);
   const chartRef = useRef(null);
 
-  const { hasPermission } = useContext(UserContext);
+  const { hasPermission } = useUserContext();
 
   useEffect(() => {
     async function loadData() {

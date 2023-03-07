@@ -1,7 +1,7 @@
-import { useContext, useEffect, useState } from 'react';
-import { UserContext } from '../../components/App';
+import { useEffect, useState } from 'react';
 import { Header } from '../../components/Header';
 import { Loader } from '../../components/Loader';
+import { useUserContext } from '../../contexts/UserContext';
 import FinancialViewsService from '../../services/FinancialViewsService';
 import { View } from '../../types/FinancialViews';
 import { FinancialView } from './components/FinancialView';
@@ -11,7 +11,7 @@ export function FinancialViews() {
   const [views, setViews] = useState<View[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const { hasPermission } = useContext(UserContext);
+  const { hasPermission } = useUserContext();
 
   useEffect(() => {
     async function loadData() {

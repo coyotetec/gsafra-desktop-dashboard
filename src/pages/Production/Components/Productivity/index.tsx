@@ -1,11 +1,11 @@
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import { Spinner } from '../../../../components/Spinner';
 import { Container, Loader } from './styles';
 import { ColheitaTotalTalhao } from '../../../../types/Colheita';
 import { ProductivityChart } from '../ProductivityChart';
 import { Switch } from '../../../../components/Switch';
 import { NotAllowed } from '../../../../components/NotAllowed';
-import { UserContext } from '../../../../components/App';
+import { useUserContext } from '../../../../contexts/UserContext';
 
 interface ProductivityProps {
   isLoading: boolean;
@@ -17,7 +17,7 @@ interface ProductivityProps {
 export function Productivity({ isLoading, totalSafra, totalSacasSafra, talhoesTotal }: ProductivityProps) {
   const [unit, setUnit] = useState<'kg' | 'sacks'>('sacks');
 
-  const { hasPermission } = useContext(UserContext);
+  const { hasPermission } = useUserContext();
 
   function formatNumber(number: number, sufix?: string) {
     return `${new Intl.NumberFormat('id').format(number)}${sufix ? sufix : ''}`;

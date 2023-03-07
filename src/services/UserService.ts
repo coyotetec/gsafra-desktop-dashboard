@@ -1,3 +1,4 @@
+import { PermissionType } from '../types/User';
 import { api } from './utils/api';
 
 class SafraService {

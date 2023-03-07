@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   ArrowCircleDown,
   ArrowCircleRight,
@@ -19,12 +19,12 @@ import CreditCardService from '../../../../services/CreditCardService';
 import FinancialService from '../../../../services/FinancialService';
 import useAnimatedUnmount from '../../../../hooks/useAnimatedUnmount';
 import { NotAllowed } from '../../../../components/NotAllowed';
-import { UserContext } from '../../../../components/App';
 import { addDays, addMonths, format } from 'date-fns';
 import { DateInput } from '../../../../components/DateInput';
 import { useSearchParams } from 'react-router-dom';
 import { toast } from '../../../../utils/toast';
 import { Spinner } from '../../../../components/Spinner';
+import { useUserContext } from '../../../../contexts/UserContext';
 
 interface TotalizerProps {
   safraId?: string;
@@ -62,7 +62,7 @@ export function Totalizer({ safraId }: TotalizerProps) {
     }
   }), []);
 
-  const { hasPermission } = useContext(UserContext);
+  const { hasPermission } = useUserContext();
 
   const [, setQuery] = useSearchParams();
 

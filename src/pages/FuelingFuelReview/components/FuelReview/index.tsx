@@ -1,9 +1,9 @@
 import html2canvas from 'html2canvas';
 import { DownloadSimple } from 'phosphor-react';
-import { useContext, useRef } from 'react';
-import { UserContext } from '../../../../components/App';
+import { useRef } from 'react';
 import { NotAllowed } from '../../../../components/NotAllowed';
 import { Spinner } from '../../../../components/Spinner';
+import { useUserContext } from '../../../../contexts/UserContext';
 import { currencyFormat } from '../../../../utils/currencyFormat';
 import { FuelReviewChart } from '../FuelReviewChart';
 import { Container, Loader } from './styles';
@@ -18,8 +18,8 @@ interface FuelReviewProps {
 }
 
 export function FuelReview({ title, total, labels, data, isCurrency, isLoading }: FuelReviewProps) {
-  const { hasPermission } = useContext(UserContext);
   const chartRef = useRef(null);
+  const { hasPermission } = useUserContext();
 
   function handleSaveChart() {
     const chartElement = chartRef.current;

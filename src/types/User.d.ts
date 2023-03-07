@@ -1,4 +1,4 @@
-type PermissionType =
+export type PermissionType =
   'resumo_pendentes_pagamento'
   | 'resumo_pendentes_recebimento'
   | 'resumo_cartao_credito'
@@ -23,4 +23,3 @@ type PermissionType =
   | 'vendas_preco_medio_por_mes'
   | 'resumo_estoque_graos'
   | 'estoque_graos_produtor'
-

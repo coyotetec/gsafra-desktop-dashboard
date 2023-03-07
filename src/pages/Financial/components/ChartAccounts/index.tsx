@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { TreeSelectSelectionKeys } from 'primereact/treeselect';
 
@@ -10,11 +10,11 @@ import { Spinner } from '../../../../components/Spinner';
 import { DateInput } from '../../../../components/DateInput';
 import { format, subMonths } from 'date-fns';
 import { ChartAccountsSelect } from '../../../../components/ChartAccoutsSelect';
-import { UserContext } from '../../../../components/App';
 import { NotAllowed } from '../../../../components/NotAllowed';
 import html2canvas from 'html2canvas';
 import { DownloadSimple } from 'phosphor-react';
 import { toast } from '../../../../utils/toast';
+import { useUserContext } from '../../../../contexts/UserContext';
 
 interface ChartAccountsProps {
   safraId: string;
@@ -46,7 +46,7 @@ export function ChartAccounts({ safraId }: ChartAccountsProps) {
   const creditChartRef = useRef(null);
   const debitChartRef = useRef(null);
 
-  const { hasPermission } = useContext(UserContext);
+  const { hasPermission } = useUserContext();
 
   useEffect(() => {
     async function loadTotal() {

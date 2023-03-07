@@ -1,11 +1,11 @@
 import { format } from 'date-fns';
 import html2canvas from 'html2canvas';
 import { DownloadSimple } from 'phosphor-react';
-import { useContext, useEffect, useRef, useState } from 'react';
-import { UserContext } from '../../../../components/App';
+import { useEffect, useRef, useState } from 'react';
 import { NotAllowed } from '../../../../components/NotAllowed';
 import { Spinner } from '../../../../components/Spinner';
 import { Switch } from '../../../../components/Switch';
+import { useUserContext } from '../../../../contexts/UserContext';
 import EstoqueGraosService from '../../../../services/EstoqueGraosService';
 import { EstoqueGraosProdutorTotal } from '../../../../types/EstoqueGraos';
 import { toast } from '../../../../utils/toast';
@@ -36,7 +36,7 @@ export function ProducerScale({ cropId, rangeDates, producerId, storageId, safra
     saldoFinal: []
   });
 
-  const { hasPermission } = useContext(UserContext);
+  const { hasPermission } = useUserContext();
 
   useEffect(() => {
     async function loadData() {

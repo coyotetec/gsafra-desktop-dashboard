@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Spinner } from '../../../../components/Spinner';
 import { Container, Loader } from './styles';
 import { ActivityChart } from '../ActivityChart';
@@ -8,8 +8,8 @@ import { format } from 'date-fns';
 import { toast } from '../../../../utils/toast';
 import { currencyFormat } from '../../../../utils/currencyFormat';
 import { Switch } from '../../../../components/Switch';
-import { UserContext } from '../../../../components/App';
 import { NotAllowed } from '../../../../components/NotAllowed';
+import { useUserContext } from '../../../../contexts/UserContext';
 
 interface MaintenanceProps {
   safraIds: string[];
@@ -30,7 +30,7 @@ export function Maintenance({ safraIds, talhaoId, rangeDates, unit: parentUnit }
     inputsTotal: []
   });
 
-  const { hasPermission } = useContext(UserContext);
+  const { hasPermission } = useUserContext();
 
   useEffect(() => {
     async function loadData() {

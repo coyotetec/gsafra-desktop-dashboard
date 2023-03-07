@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { format } from 'date-fns';
 import { Container, Loader } from './styles';
 
@@ -11,10 +11,10 @@ import { toast } from '../../../../utils/toast';
 import { currencyFormat } from '../../../../utils/currencyFormat';
 import { CustoTalhao } from '../../../../types/CustoProducao';
 import { Select } from '../../../../components/Select';
-import { UserContext } from '../../../../components/App';
 import { NotAllowed } from '../../../../components/NotAllowed';
 import { DownloadSimple } from 'phosphor-react';
 import html2canvas from 'html2canvas';
+import { useUserContext } from '../../../../contexts/UserContext';
 
 type optionType = {
   value: string;
@@ -41,7 +41,7 @@ export function TalhaoCost({ safraIds, unit, rangeDates, safraOptions }: TalhaoC
   });
   const chartRef = useRef(null);
 
-  const { hasPermission } = useContext(UserContext);
+  const { hasPermission } = useUserContext();
 
   useEffect(() => {
     setSelectedSafra('_');
