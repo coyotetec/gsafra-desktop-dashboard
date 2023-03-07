@@ -81,6 +81,10 @@ export function FuelReviewChart({ labels, data, isCurrency = false, total }: Fue
                 }
               },
               datalabels: {
+                display(ctx) {
+                  const percentage = (data[ctx.dataIndex] * 100) / total;
+                  return percentage > 2;
+                },
                 font: {
                   weight: 600,
                   size: 16

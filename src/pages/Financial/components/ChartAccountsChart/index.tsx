@@ -67,7 +67,7 @@ export function ChartAccountsChart({ labels, data }: ChartAccountsChartProps) {
                   },
                   stacked: true,
                   min: 0,
-                  max: (dataToShow.data[0] || 0) * 1.7
+                  max: dataToShow.data[0] ? dataToShow.data[0] * 1.7 : 1
                 },
                 y: {
                   beginAtZero: true,

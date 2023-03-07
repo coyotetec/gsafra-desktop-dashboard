@@ -24,11 +24,11 @@ export function DiscountChart({ labels, data, unit }: DiscountChartProps) {
     setCurrentPage(0);
   }, [data]);
 
-  function getHigherValue(arr: number[]) {
-    return arr.reduce((a, b) => {
+  const higherValue = useMemo(() => {
+    return dataToShow.data.reduce((a, b) => {
       return Math.max(a, b);
     }, -Infinity);
-  }
+  }, [dataToShow]);
 
   function formatNumber(number: number, sufix?: string) {
     return `${new Intl.NumberFormat('id').format(number)}${sufix ? sufix : ''}`;
@@ -77,7 +77,7 @@ export function DiscountChart({ labels, data, unit }: DiscountChartProps) {
                     display: false
                   },
                   min: 0,
-                  max: getHigherValue(dataToShow.data) * 1.5,
+                  max: higherValue <= 0 ? 1 : higherValue * 1.5,
                 },
                 y: {
                   beginAtZero: true,

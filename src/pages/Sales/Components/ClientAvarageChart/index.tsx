@@ -25,11 +25,11 @@ export function ClientAvarageChart({ labels, data, unit }: ClientAvarageChartPro
     setCurrentPage(0);
   }, [data]);
 
-  function getHigherValue(arr: number[]) {
-    return arr.reduce((a, b) => {
+  const higherValue = useMemo(() => {
+    return dataToShow.data.reduce((a, b) => {
       return Math.max(a, b);
     }, -Infinity);
-  }
+  }, [dataToShow]);
 
   return (
     <Container>
@@ -74,7 +74,7 @@ export function ClientAvarageChart({ labels, data, unit }: ClientAvarageChartPro
                     display: false
                   },
                   min: 0,
-                  max: getHigherValue(dataToShow.data) * 1.5,
+                  max: higherValue <= 0 ? 1 : higherValue * 1.5,
                 },
                 y: {
                   beginAtZero: true,

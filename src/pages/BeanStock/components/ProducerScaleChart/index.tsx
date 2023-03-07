@@ -80,7 +80,7 @@ export function ProducerScaleChart({ requestId, labels, data, unit }: ProducerSc
                     display: false
                   },
                   min: 0,
-                  max: higherValue === 0 ? 1 : higherValue * 1.5,
+                  max: higherValue <= 0 ? 1 : higherValue * 1.5,
 
                 },
                 y: {

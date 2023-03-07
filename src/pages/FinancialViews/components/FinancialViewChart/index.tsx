@@ -26,11 +26,11 @@ export function FinancialViewChart({ allData, labels, data }: FinancialViewChart
     setCurrentPage(0);
   }, [data]);
 
-  function getHigherValue(arr: number[]) {
-    return arr.reduce((a, b) => {
+  const higherValue = useMemo(() => {
+    return dataToShow.data.reduce((a, b) => {
       return Math.max(a, b);
     }, -Infinity);
-  }
+  }, [dataToShow]);
 
   return (
     <Container>
@@ -75,7 +75,7 @@ export function FinancialViewChart({ allData, labels, data }: FinancialViewChart
                   },
                   stacked: true,
                   min: 0,
-                  max: dataToShow ? getHigherValue(dataToShow.data) * 1.5 : 0
+                  max: higherValue <= 0 ? 1 : higherValue * 1.5
                 },
                 y: {
                   beginAtZero: true,
