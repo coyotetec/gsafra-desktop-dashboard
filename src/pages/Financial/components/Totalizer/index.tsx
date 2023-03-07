@@ -106,18 +106,19 @@ export function Totalizer({ safraId }: TotalizerProps) {
       const endDateParsed = endDate ? format(endDate, 'dd-MM-yyyy') : '';
 
       if (hasPermission('resumo_pendentes_pagamento')) {
-        const payableTotalData = await FinancialService
-          .findPayableTotal(
+        const [payableTotalData, payableCheckTotalData] = await Promise.all([
+          FinancialService.findPayableTotal(
             startDateParsed,
             endDateParsed,
             safraId !== '_' ? safraId : undefined
-          );
-        const payableCheckTotalData = await CheckService
-          .findPayableCheckTotal(
+          ),
+          CheckService.findPayableCheckTotal(
             startDateParsed,
             endDateParsed,
             safraId !== '_' ? safraId : undefined
-          );
+          )
+        ]);
+
         const sumPayableTotalData = sumTotal(
           [payableTotalData, payableCheckTotalData]
         );
@@ -128,18 +129,19 @@ export function Totalizer({ safraId }: TotalizerProps) {
       }
 
       if (hasPermission('resumo_pendentes_recebimento')) {
-        const receivableTotalData = await FinancialService
-          .findReceivableTotal(
+        const [receivableTotalData, receivableCheckTotalData] = await Promise.all([
+          FinancialService.findReceivableTotal(
             startDateParsed,
             endDateParsed,
             safraId !== '_' ? safraId : undefined
-          );
-        const receivableCheckTotalData = await CheckService
-          .findReceivableCheckTotal(
+          ),
+          CheckService.findReceivableCheckTotal(
             startDateParsed,
             endDateParsed,
             safraId !== '_' ? safraId : undefined
-          );
+          )
+        ]);
+
         const sumReceivableTotalData = sumTotal(
           [receivableTotalData, receivableCheckTotalData]
         );
@@ -150,12 +152,11 @@ export function Totalizer({ safraId }: TotalizerProps) {
       }
 
       if (hasPermission('resumo_cartao_credito')) {
-        const creditCardTotalData = await CreditCardService
-          .findTotal(
-            startDateParsed,
-            endDateParsed,
-            safraId !== '_' ? safraId : undefined
-          );
+        const creditCardTotalData = await CreditCardService.findTotal(
+          startDateParsed,
+          endDateParsed,
+          safraId !== '_' ? safraId : undefined
+        );
 
         setCreditCardTotal(creditCardTotalData);
       }

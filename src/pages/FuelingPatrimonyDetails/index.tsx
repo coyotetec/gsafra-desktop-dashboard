@@ -59,9 +59,15 @@ export function FuelingPatrimonyDetails() {
     async function loadData() {
       setIsLoading(true);
 
-      const patrimoniosData = await PatrimonioService.findPatrimonios();
-      const combustiveisData = await ProdutoAlmoxarifadoService.findCombustiveis();
-      const almoxarifadosData = await AlmoxarifadoService.findAlmoxarifados();
+      const [
+        patrimoniosData,
+        combustiveisData,
+        almoxarifadosData,
+      ] = await Promise.all([
+        PatrimonioService.findPatrimonios(),
+        ProdutoAlmoxarifadoService.findCombustiveis(),
+        AlmoxarifadoService.findAlmoxarifados()
+      ]);
 
       const patrimoniosOptions = patrimoniosData.map(item => (
         { value: String(item.id), label: item.descricao }
