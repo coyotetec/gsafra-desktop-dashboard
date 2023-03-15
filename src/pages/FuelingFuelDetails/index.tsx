@@ -1,19 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { format, parse } from 'date-fns';
+import { format } from 'date-fns';
 import { FileXls } from 'phosphor-react';
 import { Column } from 'primereact/column';
 import { DataTableExpandedRows } from 'primereact/datatable';
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import { WorkBook } from 'xlsx';
 import { DateInput } from '../../components/DateInput';
 import { Header } from '../../components/Header';
 import { Loader } from '../../components/Loader';
 import { Select } from '../../components/Select';
+import { change } from '../../redux/features/fuelingFuelFiltersSlice';
+import { RootState } from '../../redux/store';
 import AbastecimentoService from '../../services/AbastecimentoService';
-import AlmoxarifadoService from '../../services/AlmoxarifadoService';
-import PatrimonioService from '../../services/PatrimonioService';
-import TipoPatrimonioService from '../../services/TipoPatrimonioService';
 import { DetailsData } from '../../types/Abastecimento';
 import { currencyFormat } from '../../utils/currencyFormat';
 import { toast } from '../../utils/toast';
@@ -27,78 +26,25 @@ type optionType = {
 export function FuelingFuelDetails() {
   const [isLoading, setIsLoading] = useState(false);
   const [fuelDetails, setFuelDetails] = useState<DetailsData[]>([]);
-  const [patrimonios, setPatrimonios] = useState<optionType>([]);
-  const [almoxarifados, setAlmoxarifados] = useState<optionType>([]);
-  const [tiposPatrimonio, setTiposPatrimonio] = useState<optionType>([]);
   const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
   const custos: optionType = [
     { value: 'medio', label: 'Custo Médio' },
     { value: 'atual', label: 'Custo Atual' },
   ];
 
-  const [query] = useSearchParams();
-  const custoParam = query.get('custo') as string;
-  const startDateParam = query.get('startDate') as string;
-  const endDateParam = query.get('endDate') as string;
-  const patrimonioParam = query.get('idPatrimonio') as string;
-  const almoxarifadoParam = query.get('idAlmoxarifado') as string;
-  const tipoPatrimonioParam = query.get('idTipoPatrimonio') as string;
-
-  const [startDate, setStartDate] = useState<Date | null>(
-    startDateParam === '_' ? null : parse(startDateParam, 'dd-MM-yyyy', new Date())
-  );
-  const [endDate, setEndDate] = useState<Date | null>(
-    endDateParam === '_' ? null : parse(endDateParam, 'dd-MM-yyyy', new Date())
-  );
-  const [selectedPatrimonio, setSelectedPatrimonio] = useState(patrimonioParam);
-  const [selectedAlmoxarifado, setSelectedAlmoxarifado] = useState(almoxarifadoParam);
-  const [selectedTipoPatrimonio, setSelectedTipoPatrimonio] = useState(tipoPatrimonioParam);
-  const [selectedCusto, setSelectedCusto] = useState(custoParam);
+  const {
+    fuelingFuelFilters: filters,
+    patrimoniesList,
+    storeroomsList,
+    patrimonyTypesList,
+  } = useSelector((state: RootState) => state);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     async function loadData() {
       setIsLoading(true);
 
-      const [
-        patrimoniosData,
-        almoxarifadosData,
-        tiposPatrimonioData
-      ] = await Promise.all([
-        PatrimonioService.findPatrimonios(),
-        AlmoxarifadoService.findAlmoxarifados(),
-        TipoPatrimonioService.findTiposPatrimonio()
-      ]);
-
-      const patrimoniosOptions = patrimoniosData.map(item => (
-        { value: String(item.id), label: item.descricao }
-      ));
-      patrimoniosOptions.unshift({ value: '_', label: 'Todos' });
-
-      const almoxarifadosOptions = almoxarifadosData.map(item => (
-        { value: String(item.id), label: item.nome }
-      ));
-      almoxarifadosOptions.unshift({ value: '_', label: 'Todos' });
-
-      const tiposPatrimonioOptions = tiposPatrimonioData.map(item => (
-        { value: String(item.id), label: item.nome }
-      ));
-      tiposPatrimonioOptions.unshift({ value: '_', label: 'Todos' });
-
-      setPatrimonios(patrimoniosOptions);
-      setAlmoxarifados(almoxarifadosOptions);
-      setTiposPatrimonio(tiposPatrimonioOptions);
-
-      setIsLoading(false);
-    }
-
-    loadData();
-  }, []);
-
-  useEffect(() => {
-    async function loadData() {
-      setIsLoading(true);
-
-      if (endDate && startDate && endDate < startDate) {
+      if (filters.rangeDates.endDate && filters.rangeDates.startDate && filters.rangeDates.endDate < filters.rangeDates.startDate) {
         setIsLoading(false);
         toast({
           type: 'danger',
@@ -108,12 +54,12 @@ export function FuelingFuelDetails() {
       }
 
       const fuelDetailsData = await AbastecimentoService.findDetails({
-        custo: selectedCusto,
-        startDate: startDate ? format(startDate, 'dd-MM-yyyy') : '',
-        endDate: endDate ? format(endDate, 'dd-MM-yyyy') : '',
-        idPatrimonio: selectedPatrimonio !== '_' ? selectedPatrimonio : undefined,
-        idAlmoxarifado: selectedAlmoxarifado !== '_' ? selectedAlmoxarifado : undefined,
-        idTipoPatrimonio: selectedTipoPatrimonio !== '_' ? selectedTipoPatrimonio : undefined,
+        custo: filters.cost,
+        startDate: filters.rangeDates.startDate ? format(filters.rangeDates.startDate, 'dd-MM-yyyy') : '',
+        endDate: filters.rangeDates.endDate ? format(filters.rangeDates.endDate, 'dd-MM-yyyy') : '',
+        idPatrimonio: filters.patrimony !== '_' ? filters.patrimony : undefined,
+        idAlmoxarifado: filters.storeroom !== '_' ? filters.storeroom : undefined,
+        idTipoPatrimonio: filters.patrimonyType !== '_' ? filters.patrimonyType : undefined,
       });
 
       setFuelDetails(fuelDetailsData);
@@ -122,7 +68,14 @@ export function FuelingFuelDetails() {
     }
 
     loadData();
-  }, [selectedCusto, startDate, endDate, selectedPatrimonio, selectedAlmoxarifado, selectedTipoPatrimonio]);
+  }, [
+    filters.cost,
+    filters.rangeDates.startDate,
+    filters.rangeDates.endDate,
+    filters.patrimony,
+    filters.storeroom,
+    filters.patrimonyType
+  ]);
 
   function formatNumber(number: number) {
     return `${new Intl.NumberFormat('id').format(number)} lts`;
@@ -157,8 +110,8 @@ export function FuelingFuelDetails() {
       const excelBuffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'array' });
       saveAsExcelFile(
         excelBuffer,
-        `RESUMO POR COMBUSTIVEL ${startDate ? format(startDate, 'dd-MM-yyyy') : '-'
-        } À ${endDate ? format(endDate, 'dd-MM-yyyy') : '-'}`
+        `RESUMO POR COMBUSTIVEL ${filters.rangeDates.startDate ? format(filters.rangeDates.startDate, 'dd-MM-yyyy') : '-'
+        } À ${filters.rangeDates.endDate ? format(filters.rangeDates.endDate, 'dd-MM-yyyy') : '-'}`
       );
     });
   }
@@ -188,9 +141,16 @@ export function FuelingFuelDetails() {
       <div className="filters">
         <div className="date-filter">
           <DateInput
-            onChangeDate={(date) => setStartDate(date)}
+            onChangeDate={(date) => {
+              dispatch(change({
+                name: 'rangeDates', value: {
+                  startDate: date,
+                  endDate: filters.rangeDates.endDate
+                }
+              }));
+            }}
             placeholder='Data Inicial'
-            defaultDate={startDateParam === '_' ? null : parse(startDateParam, 'dd-MM-yyyy', new Date())}
+            defaultDate={filters.rangeDates.startDate}
             height="48px"
             width="100%"
             fontSize="16px"
@@ -199,9 +159,16 @@ export function FuelingFuelDetails() {
           />
           <strong>à</strong>
           <DateInput
-            onChangeDate={(date) => setEndDate(date)}
+            onChangeDate={(date) => {
+              dispatch(change({
+                name: 'rangeDates', value: {
+                  startDate: filters.rangeDates.startDate,
+                  endDate: date
+                }
+              }));
+            }}
             placeholder='Data Final'
-            defaultDate={endDateParam === '_' ? null : parse(endDateParam, 'dd-MM-yyyy', new Date())}
+            defaultDate={filters.rangeDates.endDate}
             height="48px"
             width="100%"
             fontSize="16px"
@@ -211,38 +178,52 @@ export function FuelingFuelDetails() {
         </div>
 
         <Select
-          options={patrimonios}
-          value={selectedPatrimonio}
-          onChange={setSelectedPatrimonio}
+          options={[{
+            value: '_',
+            label: 'Todos',
+          }, ...patrimoniesList.options]}
+          value={filters.patrimony}
+          onChange={(value: string) => {
+            dispatch(change({ name: 'patrimony', value: value }));
+          }}
           placeholder="Patrimonio"
           label="Patrimonio"
           noOptionsMessage="0 patrimonios encontrados"
           width="100%"
         />
-
         <Select
-          options={almoxarifados}
-          value={selectedAlmoxarifado}
-          onChange={setSelectedAlmoxarifado}
+          options={[{
+            value: '_',
+            label: 'Todos',
+          }, ...storeroomsList.options]}
+          value={filters.storeroom}
+          onChange={(value: string) => {
+            dispatch(change({ name: 'storeroom', value: value }));
+          }}
           placeholder="Local de Saída"
           label="Local de Saída"
           noOptionsMessage="0 locais de saída encontrados"
           width="100%"
         />
-
         <Select
           options={custos}
-          value={selectedCusto}
-          onChange={setSelectedCusto}
+          value={filters.cost}
+          onChange={(value: string) => {
+            dispatch(change({ name: 'cost', value: value }));
+          }}
           placeholder="Custo do Combustível"
           label="Custo do Combustível"
           width="100%"
         />
-
         <Select
-          options={tiposPatrimonio}
-          value={selectedTipoPatrimonio}
-          onChange={setSelectedTipoPatrimonio}
+          options={[{
+            value: '_',
+            label: 'Todos',
+          }, ...patrimonyTypesList.options]}
+          value={filters.patrimonyType}
+          onChange={(value: string) => {
+            dispatch(change({ name: 'patrimonyType', value: value }));
+          }}
           placeholder="Tipo de Patrimônio"
           label="Tipo de Patrimônio"
           noOptionsMessage="0 tipos de patrimônio encontrados"
@@ -269,9 +250,7 @@ export function FuelingFuelDetails() {
         emptyMessage="Nenhum dado encontrado"
       >
         <Column field="data" header="Data" body={(rowData) => format(new Date(rowData.data), 'dd/MM/yyyy')} />
-        {/* <Column field="numeroRequisicao" header="Requisição" /> */}
         <Column field="patrimonio" header="Patrimônio" />
-        {/* <Column field="combustivel" header="Combustível" /> */}
         <Column field="localSaida" header="Local" />
         <Column field="quantidade" header="Litros" body={(rowData) => formatNumber(rowData.quantidade)} />
         <Column field="custoIndividual" header="Custo por Litro" body={(rowData) => currencyFormat(rowData.custoIndividual)} />

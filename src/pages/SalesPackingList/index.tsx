@@ -1,16 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { format, parse } from 'date-fns';
+import { format } from 'date-fns';
 import { FileXls } from 'phosphor-react';
 import { Column } from 'primereact/column';
 import { DataTableExpandedRows } from 'primereact/datatable';
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import { WorkBook } from 'xlsx';
 import { DateInput } from '../../components/DateInput';
 import { Header } from '../../components/Header';
 import { Loader } from '../../components/Loader';
 import { Select } from '../../components/Select';
-import SafraService from '../../services/SafraService';
+import { change } from '../../redux/features/salesFiltersSlice';
+import { RootState } from '../../redux/store';
 import VendaService from '../../services/VendaService';
 import { Romaneio } from '../../types/Venda';
 import { toast } from '../../utils/toast';
@@ -21,16 +22,10 @@ type optionType = {
   label: string;
 }[];
 
-interface RangeDates {
-  startDate: Date | null;
-  endDate: Date | null;
-}
-
 export function SalesPackingList() {
   const [isLoading, setIsLoading] = useState(false);
   const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
   const [packingList, setPackingList] = useState<Romaneio[]>([]);
-  const [safraOptions, setSafraOptions] = useState<optionType>([]);
   const deliveryStatusOptions: optionType = [
     { value: '_', label: 'Todos' },
     { value: '1', label: 'Pendente' },
@@ -38,39 +33,21 @@ export function SalesPackingList() {
     { value: '3', label: 'Realizada' },
   ];
 
-  const [query] = useSearchParams();
-  const safraIdParam = query.get('safraId') as string;
-  const statusParam = query.get('status') as string;
-  const startDateParam = query.get('startDate') as string;
-  const endDateParam = query.get('endDate') as string;
-
-  const [selectedSafra, setSelectedSafra] = useState(safraIdParam);
-  const [selectedStatus, setSelectedStatus] = useState(statusParam);
-  const [rangeDates, setRangeDates] = useState<RangeDates>({
-    startDate: startDateParam === '_' ? null : parse(startDateParam, 'dd-MM-yyyy', new Date()),
-    endDate: endDateParam === '_' ? null : parse(endDateParam, 'dd-MM-yyyy', new Date()),
-  });
-
-  useEffect(() => {
-    async function loadSafras() {
-      setIsLoading(true);
-
-      const safrasData = await SafraService.findSafras();
-
-      const options = safrasData.map((safra) => ({ value: String(safra.id), label: safra.nome }));
-
-      setSafraOptions(options);
-      setIsLoading(true);
+  const {
+    safrasList,
+    salesFilters: {
+      safra,
+      deliveryStatus,
+      rangeDates,
     }
-
-    loadSafras();
-  }, []);
+  } = useSelector((state: RootState) => state);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     async function loadData() {
       setIsLoading(true);
 
-      if (selectedSafra === '_') {
+      if (safra === '_') {
         setIsLoading(false);
         return;
       }
@@ -84,12 +61,12 @@ export function SalesPackingList() {
         return;
       }
 
-      const deliveryStatusParsed = selectedStatus !== '_' ? selectedStatus : '';
+      const deliveryStatusParsed = deliveryStatus !== '_' ? deliveryStatus : '';
       const startDateParsed = rangeDates.startDate ? format(rangeDates.startDate, 'dd-MM-yyyy') : '';
       const endDateParsed = rangeDates.endDate ? format(rangeDates.endDate, 'dd-MM-yyyy') : '';
 
       const clientAvarageData = await VendaService.findRomaneios({
-        safraId: Number(selectedSafra),
+        safraId: Number(safra),
         deliveryStatus: deliveryStatusParsed,
         startDate: startDateParsed,
         endDate: endDateParsed,
@@ -100,7 +77,7 @@ export function SalesPackingList() {
     }
 
     loadData();
-  }, [selectedSafra, selectedStatus, rangeDates]);
+  }, [safra, deliveryStatus, rangeDates]);
 
   function formatNumber(number: number, sufix?: string) {
     return `${new Intl.NumberFormat('id', {
@@ -134,7 +111,7 @@ export function SalesPackingList() {
       const excelBuffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'array' });
       saveAsExcelFile(
         excelBuffer,
-        `ROMANEIOS DA SAFRA ${safraOptions.find((i) => i.value === selectedSafra)?.label}`
+        `ROMANEIOS DA SAFRA ${safrasList.options.find((i) => i.value === safra)?.label}`
       );
     });
   }
@@ -163,9 +140,11 @@ export function SalesPackingList() {
       />
       <div className="filters">
         <Select
-          options={safraOptions}
-          value={selectedSafra}
-          onChange={setSelectedSafra}
+          options={safrasList.options}
+          value={safra}
+          onChange={(value: string) => {
+            dispatch(change({ name: 'safra', value: value }));
+          }}
           placeholder="Safra"
           label="Safra"
           noOptionsMessage="0 safras encontrados"
@@ -173,20 +152,26 @@ export function SalesPackingList() {
         />
         <Select
           options={deliveryStatusOptions}
-          value={selectedStatus}
-          onChange={setSelectedStatus}
+          value={deliveryStatus}
+          onChange={(value: string) => {
+            dispatch(change({ name: 'deliveryStatus', value: value }));
+          }}
           placeholder="Situação de Entrega"
           label="Situação de Entrega"
           width="100%"
         />
         <div className="date-filter">
           <DateInput
-            onChangeDate={(date) => setRangeDates((prevState) => ({
-              ...prevState,
-              startDate: date
-            }))}
+            onChangeDate={(date) => {
+              dispatch(change({
+                name: 'rangeDates', value: {
+                  startDate: date,
+                  endDate: rangeDates.endDate
+                }
+              }));
+            }}
             placeholder='Data Inicial'
-            defaultDate={null}
+            defaultDate={rangeDates.startDate}
             height="48px"
             width="100%"
             fontSize="16px"
@@ -195,12 +180,16 @@ export function SalesPackingList() {
           />
           <strong>à</strong>
           <DateInput
-            onChangeDate={(date) => setRangeDates((prevState) => ({
-              ...prevState,
-              endDate: date
-            }))}
+            onChangeDate={(date) => {
+              dispatch(change({
+                name: 'rangeDates', value: {
+                  startDate: rangeDates.startDate,
+                  endDate: date
+                }
+              }));
+            }}
             placeholder='Data Final'
-            defaultDate={null}
+            defaultDate={rangeDates.endDate}
             height="48px"
             width="100%"
             fontSize="16px"

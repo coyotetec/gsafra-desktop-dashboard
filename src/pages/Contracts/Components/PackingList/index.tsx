@@ -2,80 +2,98 @@ import { format } from 'date-fns';
 import { Column } from 'primereact/column';
 import { DataTablePFSEvent } from 'primereact/datatable';
 import { PaginatorTemplate } from 'primereact/paginator';
-import { useEffect, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { componentsRefType } from '../../../../types/Types';
 import { DateInput } from '../../../../components/DateInput';
 import { NotAllowed } from '../../../../components/NotAllowed';
 import { Select } from '../../../../components/Select';
 import { Spinner } from '../../../../components/Spinner';
 import { useUserContext } from '../../../../contexts/UserContext';
+import { setPackingList } from '../../../../redux/features/contractDataSlice';
+import { change, setFirstContract } from '../../../../redux/features/contractFiltersSlice';
+import { RootState } from '../../../../redux/store';
 import ContratoService from '../../../../services/ContratoService';
-import { Romaneio } from '../../../../types/Contrato';
+import { hasToFetch } from '../../../../utils/hasToFetch';
 import { toast } from '../../../../utils/toast';
 import { Container, Loader, Table } from './styles';
 
-type optionType = {
-  value: string;
-  label: string;
-}[]
-
-interface PackingListProps {
-  contracts: optionType;
-}
-
-interface RangeDates {
-  startDate: Date | null;
-  endDate: Date | null;
-}
-
-export function PackingList({ contracts }: PackingListProps) {
+export const PackingList = forwardRef<componentsRefType>((props, ref) => {
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedContract, setSelectedContract] = useState(contracts[0].value);
-  const [packingList, setPackingList] = useState<Romaneio[]>([]);
-  const [rangeDates, setRangeDates] = useState<RangeDates>({
-    startDate: null,
-    endDate: null,
-  });
   const [first, setFirst] = useState(0);
   const [rows, setRows] = useState(10);
+  const isFirstRender = useRef(true);
 
   const { hasPermission } = useUserContext();
 
-  useEffect(() => {
-    if (contracts.length > 0) {
-      setSelectedContract(contracts[0].value);
+  const {
+    contractFilters: {
+      selectedContract,
+      packingListRangeDates: rangeDates
+    },
+    contractData: {
+      contractOptions,
+      packingList,
+      packingListLastFetch,
     }
-  }, [contracts]);
+  } = useSelector((state: RootState) => state);
+  const dispatch = useDispatch();
 
-  useEffect(() => {
-    async function loadData() {
-      if (hasPermission('contratos_romaneios')) {
-        setIsLoading(true);
+  const loadData = useCallback(async () => {
+    if (hasPermission('contratos_romaneios')) {
+      setIsLoading(true);
 
-        if (rangeDates.endDate && rangeDates.startDate && rangeDates.endDate < rangeDates.startDate) {
+      if (isFirstRender.current) {
+        isFirstRender.current = false;
+
+        if (!hasToFetch(packingListLastFetch)) {
           setIsLoading(false);
-          toast({
-            type: 'danger',
-            text: 'Data final precisa ser maior que inicial!'
-          });
           return;
         }
-
-        const startDateParsed = rangeDates.startDate ? format(rangeDates.startDate, 'dd-MM-yyyy') : '';
-        const endDateParsed = rangeDates.endDate ? format(rangeDates.endDate, 'dd-MM-yyyy') : '';
-
-        const packingListData = await ContratoService.findRomaneios({
-          contratoId: Number(selectedContract),
-          startDate: startDateParsed,
-          endDate: endDateParsed,
-        });
-
-        setPackingList(packingListData);
       }
-      setIsLoading(false);
-    }
 
+      if (selectedContract === '_') {
+        setIsLoading(false);
+        return;
+      }
+
+      if (rangeDates.endDate && rangeDates.startDate && rangeDates.endDate < rangeDates.startDate) {
+        setIsLoading(false);
+        toast({
+          type: 'danger',
+          text: 'Data final precisa ser maior que inicial!'
+        });
+        return;
+      }
+
+      const startDateParsed = rangeDates.startDate ? format(rangeDates.startDate, 'dd-MM-yyyy') : '';
+      const endDateParsed = rangeDates.endDate ? format(rangeDates.endDate, 'dd-MM-yyyy') : '';
+
+      const packingListData = await ContratoService.findRomaneios({
+        contratoId: Number(selectedContract),
+        startDate: startDateParsed,
+        endDate: endDateParsed,
+      });
+
+      dispatch(setPackingList(packingListData));
+    }
+    setIsLoading(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch, hasPermission, rangeDates.endDate, rangeDates.startDate, selectedContract]);
+
+  useImperativeHandle(ref, () => ({
+    loadData
+  }), [loadData]);
+
+  useEffect(() => {
+    if (contractOptions.length > 0) {
+      dispatch(setFirstContract(contractOptions[0]?.value || '_'));
+    }
+  }, [dispatch, contractOptions]);
+
+  useEffect(() => {
     loadData();
-  }, [selectedContract, rangeDates, hasPermission]);
+  }, [loadData]);
 
   function formatNumber(number: number, sufix?: string) {
     return `${new Intl.NumberFormat('id').format(number)}${sufix ? sufix : ''}`;
@@ -103,19 +121,27 @@ export function PackingList({ contracts }: PackingListProps) {
         <h3>ROMANEIOS</h3>
         <div className="filters">
           <Select
-            options={contracts}
-            onChange={setSelectedContract}
+            options={contractOptions}
+            onChange={(value: string) => dispatch(change({
+              name: 'selectedContract',
+              value
+            }))}
             value={selectedContract}
             width="320px"
           />
           <div className="date-filter">
             <DateInput
-              onChangeDate={(date) => setRangeDates((prevState) => ({
-                ...prevState,
-                startDate: date
-              }))}
+              onChangeDate={(date) => {
+                dispatch(change({
+                  name: 'packingListRangeDates',
+                  value: {
+                    startDate: date,
+                    endDate: rangeDates.endDate
+                  }
+                }));
+              }}
               placeholder='Data Inicial'
-              defaultDate={null}
+              defaultDate={rangeDates.startDate}
               height="48px"
               width="160px"
               fontSize="16px"
@@ -123,12 +149,17 @@ export function PackingList({ contracts }: PackingListProps) {
             />
             <strong>à</strong>
             <DateInput
-              onChangeDate={(date) => setRangeDates((prevState) => ({
-                ...prevState,
-                endDate: date
-              }))}
+              onChangeDate={(date) => {
+                dispatch(change({
+                  name: 'packingListRangeDates',
+                  value: {
+                    startDate: rangeDates.startDate,
+                    endDate: date
+                  }
+                }));
+              }}
               placeholder='Data Final'
-              defaultDate={null}
+              defaultDate={rangeDates.endDate}
               height="48px"
               width="160px"
               fontSize="16px"
@@ -165,4 +196,4 @@ export function PackingList({ contracts }: PackingListProps) {
       </div>
     </Container>
   );
-}
+});

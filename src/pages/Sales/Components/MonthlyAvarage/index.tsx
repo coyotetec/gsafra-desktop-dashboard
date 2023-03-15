@@ -1,79 +1,99 @@
-import { useEffect, useRef, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { Spinner } from '../../../../components/Spinner';
 import { Container, Loader } from './styles';
 import { Switch } from '../../../../components/Switch';
 import VendaService from '../../../../services/VendaService';
 import { format } from 'date-fns';
 import { toast } from '../../../../utils/toast';
-import { MediaMes } from '../../../../types/Venda';
 import { MonthlyAvarageChart } from '../MonthlyAvarageChart';
 import { DownloadSimple } from 'phosphor-react';
 import html2canvas from 'html2canvas';
 import { currencyFormat } from '../../../../utils/currencyFormat';
 import { NotAllowed } from '../../../../components/NotAllowed';
 import { useUserContext } from '../../../../contexts/UserContext';
-
-interface RangeDates {
-  startDate: Date | null;
-  endDate: Date | null;
-}
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../../../../redux/store';
+import { change } from '../../../../redux/features/salesFiltersSlice';
+import { setMonthlyAvarage } from '../../../../redux/features/salesDataSlice';
+import { hasToFetch } from '../../../../utils/hasToFetch';
+import { componentsRefType } from '../../../../types/Types';
 
 interface MonthlyAvarageProps {
-  safraId: string;
   safraName: string;
-  deliveryStatus: string;
-  rangeDates: RangeDates;
 }
 
-export function MonthlyAvarage({ safraId, safraName, deliveryStatus, rangeDates }: MonthlyAvarageProps) {
+export const MonthlyAvarage = forwardRef<componentsRefType, MonthlyAvarageProps>(({ safraName }, ref) => {
   const [isLoading, setIsLoading] = useState(true);
-  const [unit, setUnit] = useState<'kg' | 'sacks'>('sacks');
-  const [monthlyAvarage, setMonthlyAvarage] = useState<MediaMes>({
-    mediaSafraKg: 0,
-    mediaSafraSaca: 0,
-    mediaMes: []
-  });
   const chartRef = useRef(null);
+  const isFirstRender = useRef(true);
+
+  const {
+    salesFilters: {
+      rangeDates,
+      safra,
+      deliveryStatus,
+      monthlyAvarageUnit: unit,
+    },
+    salesData: {
+      monthlyAvarage,
+      monthlyAvarageLastFetch,
+    }
+  } = useSelector((state: RootState) => state);
+  const dispatch = useDispatch();
 
   const { hasPermission } = useUserContext();
 
-  useEffect(() => {
-    async function loadData() {
-      if (hasPermission('vendas_preco_medio_por_mes')) {
-        setIsLoading(true);
+  const loadData = useCallback(async () => {
+    if (hasPermission('vendas_preco_medio_por_mes')) {
+      setIsLoading(true);
 
-        if (safraId === '_') {
+      if (isFirstRender.current) {
+        isFirstRender.current = false;
+
+        if (!hasToFetch(monthlyAvarageLastFetch)) {
           setIsLoading(false);
           return;
         }
-
-        if (rangeDates.endDate && rangeDates.startDate && rangeDates.endDate < rangeDates.startDate) {
-          setIsLoading(false);
-          toast({
-            type: 'danger',
-            text: 'Data final precisa ser maior que inicial!'
-          });
-          return;
-        }
-
-        const deliveryStatusParsed = deliveryStatus !== '_' ? deliveryStatus : '';
-        const startDateParsed = rangeDates.startDate ? format(rangeDates.startDate, 'dd-MM-yyyy') : '';
-        const endDateParsed = rangeDates.endDate ? format(rangeDates.endDate, 'dd-MM-yyyy') : '';
-
-        const monthlyAvarageData = await VendaService.findMediaMes({
-          safraId: Number(safraId),
-          deliveryStatus: deliveryStatusParsed,
-          startDate: startDateParsed,
-          endDate: endDateParsed,
-        });
-
-        setMonthlyAvarage(monthlyAvarageData);
       }
-      setIsLoading(false);
-    }
 
+      if (safra === '_') {
+        setIsLoading(false);
+        return;
+      }
+
+      if (rangeDates.endDate && rangeDates.startDate && rangeDates.endDate < rangeDates.startDate) {
+        setIsLoading(false);
+        toast({
+          type: 'danger',
+          text: 'Data final precisa ser maior que inicial!'
+        });
+        return;
+      }
+
+      const deliveryStatusParsed = deliveryStatus !== '_' ? deliveryStatus : '';
+      const startDateParsed = rangeDates.startDate ? format(rangeDates.startDate, 'dd-MM-yyyy') : '';
+      const endDateParsed = rangeDates.endDate ? format(rangeDates.endDate, 'dd-MM-yyyy') : '';
+
+      const monthlyAvarageData = await VendaService.findMediaMes({
+        safraId: Number(safra),
+        deliveryStatus: deliveryStatusParsed,
+        startDate: startDateParsed,
+        endDate: endDateParsed,
+      });
+
+      dispatch(setMonthlyAvarage(monthlyAvarageData));
+    }
+    setIsLoading(false);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deliveryStatus, dispatch, hasPermission, rangeDates.endDate, rangeDates.startDate, safra]);
+
+  useEffect(() => {
     loadData();
-  }, [safraId, deliveryStatus, rangeDates, hasPermission]);
+  }, [loadData]);
+
+  useImperativeHandle(ref, () => ({
+    loadData
+  }), [loadData]);
 
   function handleSaveChart() {
     const chartElement = chartRef.current;
@@ -124,7 +144,10 @@ export function MonthlyAvarage({ safraId, safraName, deliveryStatus, rangeDates 
               leftLabel="Saca"
               rightLabel="Kg"
               isToggled={unit === 'kg'}
-              onToggle={(e) => { setUnit(e.target.checked ? 'kg' : 'sacks'); }}
+              onToggle={(e) => dispatch(change({
+                name: 'monthlyAvarageUnit',
+                value: e.target.checked ? 'kg' : 'sacks'
+              }))}
             />
             <button onClick={handleSaveChart}>
               <DownloadSimple size={24} color="#F7FBFE" weight='regular' />
@@ -139,4 +162,4 @@ export function MonthlyAvarage({ safraId, safraName, deliveryStatus, rangeDates 
       </div>
     </Container>
   );
-}
+});

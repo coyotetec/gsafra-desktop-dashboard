@@ -1,43 +1,40 @@
-import { format, startOfMonth, startOfYear, subMonths } from 'date-fns';
+import { format } from 'date-fns';
 import html2canvas from 'html2canvas';
 import { DownloadSimple } from 'phosphor-react';
 import { useEffect, useRef, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { DateInput } from '../../../../components/DateInput';
 import { NotAllowed } from '../../../../components/NotAllowed';
 import { Spinner } from '../../../../components/Spinner';
 import { useUserContext } from '../../../../contexts/UserContext';
+import {
+  changeView,
+  FinancialView as FinancialViewType
+} from '../../../../redux/features/financialViewsDataSlice';
 import FinancialViewsService from '../../../../services/FinancialViewsService';
-import { View, ViewTotal, ViewTotalizer } from '../../../../types/FinancialViews';
 import { currencyFormat } from '../../../../utils/currencyFormat';
+import { hasToFetch } from '../../../../utils/hasToFetch';
 import { toast } from '../../../../utils/toast';
 import { FinancialViewChart } from '../FinancialViewChart';
 import { Container, Loader } from './styles';
 
-interface RangeDates {
-  startDate: Date | null;
-  endDate: Date | null;
-}
+type FinancialViewProps = FinancialViewType;
 
-type FinancialViewProps = View
-
-export function FinancialView({ id, nome, periodoPadraoMeses }: FinancialViewProps) {
-  const [labels, setLabels] = useState<string[]>([]);
-  const [total, setTotal] = useState<number[]>([]);
-  const [data, setData] = useState<ViewTotal[]>([]);
-  const [totalizers, setTotalizers] = useState<ViewTotalizer[]>([]);
+export function FinancialView({
+  id,
+  nome,
+  rangeDates,
+  periodoPadraoMeses,
+  lastFetch,
+  totalizers,
+  total
+}: FinancialViewProps) {
   const [isLoading, setIsLoading] = useState(true);
-  const [rangeDates, setRangeDates] = useState<RangeDates>({
-    startDate: periodoPadraoMeses === 0
-      ? startOfMonth(new Date())
-      : periodoPadraoMeses === -2
-        ? startOfYear(new Date())
-        : periodoPadraoMeses === -1
-          ? null
-          : subMonths(new Date(), periodoPadraoMeses),
-    endDate: periodoPadraoMeses === -1 ? null : new Date(),
-  });
   const chartRef = useRef(null);
+  const isFirstRender = useRef(true);
+
+  const dispatch = useDispatch();
 
   const { hasPermission } = useUserContext();
 
@@ -46,10 +43,27 @@ export function FinancialView({ id, nome, periodoPadraoMeses }: FinancialViewPro
       if (hasPermission('indicadores_financeiros')) {
         setIsLoading(true);
 
+        if (isFirstRender.current) {
+          isFirstRender.current = false;
+
+          if (!hasToFetch(lastFetch)) {
+            setIsLoading(false);
+            return;
+          }
+        }
+
         if (rangeDates.endDate && rangeDates.startDate && rangeDates.endDate < rangeDates.startDate) {
           setIsLoading(false);
-          setTotal([]);
-          setTotalizers([]);
+          dispatch(changeView({
+            id,
+            name: 'total',
+            value: []
+          }));
+          dispatch(changeView({
+            id,
+            name: 'totalizers',
+            value: []
+          }));
           toast({
             type: 'danger',
             text: 'Data final precisa ser maior que inicial!'
@@ -66,27 +80,23 @@ export function FinancialView({ id, nome, periodoPadraoMeses }: FinancialViewPro
           endDateParsed
         );
 
-        setLabels(viewTotalData.data.reduce((result, item) => {
-          if (item.visivel) {
-            result.push(item.nome);
-          }
-          return result;
-        }, [] as string[]));
-        setTotal(viewTotalData.data.reduce((result, item) => {
-          if (item.visivel) {
-            result.push(item.total);
-          }
-          return result;
-        }, [] as number[]));
-        setData(viewTotalData.data);
-        setTotalizers(viewTotalData.totalizadores);
-
+        dispatch(changeView({
+          id,
+          name: 'total',
+          value: viewTotalData.data
+        }));
+        dispatch(changeView({
+          id,
+          name: 'totalizers',
+          value: viewTotalData.totalizadores
+        }));
       }
       setIsLoading(false);
     }
 
     loadData();
-  }, [hasPermission, id, rangeDates]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasPermission, id, rangeDates, dispatch]);
 
   function handleSaveChart() {
     const chartElement = chartRef.current;
@@ -122,27 +132,33 @@ export function FinancialView({ id, nome, periodoPadraoMeses }: FinancialViewPro
         <h3>{nome}</h3>
         <div>
           <DateInput
-            onChangeDate={(date) => setRangeDates((prevState) => ({
-              ...prevState,
-              startDate: date
-            }))}
+            onChangeDate={(date) => {
+              dispatch(changeView({
+                id,
+                name: 'rangeDates',
+                value: {
+                  startDate: date,
+                  endDate: rangeDates.endDate
+                }
+              }));
+            }}
             placeholder='Data Inicial'
-            defaultDate={periodoPadraoMeses === 0
-              ? startOfMonth(new Date())
-              : periodoPadraoMeses === -2
-                ? startOfYear(new Date())
-                : periodoPadraoMeses === -1
-                  ? null
-                  : subMonths(new Date(), periodoPadraoMeses)}
+            defaultDate={rangeDates.startDate}
           />
           <strong>à</strong>
           <DateInput
-            onChangeDate={(date) => setRangeDates((prevState) => ({
-              ...prevState,
-              endDate: date
-            }))}
+            onChangeDate={(date) => {
+              dispatch(changeView({
+                id,
+                name: 'rangeDates',
+                value: {
+                  startDate: rangeDates.startDate,
+                  endDate: date
+                }
+              }));
+            }}
             placeholder='Data Final'
-            defaultDate={periodoPadraoMeses === -1 ? null : new Date()}
+            defaultDate={rangeDates.endDate}
           />
         </div>
       </header>
@@ -153,7 +169,21 @@ export function FinancialView({ id, nome, periodoPadraoMeses }: FinancialViewPro
             <Spinner size={48} />
           </Loader>
         )}
-        <FinancialViewChart allData={data} labels={labels} data={total} />
+        <FinancialViewChart
+          allData={total}
+          labels={total.reduce((result, item) => {
+            if (item.visivel) {
+              result.push(item.nome);
+            }
+            return result;
+          }, [] as string[])}
+          data={total.reduce((result, item) => {
+            if (item.visivel) {
+              result.push(item.total);
+            }
+            return result;
+          }, [] as number[])}
+        />
         <div className="totalizers">
           {totalizers.map((totalizer) => (
             <div

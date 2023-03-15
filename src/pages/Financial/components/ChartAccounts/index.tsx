@@ -1,140 +1,213 @@
-import { useEffect, useRef, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { TreeSelectSelectionKeys } from 'primereact/treeselect';
-
 import { Container, Content, Loader } from './styles';
-
 import PlanoContaService from '../../../../services/PlanoContaService';
 import { ChartAccountsChart } from '../ChartAccountsChart';
 import { Spinner } from '../../../../components/Spinner';
 import { DateInput } from '../../../../components/DateInput';
-import { format, subMonths } from 'date-fns';
+import { format } from 'date-fns';
 import { ChartAccountsSelect } from '../../../../components/ChartAccoutsSelect';
 import { NotAllowed } from '../../../../components/NotAllowed';
 import html2canvas from 'html2canvas';
 import { DownloadSimple } from 'phosphor-react';
 import { toast } from '../../../../utils/toast';
 import { useUserContext } from '../../../../contexts/UserContext';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../../../../redux/store';
+import { change } from '../../../../redux/features/financialFiltersSlice';
+import { parseChartAccounts } from '../../utils/parseChartAccounts';
+import { setChartAccountsData } from '../../../../redux/features/chartAccountsListSlice';
+import { hasToFetch } from '../../../../utils/hasToFetch';
+import { setData } from '../../../../redux/features/financialChartAccountsDataSlice';
+import { componentsRefType } from '../../../../types/Types';
 
-interface ChartAccountsProps {
-  safraId: string;
-}
-
-interface RangeDates {
-  startDate: Date | null;
-  endDate: Date | null;
-}
-
-export function ChartAccounts({ safraId }: ChartAccountsProps) {
-  const [selectedDebit, setSelectedDebit] = useState<TreeSelectSelectionKeys>(null);
-  const [debitLabels, setDebitLabels] = useState<string[]>([]);
-  const [debitTotal, setDebitTotal] = useState<number[]>([]);
+export const ChartAccounts = forwardRef<componentsRefType>((props, ref) => {
   const [debitTotalIsLoading, setDebitTotalIsLoading] = useState(true);
-  const [selectedCredit, setSelectedCredit] = useState<TreeSelectSelectionKeys>(null);
-  const [creditLabels, setCreditLabels] = useState<string[]>([]);
-  const [creditTotal, setCreditTotal] = useState<number[]>([]);
   const [creditTotalIsLoading, setCreditTotalIsLoading] = useState(true);
-  const [creditRangeDates, setCreditRangeDates] = useState<RangeDates>({
-    startDate: subMonths(new Date(), 12),
-    endDate: new Date(),
-  });
-  const [debitRangeDates, setDebitRangeDates] = useState<RangeDates>({
-    startDate: subMonths(new Date(), 12),
-    endDate: new Date(),
-  });
-
   const creditChartRef = useRef(null);
+  const isCreditFirstRender = useRef(true);
   const debitChartRef = useRef(null);
+  const isDebitFirstRender = useRef(true);
+
+  const {
+    financialFilters: {
+      chartAccountsCreditRangeDates: {
+        startDate: creditStartDate,
+        endDate: creditEndDate
+      },
+      chartAccountsDebitRangeDates: {
+        startDate: debitStartDate,
+        endDate: debitEndDate,
+      },
+      chartAccountsCreditSelected: selectedCredit,
+      chartAccountsDebitSelected: selectedDebit,
+      safra,
+    },
+    chartAccountsList,
+    financialChartAccountsData: {
+      credit,
+      debit
+    }
+  } = useSelector((state: RootState) => state);
+  const dispatch = useDispatch();
 
   const { hasPermission } = useUserContext();
 
-  useEffect(() => {
-    async function loadTotal() {
-      if (hasPermission('creditos_compensados')) {
-        setCreditTotalIsLoading(true);
+  const loadCreditTotal = useCallback(async () => {
+    if (hasPermission('creditos_compensados')) {
+      setCreditTotalIsLoading(true);
 
-        if (!selectedCredit) {
-          return;
-        }
+      if (isCreditFirstRender.current) {
+        isCreditFirstRender.current = false;
 
-        if (creditRangeDates.endDate && creditRangeDates.startDate && creditRangeDates.endDate < creditRangeDates.startDate) {
+        if (!hasToFetch(credit.lastFetch)) {
           setCreditTotalIsLoading(false);
-          setCreditTotal([]);
-          toast({
-            type: 'danger',
-            text: 'Data final precisa ser maior que inicial!'
-          });
           return;
         }
-
-        const startDateParsed = creditRangeDates.startDate ? format(creditRangeDates.startDate, 'dd-MM-yyyy') : '';
-        const endDateParsed = creditRangeDates.endDate ? format(creditRangeDates.endDate, 'dd-MM-yyyy') : '';
-
-        const creditTotalData = await PlanoContaService
-          .findPlanoContasTotal(
-            String(selectedCredit),
-            startDateParsed,
-            endDateParsed,
-            safraId !== '_' ? safraId : undefined
-          );
-
-        setCreditLabels(creditTotalData.map((item) => item.descricao));
-        setCreditTotal(creditTotalData.map((item) => item.total));
       }
-      setCreditTotalIsLoading(false);
+
+      if (!selectedCredit) {
+        setCreditTotalIsLoading(false);
+        return;
+      }
+
+      if (creditEndDate && creditStartDate && creditEndDate < creditStartDate) {
+        setCreditTotalIsLoading(false);
+        dispatch(setData({
+          type: 'credit',
+          data: [],
+          labels: [],
+        }));
+        toast({
+          type: 'danger',
+          text: 'Data final precisa ser maior que inicial!'
+        });
+        return;
+      }
+
+      const startDateParsed = creditStartDate ? format(creditStartDate, 'dd-MM-yyyy') : '';
+      const endDateParsed = creditEndDate ? format(creditEndDate, 'dd-MM-yyyy') : '';
+
+      const creditTotalData = await PlanoContaService.findPlanoContasTotal(
+        String(selectedCredit),
+        startDateParsed,
+        endDateParsed,
+        safra !== '_' ? safra : undefined
+      );
+
+      dispatch(setData({
+        type: 'credit',
+        data: creditTotalData.map((item) => item.total),
+        labels: creditTotalData.map((item) => item.descricao),
+      }));
     }
 
-    loadTotal();
-  }, [hasPermission, selectedCredit, creditRangeDates, safraId]);
+    setCreditTotalIsLoading(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [creditEndDate, creditStartDate, dispatch, hasPermission, safra, selectedCredit]);
+
+  const loadDebitTotal = useCallback(async () => {
+    if (hasPermission('debitos_compensados')) {
+      setDebitTotalIsLoading(true);
+
+      if (isDebitFirstRender.current) {
+        isDebitFirstRender.current = false;
+
+        if (!hasToFetch(credit.lastFetch)) {
+          setDebitTotalIsLoading(false);
+          return;
+        }
+      }
+
+      if (!selectedDebit) {
+        setDebitTotalIsLoading(false);
+        return;
+      }
+
+      if (debitEndDate && debitStartDate && debitEndDate < debitStartDate) {
+        setDebitTotalIsLoading(false);
+        dispatch(setData({
+          type: 'debit',
+          data: [],
+          labels: [],
+        }));
+        toast({
+          type: 'danger',
+          text: 'Data final precisa ser maior que inicial!'
+        });
+        return;
+      }
+
+      const startDateParsed = debitStartDate ? format(debitStartDate, 'dd-MM-yyyy') : '';
+      const endDateParsed = debitEndDate ? format(debitEndDate, 'dd-MM-yyyy') : '';
+
+      const debitTotalData = await PlanoContaService.findPlanoContasTotal(
+        String(selectedDebit),
+        startDateParsed,
+        endDateParsed,
+        safra !== '_' ? safra : undefined
+      );
+
+      dispatch(setData({
+        type: 'debit',
+        data: debitTotalData.map((item) => item.total),
+        labels: debitTotalData.map((item) => item.descricao),
+      }));
+    }
+
+    setDebitTotalIsLoading(false);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debitEndDate, debitStartDate, dispatch, hasPermission, safra, selectedDebit]);
+
+  const loadData = useCallback(() => {
+    loadCreditTotal();
+    loadDebitTotal();
+  }, [loadCreditTotal, loadDebitTotal]);
+
+  useImperativeHandle(ref, () => ({
+    loadData
+  }), [loadData]);
 
   useEffect(() => {
-    async function loadTotal() {
-      if (hasPermission('debitos_compensados')) {
-        setDebitTotalIsLoading(true);
+    loadData();
+  }, [loadData]);
 
-        if (!selectedDebit) {
-          return;
-        }
+  useEffect(() => {
+    async function loadPlanoContas() {
+      if (hasToFetch(chartAccountsList.lastFetch)) {
+        const [creditChartAccountsData, debitChartAccountsData] = await Promise.all([
+          PlanoContaService.findPlanoContas('receita', 'sintetica'),
+          PlanoContaService.findPlanoContas('despesa', 'sintetica'),
+        ]);
 
-        if (debitRangeDates.endDate && debitRangeDates.startDate && debitRangeDates.endDate < debitRangeDates.startDate) {
-          setDebitTotalIsLoading(false);
-          setDebitTotal([]);
-          toast({
-            type: 'danger',
-            text: 'Data final precisa ser maior que inicial!'
-          });
-          return;
-        }
+        const creditChartAccountsTree = parseChartAccounts(creditChartAccountsData);
+        const debitChartAccountsTree = parseChartAccounts(debitChartAccountsData);
 
-        const startDateParsed = debitRangeDates.startDate ? format(debitRangeDates.startDate, 'dd-MM-yyyy') : '';
-        const endDateParsed = debitRangeDates.endDate ? format(debitRangeDates.endDate, 'dd-MM-yyyy') : '';
-
-        const debitTotalData = await PlanoContaService
-          .findPlanoContasTotal(
-            String(selectedDebit),
-            startDateParsed,
-            endDateParsed,
-            safraId !== '_' ? safraId : undefined
-          );
-
-        setDebitLabels(debitTotalData.map((item) => item.descricao));
-        setDebitTotal(debitTotalData.map((item) => item.total));
+        dispatch(setChartAccountsData({
+          credit: creditChartAccountsTree,
+          debit: debitChartAccountsTree,
+        }));
+        dispatch(change({
+          name: 'chartAccountsCreditSelected',
+          value: creditChartAccountsTree[0]?.key || null,
+        }));
+        dispatch(change({
+          name: 'chartAccountsDebitSelected',
+          value: debitChartAccountsTree[0]?.key || null,
+        }));
       }
-      setDebitTotalIsLoading(false);
     }
 
-    loadTotal();
-  }, [hasPermission, selectedDebit, debitRangeDates, safraId]);
+    loadPlanoContas();
+  }, [chartAccountsList.lastFetch, dispatch]);
 
   function handleSaveChart(type: 'credit' | 'debit') {
     const chartElement = type === 'credit' ? creditChartRef.current : debitChartRef.current;
     const fileName = type === 'credit'
-      ? `CRÉDITOS COMPENSADOS ${
-        creditRangeDates.startDate ? format(creditRangeDates.startDate, 'dd-MM-yyyy') : '-'
-      } À ${creditRangeDates.endDate ? format(creditRangeDates.endDate, 'dd-MM-yyyy') : '-'}`
-      : `DÉBITOS COMPENSADOS ${
-        debitRangeDates.startDate ? format(debitRangeDates.startDate, 'dd-MM-yyyy') : '-'
-      } À ${debitRangeDates.endDate ? format(debitRangeDates.endDate, 'dd-MM-yyyy') : '-'}`;
+      ? `CRÉDITOS COMPENSADOS ${creditStartDate ? format(creditStartDate, 'dd-MM-yyyy') : '-'
+      } À ${creditEndDate ? format(creditEndDate, 'dd-MM-yyyy') : '-'}`
+      : `DÉBITOS COMPENSADOS ${debitStartDate ? format(debitStartDate, 'dd-MM-yyyy') : '-'
+      } À ${debitEndDate ? format(debitEndDate, 'dd-MM-yyyy') : '-'}`;
 
     if (!chartElement) {
       return;
@@ -159,21 +232,29 @@ export function ChartAccounts({ safraId }: ChartAccountsProps) {
           <h3>DÉBITOS COMPENSADOS</h3>
           <div>
             <DateInput
-              onChangeDate={(date) => setDebitRangeDates((prevState) => ({
-                ...prevState,
-                startDate: date
-              }))}
+              onChangeDate={(date) => {
+                dispatch(change({
+                  name: 'chartAccountsDebitRangeDates', value: {
+                    startDate: date,
+                    endDate: debitEndDate
+                  }
+                }));
+              }}
               placeholder='Data Inicial'
-              defaultDate={subMonths(new Date(), 12)}
+              defaultDate={debitStartDate}
             />
             <strong>à</strong>
             <DateInput
-              onChangeDate={(date) => setDebitRangeDates((prevState) => ({
-                ...prevState,
-                endDate: date
-              }))}
+              onChangeDate={(date) => {
+                dispatch(change({
+                  name: 'chartAccountsDebitRangeDates', value: {
+                    startDate: debitStartDate,
+                    endDate: date
+                  }
+                }));
+              }}
               placeholder='Data Final'
-              defaultDate={new Date()}
+              defaultDate={debitEndDate}
             />
           </div>
         </header>
@@ -185,24 +266,19 @@ export function ChartAccounts({ safraId }: ChartAccountsProps) {
             </Loader>
           )}
           {hasPermission('debitos_compensados') && (
-            <ChartAccountsSelect
-              type='debit'
-              selected={selectedDebit}
-              setSelected={setSelectedDebit}
-              isSecondary
-            />
+            <ChartAccountsSelect type='debit' />
           )}
           <ChartAccountsChart
-            labels={debitLabels}
-            data={debitTotal}
+            labels={debit.labels}
+            data={debit.data}
           />
-          {debitTotal.length > 0 && (
+          {debit.data.length > 0 && (
             <footer data-html2canvas-ignore>
               <Link
                 to={`movimento-contas/analitica?type=debit&codigo=${(selectedDebit)
-                }&startDate=${debitRangeDates.startDate ? format(debitRangeDates.startDate, 'dd-MM-yyyy') : '_'
-                }&endDate=${debitRangeDates.endDate ? format(debitRangeDates.endDate, 'dd-MM-yyyy') : '_'
-                }&safraId=${safraId}`}
+                }&startDate=${debitStartDate ? format(debitStartDate, 'dd-MM-yyyy') : '_'
+                }&endDate=${debitEndDate ? format(debitEndDate, 'dd-MM-yyyy') : '_'
+                }&safraId=${safra}`}
               >
                 Visão Detalhada
               </Link>
@@ -218,21 +294,29 @@ export function ChartAccounts({ safraId }: ChartAccountsProps) {
           <h3>CRÉDITOS COMPENSADOS</h3>
           <div>
             <DateInput
-              onChangeDate={(date) => setCreditRangeDates((prevState) => ({
-                ...prevState,
-                startDate: date
-              }))}
+              onChangeDate={(date) => {
+                dispatch(change({
+                  name: 'chartAccountsCreditRangeDates', value: {
+                    startDate: date,
+                    endDate: creditEndDate
+                  }
+                }));
+              }}
               placeholder='Data Inicial'
-              defaultDate={subMonths(new Date(), 12)}
+              defaultDate={creditStartDate}
             />
             <strong>à</strong>
             <DateInput
-              onChangeDate={(date) => setCreditRangeDates((prevState) => ({
-                ...prevState,
-                endDate: date
-              }))}
+              onChangeDate={(date) => {
+                dispatch(change({
+                  name: 'chartAccountsCreditRangeDates', value: {
+                    startDate: creditStartDate,
+                    endDate: date
+                  }
+                }));
+              }}
               placeholder='Data Final'
-              defaultDate={new Date()}
+              defaultDate={creditEndDate}
             />
           </div>
         </header>
@@ -244,24 +328,19 @@ export function ChartAccounts({ safraId }: ChartAccountsProps) {
             </Loader>
           )}
           {hasPermission('creditos_compensados') && (
-            <ChartAccountsSelect
-              type='credit'
-              selected={selectedCredit}
-              setSelected={setSelectedCredit}
-              isSecondary
-            />
+            <ChartAccountsSelect type='credit' />
           )}
           <ChartAccountsChart
-            labels={creditLabels}
-            data={creditTotal}
+            labels={credit.labels}
+            data={credit.data}
           />
-          {creditTotal.length > 0 && (
+          {credit.data.length > 0 && (
             <footer data-html2canvas-ignore>
               <Link
                 to={`movimento-contas/analitica?type=credit&codigo=${(selectedCredit)
-                }&startDate=${creditRangeDates.startDate ? format(creditRangeDates.startDate, 'dd-MM-yyyy') : '_'
-                }&endDate=${creditRangeDates.endDate ? format(creditRangeDates.endDate, 'dd-MM-yyyy') : '_'
-                }&safraId=${safraId}`}
+                }&startDate=${creditStartDate ? format(creditStartDate, 'dd-MM-yyyy') : '_'
+                }&endDate=${creditEndDate ? format(creditEndDate, 'dd-MM-yyyy') : '_'
+                }&safraId=${safra}`}
               >
                 Visão Detalhada
               </Link>
@@ -274,4 +353,4 @@ export function ChartAccounts({ safraId }: ChartAccountsProps) {
       </Content>
     </Container>
   );
-}
+});

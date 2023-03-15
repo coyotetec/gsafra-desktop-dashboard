@@ -9,7 +9,7 @@ interface ProducerScaleChartProps {
   requestId: number;
   labels: string[];
   data: number[];
-  unit: 'kg' | 'sacks';
+  unit: string;
 }
 
 const ITEMS_PER_PAGE = 7;

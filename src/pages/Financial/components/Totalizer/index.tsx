@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import {
   ArrowCircleDown,
   ArrowCircleRight,
@@ -8,10 +8,7 @@ import {
   X,
 } from 'phosphor-react';
 import { CardsList, Container, Detail, DetailTitle, Loader } from './styles';
-
-import { CreditCardTotal } from '../../../../types/CreditCard';
 import { Total } from '../../../../types/Financial';
-
 import { sumTotal } from '../../utils/sumTotal';
 import { currencyFormat } from '../../../../utils/currencyFormat';
 import CheckService from '../../../../services/CheckService';
@@ -19,35 +16,46 @@ import CreditCardService from '../../../../services/CreditCardService';
 import FinancialService from '../../../../services/FinancialService';
 import useAnimatedUnmount from '../../../../hooks/useAnimatedUnmount';
 import { NotAllowed } from '../../../../components/NotAllowed';
-import { addDays, addMonths, format } from 'date-fns';
+import { addDays, format } from 'date-fns';
 import { DateInput } from '../../../../components/DateInput';
 import { useSearchParams } from 'react-router-dom';
 import { toast } from '../../../../utils/toast';
 import { Spinner } from '../../../../components/Spinner';
 import { useUserContext } from '../../../../contexts/UserContext';
-
-interface TotalizerProps {
-  safraId?: string;
-}
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../../../../redux/store';
+import { change } from '../../../../redux/features/financialFiltersSlice';
+import { change as totalizersChange } from '../../../../redux/features/financialTotalizersDataSlice';
+import { hasToFetch } from '../../../../utils/hasToFetch';
+import { componentsRefType } from '../../../../types/Types';
 
 interface DetailsModalArgs {
   type: 'CP' | 'CR' | 'CHP' | 'CHR' | 'CA';
   period: 0 | 7 | 15;
 }
 
-export function Totalizer({ safraId }: TotalizerProps) {
-  const [payableTotal, setPayableTotal] = useState<Total>();
-  const [receivableTotal, setReceivableTotal] = useState<Total>();
-  const [payableCheckTotal, setPayableCheckTotal] = useState<Total>();
-  const [receivableCheckTotal, setReceivableCheckTotal] = useState<Total>();
-  const [sumPayableTotal, setSumPayableTotal] = useState<Total>();
-  const [sumReceivableTotal, setSumReceivableTotal] = useState<Total>();
-  const [creditCardTotal, setCreditCardTotal] = useState<CreditCardTotal>();
+export const Totalizer = forwardRef<componentsRefType>((props, ref) => {
   const [showPayableDetails, setShowPayableDetails] = useState(false);
   const [showReceivableDetails, setShowReceivableDetails] = useState(false);
-  const [startDate, setStartDate] = useState<Date | null>(new Date());
-  const [endDate, setEndDate] = useState<Date | null>(addMonths(new Date(), 6));
-  const [isLoading, setIsLoading] = useState(true);
+  const [isPayableLoading, setIsPayableLoading] = useState(true);
+  const [isReceivableLoading, setIsReceivableLoading] = useState(true);
+  const [isCreditCardLoading, setIsCreditCardLoading] = useState(true);
+  const isFirstPayableRender = useRef(true);
+  const isFirstReceivableRender = useRef(true);
+  const isFirstCreditCardRender = useRef(true);
+
+  const {
+    financialFilters: {
+      totalizerRangeDates: { startDate, endDate },
+      safra
+    },
+    financialTotalizersData: {
+      payableTotalizer,
+      receivableTotalizer,
+      creditCardTotalizer,
+    },
+  } = useSelector((state: RootState) => state);
+  const dispatch = useDispatch();
 
   const zeroTotal = useMemo<Total>(() => ({
     quantity: 0,
@@ -63,7 +71,6 @@ export function Totalizer({ safraId }: TotalizerProps) {
   }), []);
 
   const { hasPermission } = useUserContext();
-
   const [, setQuery] = useSearchParams();
 
   const {
@@ -76,25 +83,28 @@ export function Totalizer({ safraId }: TotalizerProps) {
     animatedElementRef: animatedReceivableRef
   } = useAnimatedUnmount(showReceivableDetails);
 
-  useEffect(() => {
-    async function loadTotal() {
-      setIsLoading(true);
+  const loadPayableTotal = useCallback(async () => {
+    if (hasPermission('resumo_pendentes_pagamento')) {
+      setIsPayableLoading(true);
+
+      if (isFirstPayableRender.current) {
+        isFirstPayableRender.current = false;
+
+        if (!hasToFetch(payableTotalizer.lastFetch)) {
+          setIsPayableLoading(false);
+          return;
+        }
+      }
 
       if (endDate && startDate && endDate < startDate) {
-        setIsLoading(false);
-        setSumPayableTotal(zeroTotal);
-        setPayableTotal(zeroTotal);
-        setPayableCheckTotal(zeroTotal);
-        setSumReceivableTotal(zeroTotal);
-        setReceivableTotal(zeroTotal);
-        setReceivableCheckTotal(zeroTotal);
-        setCreditCardTotal({
-          quantity: 0,
-          total: 0,
-          availableLimit: 0,
-          totalLimit: 0,
-          usagePercentage: 0,
-        });
+        dispatch(totalizersChange({
+          name: 'payableTotalizer',
+          value: {
+            accounts: zeroTotal,
+            check: zeroTotal,
+            total: zeroTotal,
+          },
+        }));
         toast({
           type: 'danger',
           text: 'Data final precisa ser maior que inicial!'
@@ -105,67 +115,159 @@ export function Totalizer({ safraId }: TotalizerProps) {
       const startDateParsed = startDate ? format(startDate, 'dd-MM-yyyy') : '';
       const endDateParsed = endDate ? format(endDate, 'dd-MM-yyyy') : '';
 
-      if (hasPermission('resumo_pendentes_pagamento')) {
-        const [payableTotalData, payableCheckTotalData] = await Promise.all([
-          FinancialService.findPayableTotal(
-            startDateParsed,
-            endDateParsed,
-            safraId !== '_' ? safraId : undefined
-          ),
-          CheckService.findPayableCheckTotal(
-            startDateParsed,
-            endDateParsed,
-            safraId !== '_' ? safraId : undefined
-          )
-        ]);
-
-        const sumPayableTotalData = sumTotal(
-          [payableTotalData, payableCheckTotalData]
-        );
-
-        setSumPayableTotal(sumPayableTotalData);
-        setPayableTotal(payableTotalData);
-        setPayableCheckTotal(payableCheckTotalData);
-      }
-
-      if (hasPermission('resumo_pendentes_recebimento')) {
-        const [receivableTotalData, receivableCheckTotalData] = await Promise.all([
-          FinancialService.findReceivableTotal(
-            startDateParsed,
-            endDateParsed,
-            safraId !== '_' ? safraId : undefined
-          ),
-          CheckService.findReceivableCheckTotal(
-            startDateParsed,
-            endDateParsed,
-            safraId !== '_' ? safraId : undefined
-          )
-        ]);
-
-        const sumReceivableTotalData = sumTotal(
-          [receivableTotalData, receivableCheckTotalData]
-        );
-
-        setSumReceivableTotal(sumReceivableTotalData);
-        setReceivableTotal(receivableTotalData);
-        setReceivableCheckTotal(receivableCheckTotalData);
-      }
-
-      if (hasPermission('resumo_cartao_credito')) {
-        const creditCardTotalData = await CreditCardService.findTotal(
+      const [payableTotalData, payableCheckTotalData] = await Promise.all([
+        FinancialService.findPayableTotal(
           startDateParsed,
           endDateParsed,
-          safraId !== '_' ? safraId : undefined
-        );
+          safra !== '_' ? safra : undefined
+        ),
+        CheckService.findPayableCheckTotal(
+          startDateParsed,
+          endDateParsed,
+          safra !== '_' ? safra : undefined
+        )
+      ]);
 
-        setCreditCardTotal(creditCardTotalData);
+      const sumPayableTotalData = sumTotal(
+        [payableTotalData, payableCheckTotalData]
+      );
+
+      dispatch(totalizersChange({
+        name: 'payableTotalizer',
+        value: {
+          accounts: payableTotalData,
+          check: payableCheckTotalData,
+          total: sumPayableTotalData,
+        },
+      }));
+    }
+    setIsPayableLoading(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch, endDate, hasPermission, safra, startDate, zeroTotal]);
+
+  const loadReceivableTotal = useCallback(async () => {
+    if (hasPermission('resumo_pendentes_recebimento')) {
+      setIsReceivableLoading(true);
+
+      if (isFirstReceivableRender.current) {
+        isFirstReceivableRender.current = false;
+
+        if (!hasToFetch(payableTotalizer.lastFetch)) {
+          setIsReceivableLoading(false);
+          return;
+        }
       }
 
-      setIsLoading(false);
-    }
+      if (endDate && startDate && endDate < startDate) {
+        dispatch(totalizersChange({
+          name: 'receivableTotalizer',
+          value: {
+            accounts: zeroTotal,
+            check: zeroTotal,
+            total: zeroTotal,
+          },
+        }));
+        toast({
+          type: 'danger',
+          text: 'Data final precisa ser maior que inicial!'
+        });
+        return;
+      }
 
-    loadTotal();
-  }, [hasPermission, startDate, endDate, safraId, setIsLoading, zeroTotal]);
+      const startDateParsed = startDate ? format(startDate, 'dd-MM-yyyy') : '';
+      const endDateParsed = endDate ? format(endDate, 'dd-MM-yyyy') : '';
+
+      const [receivableTotalData, receivableCheckTotalData] = await Promise.all([
+        FinancialService.findReceivableTotal(
+          startDateParsed,
+          endDateParsed,
+          safra !== '_' ? safra : undefined
+        ),
+        CheckService.findReceivableCheckTotal(
+          startDateParsed,
+          endDateParsed,
+          safra !== '_' ? safra : undefined
+        )
+      ]);
+      const sumReceivableTotalData = sumTotal(
+        [receivableTotalData, receivableCheckTotalData]
+      );
+
+      dispatch(totalizersChange({
+        name: 'receivableTotalizer',
+        value: {
+          accounts: receivableTotalData,
+          check: receivableCheckTotalData,
+          total: sumReceivableTotalData,
+        },
+      }));
+    }
+    setIsReceivableLoading(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch, endDate, hasPermission, safra, startDate, zeroTotal]);
+
+  const loadCreditCardTotal = useCallback(async () => {
+    if (hasPermission('resumo_cartao_credito')) {
+      setIsCreditCardLoading(true);
+
+      if (isFirstCreditCardRender.current) {
+        isFirstCreditCardRender.current = false;
+
+        if (!hasToFetch(payableTotalizer.lastFetch)) {
+          setIsCreditCardLoading(false);
+          return;
+        }
+      }
+
+      if (endDate && startDate && endDate < startDate) {
+        dispatch(totalizersChange({
+          name: 'receivableTotalizer',
+          value: {
+            quantity: 0,
+            total: 0,
+            availableLimit: 0,
+            totalLimit: 0,
+            usagePercentage: 0,
+          },
+        }));
+        toast({
+          type: 'danger',
+          text: 'Data final precisa ser maior que inicial!'
+        });
+        return;
+      }
+
+      const startDateParsed = startDate ? format(startDate, 'dd-MM-yyyy') : '';
+      const endDateParsed = endDate ? format(endDate, 'dd-MM-yyyy') : '';
+
+      const creditCardTotalData = await CreditCardService.findTotal(
+        startDateParsed,
+        endDateParsed,
+        safra !== '_' ? safra : undefined
+      );
+
+      dispatch(totalizersChange({
+        name: 'creditCardTotalizer',
+        value: creditCardTotalData,
+      }));
+    }
+    setIsCreditCardLoading(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch, endDate, hasPermission, safra, startDate]);
+
+  const loadData = useCallback(() => {
+    loadPayableTotal();
+    loadReceivableTotal();
+    loadCreditCardTotal();
+  }, [loadCreditCardTotal, loadPayableTotal, loadReceivableTotal]);
+
+  useImperativeHandle(ref, () => ({
+    loadData
+  }), [loadData]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   function handleOpenDetailsModal({ type, period }: DetailsModalArgs) {
     if (period === 0) {
@@ -197,15 +299,29 @@ export function Totalizer({ safraId }: TotalizerProps) {
         <h3>RESUMO</h3>
         <div>
           <DateInput
-            onChangeDate={(date) => setStartDate(date)}
+            onChangeDate={(date) => {
+              dispatch(change({
+                name: 'totalizerRangeDates', value: {
+                  startDate: date,
+                  endDate
+                }
+              }));
+            }}
             placeholder='Data Inicial'
-            defaultDate={new Date()}
+            defaultDate={startDate}
           />
           <strong>à</strong>
           <DateInput
-            onChangeDate={(date) => setEndDate(date)}
+            onChangeDate={(date) => {
+              dispatch(change({
+                name: 'totalizerRangeDates', value: {
+                  startDate,
+                  endDate: date
+                }
+              }));
+            }}
             placeholder='Data Final'
-            defaultDate={addMonths(new Date(), 6)}
+            defaultDate={endDate}
           />
         </div>
       </header>
@@ -213,7 +329,7 @@ export function Totalizer({ safraId }: TotalizerProps) {
       <CardsList>
         <div className="card">
           {!hasPermission('resumo_pendentes_pagamento') && <NotAllowed />}
-          {isLoading && (
+          {isPayableLoading && (
             <Loader>
               <Spinner size={48} />
             </Loader>
@@ -223,7 +339,7 @@ export function Totalizer({ safraId }: TotalizerProps) {
             Pendentes de Pagamento
           </strong>
           <span>
-            {currencyFormat(sumPayableTotal?.total || 0)}
+            {currencyFormat(payableTotalizer.total.total)}
             <button
               type="button"
               onClick={() => setShowPayableDetails((prevState) => !prevState)}
@@ -231,16 +347,16 @@ export function Totalizer({ safraId }: TotalizerProps) {
               <ArrowCircleRight size={24} color="#F7FBFE" weight='fill' />
             </button>
           </span>
-          <small>{sumPayableTotal?.quantity} itens</small>
+          <small>{payableTotalizer.total.quantity} itens</small>
           <footer>
             <span>Próximos 7 dias:
               <small>
-                {currencyFormat(sumPayableTotal?.totalNextSeven.total || 0)}
+                {currencyFormat(payableTotalizer.total.totalNextSeven.total)}
               </small>
             </span>
             <span>Próximos 15 dias:
               <small>
-                {currencyFormat(sumPayableTotal?.totalNextSeven.total || 0)}
+                {currencyFormat(payableTotalizer.total.totalNextFifteen.total)}
               </small>
             </span>
           </footer>
@@ -248,7 +364,7 @@ export function Totalizer({ safraId }: TotalizerProps) {
 
         <div className="card">
           {!hasPermission('resumo_pendentes_recebimento') && <NotAllowed />}
-          {isLoading && (
+          {isReceivableLoading && (
             <Loader>
               <Spinner size={48} />
             </Loader>
@@ -258,7 +374,7 @@ export function Totalizer({ safraId }: TotalizerProps) {
             Pendentes de Recebimento
           </strong>
           <span>
-            {currencyFormat(sumReceivableTotal?.total || 0)}
+            {currencyFormat(receivableTotalizer.total.total)}
             <button
               type="button"
               onClick={() => setShowReceivableDetails((prevState) => !prevState)}
@@ -266,16 +382,16 @@ export function Totalizer({ safraId }: TotalizerProps) {
               <ArrowCircleRight size={24} color="#F7FBFE" weight='fill' />
             </button>
           </span>
-          <small>{sumReceivableTotal?.quantity} itens</small>
+          <small>{receivableTotalizer.total.quantity} itens</small>
           <footer>
             <span>Próximos 7 dias:
               <small>
-                {currencyFormat(sumReceivableTotal?.totalNextSeven.total || 0)}
+                {currencyFormat(receivableTotalizer.total.totalNextSeven.total)}
               </small>
             </span>
             <span>Próximos 15 dias:
               <small>
-                {currencyFormat(sumReceivableTotal?.totalNextSeven.total || 0)}
+                {currencyFormat(receivableTotalizer.total.totalNextFifteen.total)}
               </small>
             </span>
           </footer>
@@ -283,7 +399,7 @@ export function Totalizer({ safraId }: TotalizerProps) {
 
         <div className="card">
           {!hasPermission('resumo_cartao_credito') && <NotAllowed />}
-          {isLoading && (
+          {isCreditCardLoading && (
             <Loader>
               <Spinner size={48} />
             </Loader>
@@ -293,7 +409,7 @@ export function Totalizer({ safraId }: TotalizerProps) {
             Fatura do Cartão de Crédito
           </strong>
           <span>
-            {currencyFormat(creditCardTotal?.total || 0)}
+            {currencyFormat(creditCardTotalizer.total)}
             <button
               type="button"
               className="modal-button"
@@ -307,22 +423,22 @@ export function Totalizer({ safraId }: TotalizerProps) {
               <ArrowSquareOut size={24} color="#00D47E" weight="fill" />
             </button>
           </span>
-          <small>{creditCardTotal?.quantity} itens</small>
+          <small>{creditCardTotalizer.quantity} itens</small>
           <footer>
             <div className="progress-bar">
               <div
                 className="progress-bar-inner"
                 style={{
-                  width: `${(creditCardTotal?.usagePercentage || 0) > 100
+                  width: `${(creditCardTotalizer.usagePercentage) > 100
                     ? 100
-                    : creditCardTotal?.usagePercentage
+                    : creditCardTotalizer.usagePercentage
                   }%`
                 }}
               ></div>
             </div>
             <span>
               Limite restante:
-              <small>{currencyFormat(creditCardTotal?.availableLimit || 0)}</small>
+              <small>{currencyFormat(creditCardTotalizer.availableLimit)}</small>
             </span>
           </footer>
         </div>
@@ -343,9 +459,9 @@ export function Totalizer({ safraId }: TotalizerProps) {
             <section>
               <strong>Contas a Pagar</strong>
               <span>
-                {currencyFormat(payableTotal?.total || 0)}
+                {currencyFormat(payableTotalizer.accounts.total)}
               </span>
-              <small>({payableTotal?.quantity} itens)</small>
+              <small>({payableTotalizer.accounts.quantity} itens)</small>
               <button
                 type="button"
                 className="modal-button"
@@ -359,7 +475,7 @@ export function Totalizer({ safraId }: TotalizerProps) {
                 <li>
                   Próximos 7 dias:
                   <small>
-                    {currencyFormat(payableTotal?.totalNextSeven.total || 0)}
+                    {currencyFormat(payableTotalizer.accounts.totalNextSeven.total)}
                   </small>
                   {startDate && (<button
                     type="button"
@@ -374,7 +490,7 @@ export function Totalizer({ safraId }: TotalizerProps) {
                 <li>
                   Próximos 15 dias:
                   <small>
-                    {currencyFormat(payableTotal?.totalNextSeven.total || 0)}
+                    {currencyFormat(payableTotalizer.accounts.totalNextFifteen.total)}
                   </small>
                   {startDate && (<button
                     type="button"
@@ -394,9 +510,9 @@ export function Totalizer({ safraId }: TotalizerProps) {
             <section>
               <strong>Cheques a Pagar</strong>
               <span>
-                {currencyFormat(payableCheckTotal?.total || 0)}
+                {currencyFormat(payableTotalizer.check.total)}
               </span>
-              <small>({payableCheckTotal?.quantity} itens)</small>
+              <small>({payableTotalizer.check.quantity} itens)</small>
               <button
                 type="button"
                 className="modal-button"
@@ -410,7 +526,7 @@ export function Totalizer({ safraId }: TotalizerProps) {
                 <li>
                   Próximos 7 dias:
                   <small>
-                    {currencyFormat(payableCheckTotal?.totalNextSeven.total || 0)}
+                    {currencyFormat(payableTotalizer.check.totalNextSeven.total)}
                   </small>
                   {startDate && (<button
                     type="button"
@@ -425,7 +541,7 @@ export function Totalizer({ safraId }: TotalizerProps) {
                 <li>
                   Próximos 15 dias:
                   <small>
-                    {currencyFormat(payableCheckTotal?.totalNextSeven.total || 0)}
+                    {currencyFormat(payableTotalizer.check.totalNextFifteen.total)}
                   </small>
                   {startDate && (<button
                     type="button"
@@ -458,9 +574,9 @@ export function Totalizer({ safraId }: TotalizerProps) {
             <section>
               <strong>Contas a Receber</strong>
               <span>
-                {currencyFormat(receivableTotal?.total || 0)}
+                {currencyFormat(receivableTotalizer.accounts.total)}
               </span>
-              <small>({receivableTotal?.quantity} itens)</small>
+              <small>({receivableTotalizer.accounts.quantity} itens)</small>
               <button
                 type="button"
                 className="modal-button"
@@ -474,7 +590,7 @@ export function Totalizer({ safraId }: TotalizerProps) {
                 <li>
                   Próximos 7 dias:
                   <small>
-                    {currencyFormat(receivableTotal?.totalNextSeven.total || 0)}
+                    {currencyFormat(receivableTotalizer.accounts.totalNextSeven.total)}
                   </small>
                   {startDate && (<button
                     type="button"
@@ -489,7 +605,7 @@ export function Totalizer({ safraId }: TotalizerProps) {
                 <li>
                   Próximos 15 dias:
                   <small>
-                    {currencyFormat(receivableTotal?.totalNextSeven.total || 0)}
+                    {currencyFormat(receivableTotalizer.accounts.totalNextFifteen.total)}
                   </small>
                   {startDate && (<button
                     type="button"
@@ -509,9 +625,9 @@ export function Totalizer({ safraId }: TotalizerProps) {
             <section>
               <strong>Cheques a Receber</strong>
               <span>
-                {currencyFormat(receivableCheckTotal?.total || 0)}
+                {currencyFormat(receivableTotalizer.check.total)}
               </span>
-              <small>({receivableCheckTotal?.quantity} itens)</small>
+              <small>({receivableTotalizer.check.quantity} itens)</small>
               <button
                 type="button"
                 className="modal-button"
@@ -525,7 +641,7 @@ export function Totalizer({ safraId }: TotalizerProps) {
                 <li>
                   Próximos 7 dias:
                   <small>
-                    {currencyFormat(receivableCheckTotal?.totalNextSeven.total || 0)}
+                    {currencyFormat(receivableTotalizer.check.totalNextSeven.total)}
                   </small>
                   {startDate && (<button
                     type="button"
@@ -540,7 +656,7 @@ export function Totalizer({ safraId }: TotalizerProps) {
                 <li>
                   Próximos 15 dias:
                   <small>
-                    {currencyFormat(receivableCheckTotal?.totalNextSeven.total || 0)}
+                    {currencyFormat(receivableTotalizer.check.totalNextFifteen.total)}
                   </small>
                   {startDate && (<button
                     type="button"
@@ -559,4 +675,4 @@ export function Totalizer({ safraId }: TotalizerProps) {
       )}
     </Container>
   );
-}
+});

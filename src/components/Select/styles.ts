@@ -11,11 +11,7 @@ export const Wrapper = styled.div`
   }
 `;
 
-interface StyledSelectProps {
-  labelMargin?: string;
-}
-
-export const StyledSelect = styled(Dropdown)<StyledSelectProps>`
+export const StyledSelect = styled(Dropdown)`
   width: ${({ width }) => width ? width : '280px'};
   height: ${({ height }) => height ? height : '48px'};
   background: #30454C;
@@ -41,11 +37,15 @@ export const StyledSelect = styled(Dropdown)<StyledSelectProps>`
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    margin-top: ${({ labelMargin }) => labelMargin ? labelMargin : '2px'};
+    margin-top: 1px !important;
   }
 
   .p-dropdown-trigger {
-    color: #CFD4D6;
+    color: #CFD4D6 !important;
+  }
+
+  .p-dropdown-clear-icon {
+    color: #FF5555 !important;
   }
 `;
 

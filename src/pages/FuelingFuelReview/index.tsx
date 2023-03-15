@@ -1,15 +1,23 @@
-import { format, subMonths } from 'date-fns';
-import { useEffect, useState } from 'react';
+import { format } from 'date-fns';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { DateInput } from '../../components/DateInput';
 import { Header } from '../../components/Header';
 import { Loader } from '../../components/Loader';
 import { Select } from '../../components/Select';
 import { useUserContext } from '../../contexts/UserContext';
+import { setData } from '../../redux/features/fuelingFuelDataSlice';
+import { change } from '../../redux/features/fuelingFuelFiltersSlice';
+import { setPatrimoniesData } from '../../redux/features/patrimoniesListSlice';
+import { setPatrimonyTypesData } from '../../redux/features/patrimonyTypesListSlice';
+import { setStoreroomsData } from '../../redux/features/storeroomsListSlice';
+import { RootState } from '../../redux/store';
 import AbastecimentoService from '../../services/AbastecimentoService';
 import AlmoxarifadoService from '../../services/AlmoxarifadoService';
 import PatrimonioService from '../../services/PatrimonioService';
 import TipoPatrimonioService from '../../services/TipoPatrimonioService';
+import { hasToFetch } from '../../utils/hasToFetch';
 import { toast } from '../../utils/toast';
 import { FuelReview } from './components/FuelReview';
 import { Container } from './styles';
@@ -20,120 +28,148 @@ type optionType = {
 }[];
 
 export function FuelingFuelReview() {
-  const [startDate, setStartDate] = useState<Date | null>(subMonths(new Date(), 12));
-  const [endDate, setEndDate] = useState<Date | null>(new Date());
-  const [patrimonios, setPatrimonios] = useState<optionType>([]);
-  const [selectedPatrimonio, setSelectedPatrimonio] = useState('_');
-  const [almoxarifados, setAlmoxarifados] = useState<optionType>([]);
-  const [selectedAlmoxarifado, setSelectedAlmoxarifado] = useState('_');
-  const [tiposPatrimonio, setTiposPatrimonio] = useState<optionType>([]);
-  const [selectedTipoPatrimonio, setSelectedTipoPatrimonio] = useState('_');
-  const [selectedCusto, setSelectedCusto] = useState('medio');
   const custos: optionType = [
     { value: 'medio', label: 'Custo Médio' },
     { value: 'atual', label: 'Custo Atual' },
   ];
-  const [fuelValuesLabels, setFuelValuesLabels] = useState<string[]>([]);
-  const [fuelValuesData, setFuelValuesData] = useState<number[]>([]);
-  const [fuelValuesTotal, setFuelValuesTotal] = useState(0);
-  const [fuelQtysLabels, setFuelQtysLabels] = useState<string[]>([]);
-  const [fuelQtysData, setFuelQtysData] = useState<number[]>([]);
-  const [fuelQtysTotal, setFuelQtysTotal] = useState(0);
   const [isDataLoading, setIsDataLoading] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
+  const isFirstRender = useRef(true);
+
+  const {
+    fuelingFuelFilters: filters,
+    fuelingFuelData: fuelingFuel,
+    patrimoniesList,
+    storeroomsList,
+    patrimonyTypesList,
+  } = useSelector((state: RootState) => state);
+  const dispatch = useDispatch();
 
   const { hasPermission } = useUserContext();
+
+  const loadData = useCallback(async () => {
+    if (hasPermission('resumo_combustivel_abastecimento')) {
+      setIsDataLoading(true);
+
+      if (isFirstRender.current) {
+        isFirstRender.current = false;
+
+        if (!hasToFetch(fuelingFuel.lastFetch)) {
+          setIsDataLoading(false);
+          return;
+        }
+      }
+
+      if (filters.rangeDates.endDate && filters.rangeDates.startDate && filters.rangeDates.endDate < filters.rangeDates.startDate) {
+        setIsDataLoading(false);
+        dispatch(setData({
+          labels: [],
+          values: [],
+          valuesTotal: 0,
+          quantities: [],
+          quantitiesTotal: 0
+        }));
+        toast({
+          type: 'danger',
+          text: 'Data final precisa ser maior que inicial!'
+        });
+        return;
+      }
+
+      const fuelReviewData = await AbastecimentoService.findFuelReview({
+        custo: filters.cost,
+        startDate: filters.rangeDates.startDate ? format(filters.rangeDates.startDate, 'dd-MM-yyyy') : '',
+        endDate: filters.rangeDates.endDate ? format(filters.rangeDates.endDate, 'dd-MM-yyyy') : '',
+        idPatrimonio: filters.patrimony !== '_' ? filters.patrimony : undefined,
+        idAlmoxarifado: filters.storeroom !== '_' ? filters.storeroom : undefined,
+        idTipoPatrimonio: filters.patrimonyType !== '_' ? filters.patrimonyType : undefined,
+      });
+
+      dispatch(setData({
+        labels: fuelReviewData.fuelValue.map(item => item.combustivel),
+        values: fuelReviewData.fuelValue.map(item => item.total),
+        valuesTotal: fuelReviewData.fuelValueTotal,
+        quantities: fuelReviewData.fuelQty.map(item => item.total),
+        quantitiesTotal: fuelReviewData.fuelQtyTotal
+      }));
+    }
+
+    setIsDataLoading(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    dispatch,
+    filters.cost,
+    filters.patrimony,
+    filters.patrimonyType,
+    filters.rangeDates.endDate,
+    filters.rangeDates.startDate,
+    filters.storeroom,
+    hasPermission
+  ]);
 
   useEffect(() => {
     async function loadData() {
       setIsLoading(true);
 
-      const [
-        patrimoniosData,
-        almoxarifadosData,
-        tiposPatrimonioData
-      ] = await Promise.all([
-        PatrimonioService.findPatrimonios(),
-        AlmoxarifadoService.findAlmoxarifados(),
-        TipoPatrimonioService.findTiposPatrimonio()
-      ]);
+      if (hasToFetch(patrimoniesList.lastFetch)) {
+        const patrimoniosData = await PatrimonioService.findPatrimonios();
+        dispatch(setPatrimoniesData(patrimoniosData.map((item) => ({
+          value: String(item.id),
+          label: item.descricao
+        }))));
+      }
 
-      const patrimoniosOptions = patrimoniosData.map(item => (
-        { value: String(item.id), label: item.descricao }
-      ));
-      patrimoniosOptions.unshift({ value: '_', label: 'Todos' });
+      if (hasToFetch(storeroomsList.lastFetch)) {
+        const almoxarifadosData = await AlmoxarifadoService.findAlmoxarifados();
+        dispatch(setStoreroomsData(almoxarifadosData.map(item => ({
+          value: String(item.id),
+          label: item.nome
+        }))));
+      }
 
-      const almoxarifadosOptions = almoxarifadosData.map(item => (
-        { value: String(item.id), label: item.nome }
-      ));
-      almoxarifadosOptions.unshift({ value: '_', label: 'Todos' });
-
-      const tiposPatrimonioOptions = tiposPatrimonioData.map(item => (
-        { value: String(item.id), label: item.nome }
-      ));
-      tiposPatrimonioOptions.unshift({ value: '_', label: 'Todos' });
-
-      setPatrimonios(patrimoniosOptions);
-      setAlmoxarifados(almoxarifadosOptions);
-      setTiposPatrimonio(tiposPatrimonioOptions);
+      if (hasToFetch(patrimonyTypesList.lastFetch)) {
+        const tiposPatrimonioData = await TipoPatrimonioService.findTiposPatrimonio();
+        dispatch(setPatrimonyTypesData(tiposPatrimonioData.map(item => ({
+          value: String(item.id),
+          label: item.nome
+        }))));
+      }
 
       setIsLoading(false);
     }
 
     loadData();
-  }, []);
+  }, [
+    dispatch,
+    patrimoniesList.lastFetch,
+    storeroomsList.lastFetch,
+    patrimonyTypesList.lastFetch
+  ]);
 
   useEffect(() => {
-    async function loadData() {
-      if (hasPermission('resumo_combustivel_abastecimento')) {
-        setIsDataLoading(true);
-
-        if (endDate && startDate && endDate < startDate) {
-          setIsDataLoading(false);
-          setFuelValuesData([]);
-          setFuelValuesTotal(0);
-          setFuelQtysData([]);
-          setFuelQtysTotal(0);
-          toast({
-            type: 'danger',
-            text: 'Data final precisa ser maior que inicial!'
-          });
-          return;
-        }
-
-        const fuelReviewData = await AbastecimentoService.findFuelReview({
-          custo: selectedCusto,
-          startDate: startDate ? format(startDate, 'dd-MM-yyyy') : '',
-          endDate: endDate ? format(endDate, 'dd-MM-yyyy') : '',
-          idPatrimonio: selectedPatrimonio !== '_' ? selectedPatrimonio : undefined,
-          idAlmoxarifado: selectedAlmoxarifado !== '_' ? selectedAlmoxarifado : undefined,
-          idTipoPatrimonio: selectedTipoPatrimonio !== '_' ? selectedTipoPatrimonio : undefined,
-        });
-
-        setFuelValuesLabels(fuelReviewData.fuelValue.map(item => item.combustivel));
-        setFuelValuesData(fuelReviewData.fuelValue.map(item => item.total));
-        setFuelValuesTotal(fuelReviewData.fuelValueTotal);
-        setFuelQtysLabels(fuelReviewData.fuelQty.map(item => item.combustivel));
-        setFuelQtysData(fuelReviewData.fuelQty.map(item => item.total));
-        setFuelQtysTotal(fuelReviewData.fuelQtyTotal);
-      }
-
-      setIsDataLoading(false);
-    }
-
     loadData();
-  }, [hasPermission, selectedCusto, startDate, endDate, selectedPatrimonio, selectedAlmoxarifado, selectedTipoPatrimonio]);
+  }, [loadData]);
 
   return (
     <Container>
       <Loader isLoading={isLoading} />
-      <Header title="Resumo por Combustível" />
+      <Header
+        title="Resumo por Combustível"
+        refreshData={loadData}
+      />
       <div className="filters">
         <div className="date-filter">
           <DateInput
-            onChangeDate={(date) => setStartDate(date)}
+            onChangeDate={(date) => {
+              dispatch(change({
+                name: 'rangeDates', value: {
+                  startDate: date,
+                  endDate: filters.rangeDates.endDate
+                }
+              }));
+            }}
             placeholder='Data Inicial'
-            defaultDate={subMonths(new Date(), 12)}
+            defaultDate={filters.rangeDates.startDate}
             height="48px"
             width="100%"
             fontSize="16px"
@@ -142,9 +178,16 @@ export function FuelingFuelReview() {
           />
           <strong>à</strong>
           <DateInput
-            onChangeDate={(date) => setEndDate(date)}
+            onChangeDate={(date) => {
+              dispatch(change({
+                name: 'rangeDates', value: {
+                  startDate: filters.rangeDates.startDate,
+                  endDate: date
+                }
+              }));
+            }}
             placeholder='Data Final'
-            defaultDate={new Date()}
+            defaultDate={filters.rangeDates.endDate}
             height="48px"
             width="100%"
             fontSize="16px"
@@ -154,67 +197,76 @@ export function FuelingFuelReview() {
         </div>
 
         <Select
-          options={patrimonios}
-          value={selectedPatrimonio}
-          onChange={setSelectedPatrimonio}
+          options={[{
+            value: '_',
+            label: 'Todos',
+          }, ...patrimoniesList.options]}
+          value={filters.patrimony}
+          onChange={(value: string) => {
+            dispatch(change({ name: 'patrimony', value: value }));
+          }}
           placeholder="Patrimonio"
           label="Patrimonio"
           noOptionsMessage="0 patrimonios encontrados"
           width="100%"
         />
         <Select
-          options={almoxarifados}
-          value={selectedAlmoxarifado}
-          onChange={setSelectedAlmoxarifado}
+          options={[{
+            value: '_',
+            label: 'Todos',
+          }, ...storeroomsList.options]}
+          value={filters.storeroom}
+          onChange={(value: string) => {
+            dispatch(change({ name: 'storeroom', value: value }));
+          }}
           placeholder="Local de Saída"
           label="Local de Saída"
           noOptionsMessage="0 locais de saída encontrados"
           width="100%"
         />
-
         <Select
           options={custos}
-          value={selectedCusto}
-          onChange={setSelectedCusto}
+          value={filters.cost}
+          onChange={(value: string) => {
+            dispatch(change({ name: 'cost', value: value }));
+          }}
           placeholder="Custo do Combustível"
           label="Custo do Combustível"
           width="100%"
         />
-
         <Select
-          options={tiposPatrimonio}
-          value={selectedTipoPatrimonio}
-          onChange={setSelectedTipoPatrimonio}
+          options={[{
+            value: '_',
+            label: 'Todos',
+          }, ...patrimonyTypesList.options]}
+          value={filters.patrimonyType}
+          onChange={(value: string) => {
+            dispatch(change({ name: 'patrimonyType', value: value }));
+          }}
           placeholder="Tipo de Patrimônio"
           label="Tipo de Patrimônio"
           noOptionsMessage="0 tipos de patrimônio encontrados"
           width="100%"
         />
       </div>
-      <Link
-        to={`analitica?custo=${selectedCusto}&startDate=${startDate ? format(startDate, 'dd-MM-yyyy') : '_'
-        }&endDate=${endDate ? format(endDate, 'dd-MM-yyyy') : '_'
-        }&idPatrimonio=${selectedPatrimonio
-        }&idAlmoxarifado=${selectedAlmoxarifado
-        }&idTipoPatrimonio=${selectedTipoPatrimonio}`}
-      >
+      <Link to="analitica">
         {hasPermission('resumo_combustivel_abastecimento') && 'Visão Detalhada'}
       </Link>
       <div className="cards">
         <FuelReview
           isLoading={isDataLoading}
           title='VALORES ABASTECIDOS'
-          total={fuelValuesTotal}
-          labels={fuelValuesLabels}
-          data={fuelValuesData}
+          total={fuelingFuel.valuesTotal}
+          labels={fuelingFuel.labels}
+          data={fuelingFuel.values}
           isCurrency
         />
         <FuelReview
           isLoading={isDataLoading}
           title='LITROS ABASTECIDOS'
-          total={fuelQtysTotal}
-          labels={fuelQtysLabels}
-          data={fuelQtysData}
+          total={fuelingFuel.quantitiesTotal}
+          labels={fuelingFuel.labels}
+          data={fuelingFuel.quantities}
         />
       </div>
     </Container>

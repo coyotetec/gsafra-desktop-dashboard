@@ -1,31 +1,48 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Header } from '../../components/Header';
 import { Loader } from '../../components/Loader';
 import { useUserContext } from '../../contexts/UserContext';
+import { addViews } from '../../redux/features/financialViewsDataSlice';
+import { RootState } from '../../redux/store';
 import FinancialViewsService from '../../services/FinancialViewsService';
-import { View } from '../../types/FinancialViews';
+import { hasToFetch } from '../../utils/hasToFetch';
 import { FinancialView } from './components/FinancialView';
 import { Container } from './styles';
 
 export function FinancialViews() {
-  const [views, setViews] = useState<View[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const isFirstRender = useRef(true);
+
+  const { financialViewsData: { lastFetch, views } } = useSelector((state: RootState) => state);
+  const dispatch = useDispatch();
 
   const { hasPermission } = useUserContext();
 
-  useEffect(() => {
-    async function loadData() {
-      if (hasPermission('indicadores_financeiros')) {
-        const viewsData = await FinancialViewsService.findViews();
+  const loadData = useCallback(async () => {
+    if (hasPermission('indicadores_financeiros')) {
+      setIsLoading(true);
 
-        setViews(viewsData);
+      if (isFirstRender.current) {
+        isFirstRender.current = false;
+
+        if (!hasToFetch(lastFetch)) {
+          setIsLoading(false);
+          return;
+        }
       }
 
-      setIsLoading(false);
+      const viewsData = await FinancialViewsService.findViews();
+      dispatch(addViews(viewsData));
     }
 
+    setIsLoading(false);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch, hasPermission]);
+
+  useEffect(() => {
     loadData();
-  }, [hasPermission]);
+  }, [loadData]);
 
   return (
     <Container>
@@ -33,6 +50,7 @@ export function FinancialViews() {
       <Header
         title='Indicadores Financeiros'
         subtitle={`${views.length} ${views.length === 1 ? 'INDICADOR ENCONTRADO' : 'INDICADORES ENCONTRADOS'}`}
+        refreshData={loadData}
       />
 
       <div className="views-grid">
@@ -41,7 +59,19 @@ export function FinancialViews() {
             <FinancialView key={view.id} {...view} />
           ))
           : (
-            <FinancialView id={1} nome="Indicador" situacao={1} periodoPadraoMeses={12} />
+            <FinancialView
+              id={1}
+              nome="Indicador"
+              situacao={1}
+              periodoPadraoMeses={12}
+              lastFetch={null}
+              rangeDates={{
+                startDate: null,
+                endDate: null
+              }}
+              total={[]}
+              totalizers={[]}
+            />
           )}
       </div>
     </Container>

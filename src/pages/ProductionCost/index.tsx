@@ -1,12 +1,18 @@
 import { Info } from 'phosphor-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { DateInput } from '../../components/DateInput';
 import { Header } from '../../components/Header';
 import { MultiSelect } from '../../components/MultiSelect';
 import { Select } from '../../components/Select';
 import useAnimatedUnmount from '../../hooks/useAnimatedUnmount';
+import { change, setFirstSafra } from '../../redux/features/productionCostFiltersSlice';
+import { setSafrasData } from '../../redux/features/safrasListSlice';
+import { RootState } from '../../redux/store';
 import SafraService from '../../services/SafraService';
 import TalhaoService from '../../services/TalhaoService';
+import { componentsRefType } from '../../types/Types';
+import { hasToFetch } from '../../utils/hasToFetch';
 import { Activity } from './Components/Activity';
 import { CategoryCost } from './Components/CategoryCost';
 import { Fueling } from './Components/Fueling';
@@ -27,32 +33,52 @@ type groupedOptionsType = {
   }[]
 }[];
 
-interface RangeDates {
-  startDate: Date | null;
-  endDate: Date | null;
-}
-
 export function ProductionCost() {
-  const [safrasOptions, setSafraOptions] = useState<optionType>([]);
-  const [selectedSafrasOptions, setSelectedSafrasOptions] = useState<optionType>([]);
-  const [selectedSafras, setSelectedSafras] = useState<string[]>([]);
-  const [lastSelectedSafras, setLastSelectedSafras] = useState<string[]>([]);
-  const [talhoesOptions, setTalhoesOptions] = useState<groupedOptionsType>([]);
-  const [selectedTalhao, setSelectedTalhao] = useState<string | null>(null);
-  const [selectedUnit, setSelectedUnit] = useState('cost');
-  const [rangeDates, setRangeDates] = useState<RangeDates>({
-    startDate: null,
-    endDate: null,
-  });
   const unitOptions: optionType = [
     { value: 'cost', label: 'Custo (R$)' },
     { value: 'hectareCost', label: 'Custo por Hectare (R$/ha)' },
     { value: 'percent', label: 'Porcentagem (%)' },
   ];
+  const categoryCostRef = useRef<componentsRefType>({
+    loadData() { return; },
+  });
+  const talhaoCostRef = useRef<componentsRefType>({
+    loadData() { return; },
+  });
+  const activityCostRef = useRef<componentsRefType>({
+    loadData() { return; },
+  });
+  const maintenanceCostRef = useRef<componentsRefType>({
+    loadData() { return; },
+  });
+  const fuelingCostRef = useRef<componentsRefType>({
+    loadData() { return; },
+  });
+
+  const {
+    safrasList,
+    productionCostFilters: {
+      unit,
+      rangeDates,
+      safras,
+      talhoesOptions,
+      talhao,
+      lastSelectedSafras,
+    }
+  } = useSelector((state: RootState) => state);
+  const dispatch = useDispatch();
+
+  const refreshData = useCallback(() => {
+    categoryCostRef.current.loadData();
+    talhaoCostRef.current.loadData();
+    activityCostRef.current.loadData();
+    maintenanceCostRef.current.loadData();
+    fuelingCostRef.current.loadData();
+  }, []);
 
   const hectareCostMessageVisible = useMemo(() => (
-    selectedUnit === 'hectareCost' && lastSelectedSafras.length > 1
-  ), [lastSelectedSafras, selectedUnit]);
+    unit === 'hectareCost' && lastSelectedSafras.length > 1
+  ), [lastSelectedSafras, unit]);
 
   const {
     shouldRender,
@@ -60,21 +86,25 @@ export function ProductionCost() {
   } = useAnimatedUnmount(hectareCostMessageVisible);
 
   const loadTalhoes = useCallback(async (value: string[]) => {
-    setSelectedTalhao(null);
+    dispatch(change({ name: 'talhao', value: null }));
 
     if (JSON.stringify(lastSelectedSafras) === JSON.stringify(value)) {
       return;
     }
 
     const parsedSafras = value.join(',');
-    setLastSelectedSafras(value);
-    setSelectedSafrasOptions(value.map((i) => {
-      const safra = safrasOptions.find((option) => option.value === i) as {
-        value: string;
-        label: string;
-      };
 
-      return safra;
+    dispatch(change({ name: 'lastSelectedSafras', value }));
+    dispatch(change({
+      name: 'selectedSafrasOptions',
+      value: value.map((i) => {
+        const safra = safrasList.options.find((option) => option.value === i) as {
+          value: string;
+          label: string;
+        };
+
+        return safra;
+      })
     }));
 
     const talhoesData = await TalhaoService.findTalhoes(parsedSafras);
@@ -100,36 +130,41 @@ export function ProductionCost() {
       return acc;
     }, [] as groupedOptionsType);
 
-    setTalhoesOptions(groupedTalhoes);
-  }, [lastSelectedSafras, safrasOptions]);
+    dispatch(change({ name: 'talhoesOptions', value: groupedTalhoes }));
+  }, [dispatch, lastSelectedSafras, safrasList.options]);
 
   useEffect(() => {
     async function loadSafras() {
-      const safrasData = await SafraService.findSafras();
+      if (hasToFetch(safrasList.lastFetch)) {
+        const safrasData = await SafraService.findSafras();
+        dispatch(setSafrasData(safrasData.map((item) => ({
+          value: String(item.id),
+          label: item.nome
+        }))));
+      }
 
-      const options = safrasData.map((safra) => ({ value: String(safra.id), label: safra.nome }));
-      const initialState = options.length > 0 ? [options[0].value] : [];
-
-      setSafraOptions(options);
-      setSelectedSafras(initialState);
-
-      loadTalhoes(initialState);
+      dispatch(setFirstSafra(safrasList.options[0]?.value || null));
+      if (safrasList.options[0]?.value && talhoesOptions.length === 0) {
+        loadTalhoes([safrasList.options[0].value]);
+      }
     }
 
     loadSafras();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [dispatch, safrasList.lastFetch, safrasList.options, loadTalhoes, talhoesOptions]);
 
   return (
     <Container>
       <Header
         title="Custo da Produção"
+        refreshData={refreshData}
       />
       <div className="filters">
         <MultiSelect
-          options={safrasOptions}
-          onChange={setSelectedSafras}
-          value={selectedSafras}
+          options={safrasList.options}
+          onChange={(value: string[]) => {
+            dispatch(change({ name: 'safras', value: value }));
+          }}
+          value={safras}
           placeholder="Safras"
           selectedItemsLabel='{0} Safras'
           onClose={loadTalhoes}
@@ -140,20 +175,26 @@ export function ProductionCost() {
           options={talhoesOptions}
           placeholder="Talhão"
           noOptionsMessage="0 talhões encontrada"
-          value={selectedTalhao}
-          onChange={setSelectedTalhao}
+          value={talhao}
+          onChange={(value: string | null) => {
+            dispatch(change({ name: 'talhao', value: value }));
+          }}
           label="Talhão"
           width="100%"
           isGrouped
         />
         <div className="date-filter">
           <DateInput
-            onChangeDate={(date) => setRangeDates((prevState) => ({
-              ...prevState,
-              startDate: date
-            }))}
+            onChangeDate={(date) => {
+              dispatch(change({
+                name: 'rangeDates', value: {
+                  startDate: date,
+                  endDate: rangeDates.endDate
+                }
+              }));
+            }}
             placeholder='Data Inicial'
-            defaultDate={null}
+            defaultDate={rangeDates.startDate}
             height="48px"
             width="100%"
             fontSize="16px"
@@ -162,12 +203,16 @@ export function ProductionCost() {
           />
           <strong>à</strong>
           <DateInput
-            onChangeDate={(date) => setRangeDates((prevState) => ({
-              ...prevState,
-              endDate: date
-            }))}
+            onChangeDate={(date) => {
+              dispatch(change({
+                name: 'rangeDates', value: {
+                  startDate: rangeDates.startDate,
+                  endDate: date
+                }
+              }));
+            }}
             placeholder='Data Final'
-            defaultDate={null}
+            defaultDate={rangeDates.endDate}
             height="48px"
             width="100%"
             fontSize="16px"
@@ -179,8 +224,10 @@ export function ProductionCost() {
           options={unitOptions}
           placeholder="Unidade"
           noOptionsMessage="0 unidades encontradas"
-          value={selectedUnit}
-          onChange={setSelectedUnit}
+          value={unit}
+          onChange={(value: string) => {
+            dispatch(change({ name: 'unit', value: value }));
+          }}
           label="Unidade"
           width="100%"
         />
@@ -198,36 +245,11 @@ export function ProductionCost() {
           </span>
         </HectareCostMessage>
       )}
-      <CategoryCost
-        safraIds={lastSelectedSafras}
-        talhaoId={selectedTalhao}
-        rangeDates={rangeDates}
-        unit={selectedUnit}
-      />
-      <TalhaoCost
-        safraIds={lastSelectedSafras}
-        rangeDates={rangeDates}
-        unit={selectedUnit}
-        safraOptions={selectedSafrasOptions}
-      />
-      <Activity
-        safraIds={lastSelectedSafras}
-        talhaoId={selectedTalhao}
-        rangeDates={rangeDates}
-        unit={selectedUnit}
-      />
-      <Maintenance
-        safraIds={lastSelectedSafras}
-        talhaoId={selectedTalhao}
-        rangeDates={rangeDates}
-        unit={selectedUnit}
-      />
-      <Fueling
-        safraIds={lastSelectedSafras}
-        talhaoId={selectedTalhao}
-        rangeDates={rangeDates}
-        unit={selectedUnit}
-      />
+      <CategoryCost ref={categoryCostRef} />
+      <TalhaoCost ref={talhaoCostRef} />
+      <Activity ref={activityCostRef} />
+      <Maintenance ref={maintenanceCostRef} />
+      <Fueling ref={fuelingCostRef} />
     </Container>
   );
 }

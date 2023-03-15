@@ -22,7 +22,6 @@ interface SelectProps {
   noOptionsMessage?: string;
   width?: string;
   height?: string;
-  labelMargin?: string;
   label?: string;
   isGrouped?: boolean;
 }
@@ -35,7 +34,6 @@ interface SelectGroupProps {
   noOptionsMessage?: string;
   width?: string;
   height?: string;
-  labelMargin?: string;
   label?: string;
   isGrouped?: boolean;
 }
@@ -48,7 +46,6 @@ export function Select({
   value,
   width,
   height,
-  labelMargin,
   label,
   isGrouped = false
 }: SelectProps | SelectGroupProps) {
@@ -58,7 +55,6 @@ export function Select({
       <StyledSelect
         width={width}
         height={height}
-        labelMargin={labelMargin}
         value={value}
         placeholder={placeholder}
         emptyMessage={noOptionsMessage}

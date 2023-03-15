@@ -1,84 +1,104 @@
 import { format } from 'date-fns';
 import html2canvas from 'html2canvas';
 import { DownloadSimple } from 'phosphor-react';
-import { useEffect, useRef, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { NotAllowed } from '../../../../components/NotAllowed';
 import { Spinner } from '../../../../components/Spinner';
 import { Switch } from '../../../../components/Switch';
 import { useUserContext } from '../../../../contexts/UserContext';
+import { setBeanStockProducer } from '../../../../redux/features/beanStockDataSlice';
+import { change } from '../../../../redux/features/beanStockFiltersSlice';
+import { RootState } from '../../../../redux/store';
 import EstoqueGraosService from '../../../../services/EstoqueGraosService';
-import { EstoqueGraosProdutorTotal } from '../../../../types/EstoqueGraos';
+import { componentsRefType } from '../../../../types/Types';
+import { hasToFetch } from '../../../../utils/hasToFetch';
 import { toast } from '../../../../utils/toast';
 import { ProducerScaleChart } from '../ProducerScaleChart';
 import { ProducerScaleDetails } from '../ProducerScaleDetails';
 import { Container, Loader } from './styles';
 
-interface RangeDates {
-  startDate: Date | null;
-  endDate: Date | null;
-}
-
-interface ProducerScaleProps {
-  cropId: string;
-  rangeDates: RangeDates;
-  producerId: string;
-  storageId: string;
-  safraId: string;
-}
-
-export function ProducerScale({ cropId, rangeDates, producerId, storageId, safraId }: ProducerScaleProps) {
+export const ProducerScale = forwardRef<componentsRefType>((props, ref) => {
   const [isLoading, setIsLoading] = useState(true);
-  const [unit, setUnit] = useState<'kg' | 'sacks'>('kg');
-  const chartRef = useRef(null);
   const [requestId, setRequestId] = useState(1);
-  const [beanStockProducer, setBeanStockProducer] = useState<EstoqueGraosProdutorTotal>({
-    estoqueGraosProdutor: [],
-    saldoFinal: []
-  });
+  const chartRef = useRef(null);
+  const isFirstRender = useRef(true);
+
+  const {
+    beanStockFilters: {
+      crop,
+      rangeDates,
+      producer,
+      storage,
+      safra,
+      producerStockUnit: unit,
+    },
+    beanStockData: {
+      beanStockProducer,
+      beanStockProducerLastFetch,
+    }
+  } = useSelector((state: RootState) => state);
+  const dispatch = useDispatch();
 
   const { hasPermission } = useUserContext();
 
-  useEffect(() => {
-    async function loadData() {
+  const loadData = useCallback(async () => {
+    if (hasPermission('estoque_graos_produtor')) {
       setIsLoading(true);
-      if (hasPermission('estoque_graos_produtor')) {
-        if (cropId === '_') {
+
+      if (isFirstRender.current) {
+        isFirstRender.current = false;
+
+        if (!hasToFetch(beanStockProducerLastFetch)) {
           setIsLoading(false);
           return;
         }
-
-        if (rangeDates.endDate && rangeDates.startDate && rangeDates.endDate < rangeDates.startDate) {
-          setIsLoading(false);
-          toast({
-            type: 'danger',
-            text: 'Data final precisa ser maior que inicial!'
-          });
-          return;
-        }
-
-        const produtorIdParsed = producerId !== '_' ? Number(producerId) : undefined;
-        const armazenamentoIdParsed = storageId !== '_' ? Number(storageId) : undefined;
-        const safraIdParsed = safraId !== '_' ? Number(safraId) : undefined;
-        const startDateParsed = rangeDates.startDate ? format(rangeDates.startDate, 'dd-MM-yyyy') : '';
-        const endDateParsed = rangeDates.endDate ? format(rangeDates.endDate, 'dd-MM-yyyy') : '';
-
-        const beanStockProducerData = await EstoqueGraosService.findProducerTotal({
-          culturaId: Number(cropId),
-          startDate: startDateParsed,
-          endDate: endDateParsed,
-          produtorId: produtorIdParsed,
-          armazenamentoId: armazenamentoIdParsed,
-          safraId: safraIdParsed
-        });
-
-        setBeanStockProducer(beanStockProducerData);
-        setRequestId((prevState) => prevState + 1);
       }
-      setIsLoading(false);
-    }
 
+      if (crop === '_') {
+        setIsLoading(false);
+        return;
+      }
+
+      if (rangeDates.endDate && rangeDates.startDate && rangeDates.endDate < rangeDates.startDate) {
+        setIsLoading(false);
+        toast({
+          type: 'danger',
+          text: 'Data final precisa ser maior que inicial!'
+        });
+        return;
+      }
+
+      const produtorIdParsed = producer !== '_' ? Number(producer) : undefined;
+      const armazenamentoIdParsed = storage !== '_' ? Number(storage) : undefined;
+      const safraIdParsed = safra !== '_' ? Number(safra) : undefined;
+      const startDateParsed = rangeDates.startDate ? format(rangeDates.startDate, 'dd-MM-yyyy') : '';
+      const endDateParsed = rangeDates.endDate ? format(rangeDates.endDate, 'dd-MM-yyyy') : '';
+
+      const beanStockProducerData = await EstoqueGraosService.findProducerTotal({
+        culturaId: Number(crop),
+        startDate: startDateParsed,
+        endDate: endDateParsed,
+        produtorId: produtorIdParsed,
+        armazenamentoId: armazenamentoIdParsed,
+        safraId: safraIdParsed
+      });
+
+      dispatch(setBeanStockProducer(beanStockProducerData));
+
+      setRequestId((prevState) => prevState + 1);
+    }
+    setIsLoading(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [crop, dispatch, hasPermission, producer, rangeDates.endDate, rangeDates.startDate, safra, storage]);
+
+  useEffect(() => {
     loadData();
-  }, [cropId, producerId, rangeDates, safraId, storageId, hasPermission]);
+  }, [loadData]);
+
+  useImperativeHandle(ref, () => ({
+    loadData
+  }), [loadData]);
 
   function handleSaveChart() {
     const chartElement = chartRef.current;
@@ -117,7 +137,10 @@ export function ProducerScale({ cropId, rangeDates, producerId, storageId, safra
             leftLabel="Kg"
             rightLabel="Sacas"
             isToggled={unit === 'sacks'}
-            onToggle={(e) => { setUnit(e.target.checked ? 'sacks' : 'kg'); }}
+            onToggle={(e) => dispatch(change({
+              name: 'producerStockUnit',
+              value: e.target.checked ? 'sacks' : 'kg'
+            }))}
           />
           <button onClick={handleSaveChart}>
             <DownloadSimple size={24} color="#F7FBFE" weight='regular' />
@@ -131,10 +154,8 @@ export function ProducerScale({ cropId, rangeDates, producerId, storageId, safra
         />
       </div>
       {beanStockProducer.estoqueGraosProdutor.length > 0 && (
-        <ProducerScaleDetails
-          producersBeansStock={beanStockProducer.estoqueGraosProdutor}
-        />
+        <ProducerScaleDetails />
       )}
     </Container>
   );
-}
+});

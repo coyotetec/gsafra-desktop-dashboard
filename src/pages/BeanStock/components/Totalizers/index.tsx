@@ -1,50 +1,39 @@
 import { format } from 'date-fns';
 import { ArrowCircleDown, ArrowCircleRight, ArrowCircleUp, ChartLine, Scales, X } from 'phosphor-react';
 import { Column } from 'primereact/column';
-import { useEffect, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { NotAllowed } from '../../../../components/NotAllowed';
 import { Spinner } from '../../../../components/Spinner';
 import { useUserContext } from '../../../../contexts/UserContext';
 import useAnimatedUnmount from '../../../../hooks/useAnimatedUnmount';
+import { setBeanStock } from '../../../../redux/features/beanStockDataSlice';
+import { RootState } from '../../../../redux/store';
 import EstoqueGraosService from '../../../../services/EstoqueGraosService';
-import { EstoqueGraosTotal } from '../../../../types/EstoqueGraos';
+import { componentsRefType } from '../../../../types/Types';
+import { hasToFetch } from '../../../../utils/hasToFetch';
 import { Container, DetailWrapper, Loader, Table } from './styles';
 
-interface RangeDates {
-  startDate: Date | null;
-  endDate: Date | null;
-}
-
-interface TotalizersProps {
-  cropId: string;
-  rangeDates: RangeDates;
-  producerId: string;
-  storageId: string;
-  safraId: string;
-}
-
-export function Totalizers({ cropId, rangeDates, producerId, storageId, safraId }: TotalizersProps) {
+export const Totalizers = forwardRef<componentsRefType>((props, ref) => {
   const [isLoading, setIsLoading] = useState(true);
   const [entriesIsVisible, setEntrieIsVisible] = useState(false);
   const [departuresIsVisible, setDepartureIsVisible] = useState(false);
-  const [beanStock, setBeanStock] = useState<EstoqueGraosTotal>({
-    saldoAnterior: 0,
-    entradas: {
-      peso: 0,
-      descontoClassificacao: 0,
-      taxaRecepcao: 0,
-      cotaCapital: 0,
-      taxaArmazenamento: 0,
-      quebraTecnica: 0,
-      pesoLiquido: 0,
+  const isFirstRender = useRef(true);
+
+  const {
+    beanStockFilters: {
+      crop,
+      rangeDates,
+      producer,
+      storage,
+      safra,
     },
-    saidas: {
-      peso: 0,
-      descontoClassificacao: 0,
-      pesoLiquido: 0
-    },
-    saldoFinal: 0,
-  });
+    beanStockData: {
+      beanStock,
+      beanStcokLastFetch,
+    }
+  } = useSelector((state: RootState) => state);
+  const dispatch = useDispatch();
 
   const { hasPermission } = useUserContext();
 
@@ -58,38 +47,54 @@ export function Totalizers({ cropId, rangeDates, producerId, storageId, safraId 
     animatedElementRef: departuresRef
   } = useAnimatedUnmount(departuresIsVisible);
 
-  useEffect(() => {
-    async function loadData() {
-      if (hasPermission('resumo_estoque_graos')) {
-        setIsLoading(true);
+  const loadData = useCallback(async () => {
+    if (hasPermission('resumo_estoque_graos')) {
+      setIsLoading(true);
 
-        if (cropId === '_') {
+      if (isFirstRender.current) {
+        isFirstRender.current = false;
+
+        if (!hasToFetch(beanStcokLastFetch)) {
           setIsLoading(false);
           return;
         }
-
-        const produtorIdParsed = producerId !== '_' ? Number(producerId) : undefined;
-        const armazenamentoIdParsed = storageId !== '_' ? Number(storageId) : undefined;
-        const safraIdParsed = safraId !== '_' ? Number(safraId) : undefined;
-        const startDateParsed = rangeDates.startDate ? format(rangeDates.startDate, 'dd-MM-yyyy') : '';
-        const endDateParsed = rangeDates.endDate ? format(rangeDates.endDate, 'dd-MM-yyyy') : '';
-
-        const beanStockTotalData = await EstoqueGraosService.findTotal({
-          culturaId: Number(cropId),
-          startDate: startDateParsed,
-          endDate: endDateParsed,
-          produtorId: produtorIdParsed,
-          armazenamentoId: armazenamentoIdParsed,
-          safraId: safraIdParsed
-        });
-
-        setBeanStock(beanStockTotalData);
       }
-      setIsLoading(false);
-    }
 
+      if (crop === '_') {
+        setIsLoading(false);
+        return;
+      }
+
+      const produtorIdParsed = producer !== '_' ? Number(producer) : undefined;
+      const armazenamentoIdParsed = storage !== '_' ? Number(storage) : undefined;
+      const safraIdParsed = safra !== '_' ? Number(safra) : undefined;
+      const startDateParsed = rangeDates.startDate ? format(rangeDates.startDate, 'dd-MM-yyyy') : '';
+      const endDateParsed = rangeDates.endDate ? format(rangeDates.endDate, 'dd-MM-yyyy') : '';
+
+      const beanStockTotalData = await EstoqueGraosService.findTotal({
+        culturaId: Number(crop),
+        startDate: startDateParsed,
+        endDate: endDateParsed,
+        produtorId: produtorIdParsed,
+        armazenamentoId: armazenamentoIdParsed,
+        safraId: safraIdParsed
+      });
+
+      dispatch(setBeanStock(beanStockTotalData));
+
+      setBeanStock(beanStockTotalData);
+    }
+    setIsLoading(false);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [crop, dispatch, hasPermission, producer, rangeDates.endDate, rangeDates.startDate, safra, storage]);
+
+  useEffect(() => {
     loadData();
-  }, [cropId, rangeDates, producerId, storageId, safraId, hasPermission]);
+  }, [loadData]);
+
+  useImperativeHandle(ref, () => ({
+    loadData
+  }), [loadData]);
 
   function formatNumber(number: number, sufix?: string) {
     return `${new Intl.NumberFormat('id', {
@@ -228,4 +233,4 @@ export function Totalizers({ cropId, rangeDates, producerId, storageId, safraId 
       )}
     </Container>
   );
-}
+});
