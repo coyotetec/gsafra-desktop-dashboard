@@ -5,11 +5,7 @@ import { useNavigate } from 'react-router-dom';
 interface HeaderProps {
   title: string;
   subtitle?: string;
-  hasSafraFilter?: boolean;
-  setChangeSafra?: React.Dispatch<React.SetStateAction<string>>;
-  selectedSafra?: string;
   canGoBack?: boolean;
-  allSafras?: boolean;
   headerFilter?: React.ReactNode;
   refreshData?: () => void;
 }

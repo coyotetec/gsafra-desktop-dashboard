@@ -275,10 +275,7 @@ export const ChartAccounts = forwardRef<componentsRefType>((props, ref) => {
           {debit.data.length > 0 && (
             <footer data-html2canvas-ignore>
               <Link
-                to={`movimento-contas/analitica?type=debit&codigo=${(selectedDebit)
-                }&startDate=${debitStartDate ? format(debitStartDate, 'dd-MM-yyyy') : '_'
-                }&endDate=${debitEndDate ? format(debitEndDate, 'dd-MM-yyyy') : '_'
-                }&safraId=${safra}`}
+                to={'movimento-contas/analitica?type=debit'}
               >
                 Visão Detalhada
               </Link>
@@ -337,10 +334,7 @@ export const ChartAccounts = forwardRef<componentsRefType>((props, ref) => {
           {credit.data.length > 0 && (
             <footer data-html2canvas-ignore>
               <Link
-                to={`movimento-contas/analitica?type=credit&codigo=${(selectedCredit)
-                }&startDate=${creditStartDate ? format(creditStartDate, 'dd-MM-yyyy') : '_'
-                }&endDate=${creditEndDate ? format(creditEndDate, 'dd-MM-yyyy') : '_'
-                }&safraId=${safra}`}
+                to={'movimento-contas/analitica?type=credit'}
               >
                 Visão Detalhada
               </Link>

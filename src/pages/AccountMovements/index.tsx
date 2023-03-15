@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { DataTableExpandedRows } from 'primereact/datatable';
 
@@ -9,19 +9,17 @@ import MovimentoContaService from '../../services/MovimentoContaService';
 import { MovimentoContas } from '../../types/MovimentoContas';
 import { Container, Table } from './styles';
 import { Column } from 'primereact/column';
-import { format, parse } from 'date-fns';
+import { format } from 'date-fns';
 import { currencyFormat } from '../../utils/currencyFormat';
 import { DateInput } from '../../components/DateInput';
 import { ChartAccountsSelect } from '../../components/ChartAccoutsSelect';
-import { TreeSelectSelectionKeys } from 'primereact/treeselect';
 import { FileXls } from 'phosphor-react';
 import { WorkBook } from 'xlsx';
 import { toast } from '../../utils/toast';
-
-interface RangeDates {
-  startDate: Date | null;
-  endDate: Date | null;
-}
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../../redux/store';
+import { change } from '../../redux/features/financialFiltersSlice';
+import { Select } from '../../components/Select';
 
 export function AccountMovements() {
   const [isLoading, setIsLoading] = useState(true);
@@ -30,17 +28,38 @@ export function AccountMovements() {
 
   const [query] = useSearchParams();
   const type = query.get('type') as 'credit' | 'debit';
-  const codigo = query.get('codigo') as string;
-  const startDate = query.get('startDate') as string;
-  const endDate = query.get('endDate') as string;
-  const safraId = query.get('safraId') as string;
 
-  const [selectedSafra, setSelectedSafra] = useState(safraId);
-  const [selectedChartAccount, setSelectedChartAccount] = useState<TreeSelectSelectionKeys>(codigo);
-  const [rangeDates, setRangeDate] = useState<RangeDates>({
-    startDate: startDate === '_' ? null : parse(startDate, 'dd-MM-yyyy', new Date()),
-    endDate: endDate === '_' ? null : parse(endDate, 'dd-MM-yyyy', new Date()),
-  });
+  const {
+    financialFilters: {
+      chartAccountsCreditRangeDates: {
+        startDate: creditStartDate,
+        endDate: creditEndDate
+      },
+      chartAccountsDebitRangeDates: {
+        startDate: debitStartDate,
+        endDate: debitEndDate,
+      },
+      chartAccountsCreditSelected: selectedCredit,
+      chartAccountsDebitSelected: selectedDebit,
+      safra,
+    },
+    safrasList
+  } = useSelector((state: RootState) => state);
+  const dispatch = useDispatch();
+
+  const rangeDates = useMemo(() => (
+    type === 'credit'
+      ? {
+        startDate: creditStartDate,
+        endDate: creditEndDate
+      } : {
+        startDate: debitStartDate,
+        endDate: debitEndDate,
+      }
+  ), [creditEndDate, creditStartDate, debitEndDate, debitStartDate, type]);
+  const selectedChartAccount = useMemo(() => (
+    type === 'credit' ? selectedCredit : selectedDebit
+  ), [selectedCredit, selectedDebit, type]);
 
   useEffect(() => {
     async function loadData() {
@@ -62,14 +81,14 @@ export function AccountMovements() {
         String(selectedChartAccount),
         startDateParsed,
         endDateParsed,
-        selectedSafra !== '_' ? selectedSafra : undefined
+        safra !== '_' ? safra : undefined
       );
       setAccountMovements(accountMovementsData);
       setIsLoading(false);
     }
 
     loadData();
-  }, [selectedChartAccount, rangeDates, selectedSafra]);
+  }, [selectedChartAccount, rangeDates, safra]);
 
   function handleExportExcel() {
     import('xlsx').then(xlsx => {
@@ -125,37 +144,59 @@ export function AccountMovements() {
     <Container>
       <Loader isLoading={isLoading} />
       <Header
-        hasSafraFilter
-        selectedSafra={selectedSafra}
-        setChangeSafra={setSelectedSafra}
         title={`${type === 'credit' ? 'Créditos' : 'Debitos'} Compensados`}
         subtitle="VISÃO ANALÍTICA"
         canGoBack
+        headerFilter={(
+          <Select
+            options={[{
+              value: '_',
+              label: 'Todos os Lançamentos',
+            }, ...safrasList.options]}
+            placeholder="Safra"
+            noOptionsMessage="0 safras encontradas"
+            value={safra}
+            onChange={(value: string) => {
+              dispatch(change({ name: 'safra', value: value }));
+            }}
+            width="324px"
+          />
+        )}
       />
       <div className="filters">
-        <ChartAccountsSelect
-          type={type}
-          selected={selectedChartAccount}
-          setSelected={setSelectedChartAccount}
-        />
+        <ChartAccountsSelect type={type} />
         <div>
           <div className="date-inputs">
             <DateInput
-              onChangeDate={(date) => setRangeDate((prevState) => ({
-                ...prevState,
-                startDate: date
-              }))}
+              onChangeDate={(date) => {
+                dispatch(change({
+                  name: type === 'credit'
+                    ? 'chartAccountsCreditRangeDates'
+                    : 'chartAccountsDebitRangeDates',
+                  value: {
+                    startDate: date,
+                    endDate: rangeDates.endDate
+                  }
+                }));
+              }}
               placeholder='Data Inicial'
-              defaultDate={startDate === '_' ? null : parse(startDate, 'dd-MM-yyyy', new Date())}
+              defaultDate={rangeDates.startDate}
             />
             <strong>à</strong>
             <DateInput
-              onChangeDate={(date) => setRangeDate((prevState) => ({
-                ...prevState,
-                endDate: date
-              }))}
+              onChangeDate={(date) => {
+                dispatch(change({
+                  name: type === 'credit'
+                    ? 'chartAccountsCreditRangeDates'
+                    : 'chartAccountsDebitRangeDates',
+                  value: {
+                    startDate: rangeDates.startDate,
+                    endDate: date
+                  }
+                }));
+              }}
               placeholder='Data Final'
-              defaultDate={endDate === '_' ? null : parse(endDate, 'dd-MM-yyyy', new Date())}
+              defaultDate={rangeDates.endDate}
             />
           </div>
           <button className="export-button" onClick={handleExportExcel}>
