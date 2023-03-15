@@ -8,7 +8,7 @@ import emptyIllustration from '../../../../assets/images/empty.svg';
 interface DiscountChartProps {
   labels: string[];
   data: number[];
-  unit: 'kg' | 'percent';
+  unit: string;
 }
 
 const ITEMS_PER_PAGE = 7;

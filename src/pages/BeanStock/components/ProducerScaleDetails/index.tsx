@@ -1,36 +1,46 @@
 import html2canvas from 'html2canvas';
 import { DownloadSimple } from 'phosphor-react';
 import { Column } from 'primereact/column';
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useRef } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { NotAllowed } from '../../../../components/NotAllowed';
 import { Select } from '../../../../components/Select';
 import { useUserContext } from '../../../../contexts/UserContext';
+import { change, setFirstProducerDetails } from '../../../../redux/features/beanStockFiltersSlice';
+import { RootState } from '../../../../redux/store';
 import { EstoqueGraosProdutor } from '../../../../types/EstoqueGraos';
 import { Container, Table } from './styles';
-
-interface ProducerScaleDetailsProps {
-  producersBeansStock: EstoqueGraosProdutor[];
-}
 
 type optionType = {
   value: string;
   label: string;
 }[]
 
-export function ProducerScaleDetails({ producersBeansStock }: ProducerScaleDetailsProps) {
-  const [selectedProducer, setSelectedProducer] = useState('_');
+export function ProducerScaleDetails() {
   const chartRef = useRef(null);
-  const producersOptions = useMemo<optionType>(() => {
-    setSelectedProducer(String(producersBeansStock[0].idProdutor));
 
-    return producersBeansStock.map((item) => ({
+  const {
+    beanStockFilters: { selectedProducerDetail },
+    beanStockData: {
+      beanStockProducer: {
+        estoqueGraosProdutor
+      }
+    }
+  } = useSelector((state: RootState) => state);
+  const dispatch = useDispatch();
+
+  const producersOptions = useMemo<optionType>(() => {
+    dispatch(setFirstProducerDetails(String(estoqueGraosProdutor[0].idProdutor)));
+
+    return estoqueGraosProdutor.map((item) => ({
       value: String(item.idProdutor),
       label: item.produtor
     }));
-  }, [producersBeansStock]);
+  }, [dispatch, estoqueGraosProdutor]);
+
   const selectedProducerBeansStock = useMemo<EstoqueGraosProdutor>(() => {
-    const beanStock = producersBeansStock.find(
-      (item) => item.idProdutor === Number(selectedProducer)
+    const beanStock = estoqueGraosProdutor.find(
+      (item) => item.idProdutor === Number(selectedProducerDetail)
     );
 
     if (!beanStock) {
@@ -57,7 +67,7 @@ export function ProducerScaleDetails({ producersBeansStock }: ProducerScaleDetai
     }
 
     return beanStock;
-  }, [producersBeansStock, selectedProducer]);
+  }, [estoqueGraosProdutor, selectedProducerDetail]);
 
   const { hasPermission } = useUserContext();
 
@@ -82,7 +92,7 @@ export function ProducerScaleDetails({ producersBeansStock }: ProducerScaleDetai
       const a = document.createElement('a');
       a.href = canvas.toDataURL('image/png');
       a.target = '_blank';
-      a.download = `SALDO ${producersOptions.find((i) => i.value === selectedProducer)?.label || ''} - VISÃO DETALHADA`;
+      a.download = `SALDO ${producersOptions.find((i) => i.value === selectedProducerDetail)?.label || ''} - VISÃO DETALHADA`;
       a.click();
     });
   }
@@ -95,8 +105,13 @@ export function ProducerScaleDetails({ producersBeansStock }: ProducerScaleDetai
         </h3>
         <Select
           options={producersOptions}
-          value={selectedProducer}
-          onChange={setSelectedProducer}
+          value={selectedProducerDetail}
+          onChange={(value: string) => {
+            dispatch(change({
+              name: 'selectedProducerDetail',
+              value,
+            }));
+          }}
           width="320px"
           height="40px"
         />

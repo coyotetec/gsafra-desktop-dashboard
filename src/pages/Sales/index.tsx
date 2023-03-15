@@ -1,62 +1,90 @@
 import { Container } from './styles';
 import { Header } from '../../components/Header';
 import SafraService from '../../services/SafraService';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Select } from '../../components/Select';
 import { DateInput } from '../../components/DateInput';
 import { Totalizers } from './Components/Totalizers';
 import { ClientAvarage } from './Components/ClientAvarage';
 import { MonthlyAvarage } from './Components/MonthlyAvarage';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../../redux/store';
+import { hasToFetch } from '../../utils/hasToFetch';
+import { setSafrasData } from '../../redux/features/safrasListSlice';
+import { change, setFirstSafra } from '../../redux/features/salesFiltersSlice';
+import { componentsRefType } from '../../types/Types';
 
 type optionType = {
   value: string;
   label: string;
 }[];
 
-interface RangeDates {
-  startDate: Date | null;
-  endDate: Date | null;
-}
-
 export function Sales() {
-  const [safraOptions, setSafraOptions] = useState<optionType>([]);
-  const [selectedSafra, setSelectedSafra] = useState('_');
-  const [selectedStatus, setSelectedStatus] = useState('_');
-  const [rangeDates, setRangeDates] = useState<RangeDates>({
-    startDate: null,
-    endDate: null,
-  });
   const deliveryStatusOptions: optionType = [
     { value: '_', label: 'Todos' },
     { value: '1', label: 'Pendente' },
     { value: '2', label: 'Entrega Parcial' },
     { value: '3', label: 'Realizada' },
   ];
+  const totalizersRef = useRef<componentsRefType>({
+    loadData() { return; },
+  });
+  const clientAvarageRef = useRef<componentsRefType>({
+    loadData() { return; },
+  });
+  const monthlyAvarageRef = useRef<componentsRefType>({
+    loadData() { return; },
+  });
+
+  const {
+    safrasList,
+    salesFilters: {
+      safra,
+      deliveryStatus,
+      rangeDates,
+    }
+  } = useSelector((state: RootState) => state);
+  const dispatch = useDispatch();
+
+  const refreshData = useCallback(() => {
+    totalizersRef.current.loadData();
+    clientAvarageRef.current.loadData();
+    monthlyAvarageRef.current.loadData();
+  }, []);
+
   const safraName = useMemo(() => (
-    safraOptions.find((i) => i.value === selectedSafra)?.label || ''
-  ), [safraOptions, selectedSafra]);
+    safrasList.options.find((i) => i.value === safra)?.label || ''
+  ), [safrasList.options, safra]);
 
   useEffect(() => {
     async function loadSafras() {
-      const safrasData = await SafraService.findSafras();
+      if (hasToFetch(safrasList.lastFetch)) {
+        const safrasData = await SafraService.findSafras();
+        dispatch(setSafrasData(safrasData.map((item) => ({
+          value: String(item.id),
+          label: item.nome
+        }))));
+      }
 
-      const options = safrasData.map((safra) => ({ value: String(safra.id), label: safra.nome }));
-
-      setSafraOptions(options);
-      setSelectedSafra(options[0].value);
+      dispatch(setFirstSafra(safrasList.options[0]?.value || '_'));
     }
 
     loadSafras();
-  }, []);
+  }, [dispatch, safrasList.lastFetch, safrasList.options]);
 
   return (
     <Container>
-      <Header title="Vendas da Produção" />
+      <Header
+        title="Vendas da Produção"
+        refreshData={refreshData}
+      />
       <div className="filters">
         <Select
-          options={safraOptions}
-          value={selectedSafra}
-          onChange={setSelectedSafra}
+          options={safrasList.options}
+          value={safra}
+          onChange={(value: string) => {
+            dispatch(change({ name: 'safra', value: value }));
+          }}
           placeholder="Safra"
           label="Safra"
           noOptionsMessage="0 safras encontrados"
@@ -64,20 +92,26 @@ export function Sales() {
         />
         <Select
           options={deliveryStatusOptions}
-          value={selectedStatus}
-          onChange={setSelectedStatus}
+          value={deliveryStatus}
+          onChange={(value: string) => {
+            dispatch(change({ name: 'deliveryStatus', value: value }));
+          }}
           placeholder="Situação de Entrega"
           label="Situação de Entrega"
           width="100%"
         />
         <div className="date-filter">
           <DateInput
-            onChangeDate={(date) => setRangeDates((prevState) => ({
-              ...prevState,
-              startDate: date
-            }))}
+            onChangeDate={(date) => {
+              dispatch(change({
+                name: 'rangeDates', value: {
+                  startDate: date,
+                  endDate: rangeDates.endDate
+                }
+              }));
+            }}
             placeholder='Data Inicial'
-            defaultDate={null}
+            defaultDate={rangeDates.startDate}
             height="48px"
             width="100%"
             fontSize="16px"
@@ -86,12 +120,16 @@ export function Sales() {
           />
           <strong>à</strong>
           <DateInput
-            onChangeDate={(date) => setRangeDates((prevState) => ({
-              ...prevState,
-              endDate: date
-            }))}
+            onChangeDate={(date) => {
+              dispatch(change({
+                name: 'rangeDates', value: {
+                  startDate: rangeDates.startDate,
+                  endDate: date
+                }
+              }));
+            }}
             placeholder='Data Final'
-            defaultDate={null}
+            defaultDate={rangeDates.endDate}
             height="48px"
             width="100%"
             fontSize="16px"
@@ -100,24 +138,9 @@ export function Sales() {
           />
         </div>
       </div>
-      <Totalizers
-        safraId={selectedSafra}
-        safraName={safraName}
-        deliveryStatus={selectedStatus}
-        rangeDates={rangeDates}
-      />
-      <ClientAvarage
-        safraId={selectedSafra}
-        safraName={safraName}
-        deliveryStatus={selectedStatus}
-        rangeDates={rangeDates}
-      />
-      <MonthlyAvarage
-        safraId={selectedSafra}
-        safraName={safraName}
-        deliveryStatus={selectedStatus}
-        rangeDates={rangeDates}
-      />
+      <Totalizers ref={totalizersRef} safraName={safraName} />
+      <ClientAvarage ref={clientAvarageRef} safraName={safraName} />
+      <MonthlyAvarage ref={monthlyAvarageRef} safraName={safraName} />
     </Container>
   );
 }

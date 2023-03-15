@@ -1,8 +1,7 @@
 import { format } from 'date-fns';
 import { ArrowLeft, ArrowRight, DownloadSimple } from 'phosphor-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import VendaService from '../../../../services/VendaService';
-import { Venda } from '../../../../types/Venda';
 import { toast } from '../../../../utils/toast';
 import { Container, Loader } from './styles';
 import emptyIllustration from '../../../../assets/images/empty.svg';
@@ -11,26 +10,36 @@ import { Link } from 'react-router-dom';
 import html2canvas from 'html2canvas';
 import { NotAllowed } from '../../../../components/NotAllowed';
 import { useUserContext } from '../../../../contexts/UserContext';
-
-interface RangeDates {
-  startDate: Date | null;
-  endDate: Date | null;
-}
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../../../../redux/store';
+import { setSales } from '../../../../redux/features/salesDataSlice';
+import { hasToFetch } from '../../../../utils/hasToFetch';
+import { componentsRefType } from '../../../../types/Types';
 
 interface TotalizersProps {
-  safraId: string;
   safraName: string;
-  deliveryStatus: string;
-  rangeDates: RangeDates;
 }
 
 const ITEMS_PER_PAGE = 4;
 
-export function Totalizers({ safraId, safraName, deliveryStatus, rangeDates }: TotalizersProps) {
+export const Totalizers = forwardRef<componentsRefType, TotalizersProps>(({ safraName }, ref) => {
   const [currentPage, setCurrentPage] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [sales, setSales] = useState<Venda[]>([]);
   const chartRef = useRef(null);
+  const isFirstRender = useRef(true);
+
+  const {
+    salesFilters: {
+      rangeDates,
+      safra,
+      deliveryStatus,
+    },
+    salesData: {
+      sales,
+      salesLastFetch
+    }
+  } = useSelector((state: RootState) => state);
+  const dispatch = useDispatch();
 
   const salesToShow = useMemo(() => (
     sales.slice(currentPage * ITEMS_PER_PAGE, (currentPage * ITEMS_PER_PAGE) + ITEMS_PER_PAGE)
@@ -38,47 +47,61 @@ export function Totalizers({ safraId, safraName, deliveryStatus, rangeDates }: T
 
   const { hasPermission } = useUserContext();
 
+  const loadData = useCallback(async () => {
+    if (hasPermission('vendas_por_cliente')) {
+      setIsLoading(true);
+
+      if (isFirstRender.current) {
+        isFirstRender.current = false;
+
+        if (!hasToFetch(salesLastFetch)) {
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      if (safra === '_') {
+        setIsLoading(false);
+        return;
+      }
+
+      if (rangeDates.endDate && rangeDates.startDate && rangeDates.endDate < rangeDates.startDate) {
+        setIsLoading(false);
+        toast({
+          type: 'danger',
+          text: 'Data final precisa ser maior que inicial!'
+        });
+        return;
+      }
+
+      const deliveryStatusParsed = deliveryStatus !== '_' ? deliveryStatus : '';
+      const startDateParsed = rangeDates.startDate ? format(rangeDates.startDate, 'dd-MM-yyyy') : '';
+      const endDateParsed = rangeDates.endDate ? format(rangeDates.endDate, 'dd-MM-yyyy') : '';
+
+      const salesData = await VendaService.findVendas({
+        safraId: Number(safra),
+        deliveryStatus: deliveryStatusParsed,
+        startDate: startDateParsed,
+        endDate: endDateParsed,
+      });
+
+      dispatch(setSales(salesData));
+    }
+    setIsLoading(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deliveryStatus, dispatch, hasPermission, rangeDates.endDate, rangeDates.startDate, safra]);
+
+  useImperativeHandle(ref, () => ({
+    loadData
+  }), [loadData]);
+
   useEffect(() => {
     setCurrentPage(0);
   }, [sales]);
 
   useEffect(() => {
-    async function loadData() {
-      if (hasPermission('vendas_por_cliente')) {
-        setIsLoading(true);
-
-        if (safraId === '_') {
-          setIsLoading(false);
-          return;
-        }
-
-        if (rangeDates.endDate && rangeDates.startDate && rangeDates.endDate < rangeDates.startDate) {
-          setIsLoading(false);
-          toast({
-            type: 'danger',
-            text: 'Data final precisa ser maior que inicial!'
-          });
-          return;
-        }
-
-        const deliveryStatusParsed = deliveryStatus !== '_' ? deliveryStatus : '';
-        const startDateParsed = rangeDates.startDate ? format(rangeDates.startDate, 'dd-MM-yyyy') : '';
-        const endDateParsed = rangeDates.endDate ? format(rangeDates.endDate, 'dd-MM-yyyy') : '';
-
-        const salesData = await VendaService.findVendas({
-          safraId: Number(safraId),
-          deliveryStatus: deliveryStatusParsed,
-          startDate: startDateParsed,
-          endDate: endDateParsed,
-        });
-
-        setSales(salesData);
-      }
-      setIsLoading(false);
-    }
-
     loadData();
-  }, [safraId, deliveryStatus, rangeDates, hasPermission]);
+  }, [loadData]);
 
   function handleSaveChart() {
     const chartElement = chartRef.current;
@@ -188,7 +211,7 @@ export function Totalizers({ safraId, safraName, deliveryStatus, rangeDates }: T
         )}
         <footer data-html2canvas-ignore>
           <Link
-            to={`romaneios?safraId=${safraId
+            to={`romaneios?safraId=${safra
             }&startDate=${rangeDates.startDate ? format(rangeDates.startDate, 'dd-MM-yyyy') : '_'
             }&endDate=${rangeDates.endDate ? format(rangeDates.endDate, 'dd-MM-yyyy') : '_'
             }&status=${deliveryStatus}`}
@@ -202,4 +225,4 @@ export function Totalizers({ safraId, safraName, deliveryStatus, rangeDates }: T
       </div>
     </Container>
   );
-}
+});

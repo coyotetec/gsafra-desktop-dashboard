@@ -1,22 +1,28 @@
 import { ArrowLeft, ArrowRight } from 'phosphor-react';
 import { useEffect, useMemo, useState } from 'react';
-import { Contrato } from '../../../../types/Contrato';
 import { Container, Loader } from './styles';
 import emptyIllustration from '../../../../assets/images/empty.svg';
 import { NotAllowed } from '../../../../components/NotAllowed';
 import { Spinner } from '../../../../components/Spinner';
 import { useUserContext } from '../../../../contexts/UserContext';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../../redux/store';
 
 interface TotalizersProps {
-  contracts: Contrato[];
   isLoading: boolean;
 }
 
 const ITEMS_PER_PAGE = 4;
 
-export function Totalizers({ contracts, isLoading }: TotalizersProps) {
+export function Totalizers({ isLoading }: TotalizersProps) {
   const [currentPage, setCurrentPage] = useState(0);
   const { hasPermission } = useUserContext();
+
+  const {
+    contractData: {
+      contracts
+    },
+  } = useSelector((state: RootState) => state);
 
   const contractsToShow = useMemo(() => (
     contracts.slice(currentPage * ITEMS_PER_PAGE, (currentPage * ITEMS_PER_PAGE) + ITEMS_PER_PAGE)

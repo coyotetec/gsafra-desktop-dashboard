@@ -16,6 +16,18 @@ export const Container = styled.header`
     }
   }
 
+  .refresh-button {
+    margin-left: auto;
+    height: 48px;
+    width: 48px;
+    background: #506167;
+    border: none;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   h1 {
     font-size: 24px;
     color: #F7FBFE;

@@ -1,26 +1,30 @@
-import { useCallback, useEffect, useState } from 'react';
-import { addMonths, format } from 'date-fns';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import { format } from 'date-fns';
 
 import { Container, Header } from './styles';
 
 import { DateInput } from '../../../../components/DateInput';
 
 import FinancialService from '../../../../services/FinancialService';
-import { CashFlow as CashFlowType } from '../../../../types/Financial';
 import { CashFlowChart } from '../CashFlowChart';
 import { toast } from '../../../../utils/toast';
 import { useUserContext } from '../../../../contexts/UserContext';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../../../../redux/store';
+import { change } from '../../../../redux/features/financialFiltersSlice';
+import { hasToFetch } from '../../../../utils/hasToFetch';
+import { setData, setLabels } from '../../../../redux/features/financialCashFlowDataSlice';
+import { componentsRefType } from '../../../../types/Types';
 
-interface CashFlowProps {
-  safraId: string;
-}
-
-export function CashFlow({ safraId }: CashFlowProps) {
-  const [startDate, setStartDate] = useState<Date | null>(new Date());
-  const [endDate, setEndDate] = useState<Date | null>(addMonths(new Date(), 6));
-  const [labels, setLabels] = useState<string[]>([]);
-  const [cashFlow, setCashFlow] = useState<CashFlowType>({} as CashFlowType);
+export const CashFlow = forwardRef<componentsRefType>((props, ref) => {
   const [isLoading, setIsLoading] = useState(true);
+  const isFirstRender = useRef(true);
+
+  const {
+    financialFilters: { cashFlowRangeDates: { startDate, endDate }, safra },
+    financialCashFlowData: cashFlow
+  } = useSelector((state: RootState) => state);
+  const dispatch = useDispatch();
 
   const { hasPermission } = useUserContext();
 
@@ -28,13 +32,28 @@ export function CashFlow({ safraId }: CashFlowProps) {
     if (hasPermission('fluxo_caixa')) {
       setIsLoading(true);
 
+      if (isFirstRender.current) {
+        isFirstRender.current = false;
+
+        if (!hasToFetch(cashFlow.lastFetch)) {
+          setIsLoading(false);
+          return;
+        }
+      }
+
       if (!startDate || !endDate) {
         setIsLoading(false);
-        setCashFlow((prevState) => ({
-          ...prevState,
-          hasError: true,
+        dispatch(setData({
           currentBalance: 0,
+          cashFlowBalance: [],
+          cashFlowBalancePlan: [],
+          cashFlowCredits: [],
+          cashFlowCreditsPlan: [],
+          cashFlowDebits: [],
+          cashFlowDebitsPlan: [],
+          hasError: false,
         }));
+        dispatch(setLabels([]));
         toast({
           type: 'danger',
           text: 'Datas inicial e final são obrigatórias!'
@@ -44,11 +63,17 @@ export function CashFlow({ safraId }: CashFlowProps) {
 
       if (startDate > endDate) {
         setIsLoading(false);
-        setCashFlow((prevState) => ({
-          ...prevState,
-          hasError: true,
+        dispatch(setData({
           currentBalance: 0,
+          cashFlowBalance: [],
+          cashFlowBalancePlan: [],
+          cashFlowCredits: [],
+          cashFlowCreditsPlan: [],
+          cashFlowDebits: [],
+          cashFlowDebitsPlan: [],
+          hasError: false,
         }));
+        dispatch(setLabels([]));
         toast({
           type: 'danger',
           text: 'Data final precisa ser maior que inicial!'
@@ -62,15 +87,20 @@ export function CashFlow({ safraId }: CashFlowProps) {
       const cashFlowData = await FinancialService.findCashFlow(
         startDateParsed,
         endDateParsed,
-        safraId !== '_' ? safraId : undefined
+        safra !== '_' ? safra : undefined
       );
 
-      setLabels(cashFlowData.cashFlowCredits.map((i) => i.month));
-      setCashFlow(cashFlowData);
+      dispatch(setData(cashFlowData));
+      dispatch(setLabels(cashFlowData.cashFlowCredits.map((i) => i.month)));
     }
 
     setIsLoading(false);
-  }, [hasPermission, startDate, endDate, safraId, setIsLoading]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasPermission, startDate, endDate, safra, dispatch]);
+
+  useImperativeHandle(ref, () => ({
+    loadData
+  }), [loadData]);
 
   useEffect(() => {
     loadData();
@@ -82,26 +112,40 @@ export function CashFlow({ safraId }: CashFlowProps) {
         <h3>FLUXO DE CAIXA</h3>
         <div>
           <DateInput
-            onChangeDate={(date) => setStartDate(date)}
+            onChangeDate={(date) => {
+              dispatch(change({
+                name: 'cashFlowRangeDates', value: {
+                  startDate: date,
+                  endDate
+                }
+              }));
+            }}
             placeholder='Data Inicial'
-            defaultDate={new Date()}
+            defaultDate={startDate}
           />
           <strong>à</strong>
           <DateInput
-            onChangeDate={(date) => setEndDate(date)}
+            onChangeDate={(date) => {
+              dispatch(change({
+                name: 'cashFlowRangeDates', value: {
+                  startDate,
+                  endDate: date
+                }
+              }));
+            }}
             placeholder='Data Final'
-            defaultDate={addMonths(new Date(), 6)}
+            defaultDate={endDate}
           />
         </div>
       </Header>
 
       <CashFlowChart
-        labels={labels}
-        cashFlow={cashFlow}
+        labels={cashFlow.labels}
+        cashFlow={cashFlow.data}
         startDate={startDate}
         endDate={endDate}
         isLoading={isLoading}
       />
     </Container>
   );
-}
+});

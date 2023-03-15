@@ -1,34 +1,26 @@
-import { useEffect, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { Spinner } from '../../../../components/Spinner';
 import ColheitaService, { descontoType } from '../../../../services/ColheitaService';
 import { Container, Loader } from './styles';
-import { ColheitaDescontoTotal } from '../../../../types/Colheita';
 import { Switch } from '../../../../components/Switch';
 import { Select } from '../../../../components/Select';
 import { DiscountChart } from '../DiscountChart';
 import { NotAllowed } from '../../../../components/NotAllowed';
 import { useUserContext } from '../../../../contexts/UserContext';
-
-interface DiscountProps {
-  safraId: string;
-}
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../../../../redux/store';
+import { change } from '../../../../redux/features/productionFiltersSlice';
+import { hasToFetch } from '../../../../utils/hasToFetch';
+import { setData } from '../../../../redux/features/productionDataSlice';
+import { componentsRefType } from '../../../../types/Types';
 
 type optionType = {
   value: descontoType;
   label: string;
 }[]
 
-export function Discount({ safraId }: DiscountProps) {
+export const Discount = forwardRef<componentsRefType>((props, ref) => {
   const [isLoading, setIsLoading] = useState(true);
-  const [unit, setUnit] = useState<'kg' | 'percent'>('percent');
-  const [selectedDiscount, setSelectedDiscount] = useState('umidade');
-  const [discountTotal, setDiscountTotal] = useState<ColheitaDescontoTotal>({
-    pesoTotalSafra: 0,
-    porcentagemDescontoSafra: 0,
-    totalDescontoRealSafra: 0,
-    totalDescontoSafra: 0,
-    talhoesDescontoTotal: [],
-  });
   const discountOptions: optionType = [
     { value: 'umidade', label: 'Umidade' },
     { value: 'impureza', label: 'Impureza' },
@@ -38,29 +30,59 @@ export function Discount({ safraId }: DiscountProps) {
     { value: 'taxa_recepcao', label: 'Taxa de Recepção' },
     { value: 'cota', label: 'Cota' },
   ];
+  const isFirstRender = useRef(true);
+
+  const {
+    productionFilters: {
+      discountsUnit: unit,
+      discount: selectedDiscount,
+      safra,
+    },
+    productionData: {
+      discount
+    }
+  } = useSelector((state: RootState) => state);
+  const dispatch = useDispatch();
 
   const { hasPermission } = useUserContext();
 
-  useEffect(() => {
-    async function loadData() {
-      if (hasPermission('descontos_producao')) {
-        setIsLoading(true);
+  const loadData = useCallback(async () => {
+    if (hasPermission('descontos_producao')) {
+      setIsLoading(true);
 
-        if (safraId === '_') {
+      if (isFirstRender.current) {
+        isFirstRender.current = false;
+
+        if (!hasToFetch(discount.lastFetch)) {
           setIsLoading(false);
           return;
         }
-
-        const discountTotalData = await ColheitaService
-          .findDescontoTotal(safraId, selectedDiscount as descontoType);
-
-        setDiscountTotal(discountTotalData);
       }
-      setIsLoading(false);
-    }
 
+      if (safra === '_') {
+        setIsLoading(false);
+        return;
+      }
+
+      const discountTotalData = await ColheitaService
+        .findDescontoTotal(safra, selectedDiscount as descontoType);
+
+      dispatch(setData({
+        name: 'discount',
+        data: discountTotalData,
+      }));
+    }
+    setIsLoading(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch, hasPermission, safra, selectedDiscount]);
+
+  useEffect(() => {
     loadData();
-  }, [safraId, selectedDiscount, hasPermission]);
+  }, [loadData]);
+
+  useImperativeHandle(ref, () => ({
+    loadData
+  }), [loadData]);
 
   function formatNumber(number: number, sufix?: string) {
     return `${new Intl.NumberFormat('id').format(number)}${sufix ? sufix : ''}`;
@@ -73,7 +95,10 @@ export function Discount({ safraId }: DiscountProps) {
         <Select
           options={discountOptions}
           value={selectedDiscount}
-          onChange={setSelectedDiscount}
+          onChange={(value: string) => dispatch(change({
+            name: 'discount',
+            value: value
+          }))}
           width="240px"
           height="40px"
         />
@@ -89,26 +114,29 @@ export function Discount({ safraId }: DiscountProps) {
           <div className="total">
             <span>
               <strong>Desconto Total em Kg: </strong>
-              {formatNumber(discountTotal.totalDescontoRealSafra, ' Kg')}
+              {formatNumber(discount.totalDescontoRealSafra, ' Kg')}
             </span>
             <span>
               <strong>Média {discountOptions.find((i) => i.value === selectedDiscount)?.label}: </strong>
-              {formatNumber(discountTotal.porcentagemDescontoSafra, '%')}
+              {formatNumber(discount.porcentagemDescontoSafra, '%')}
             </span>
           </div>
           <Switch
             leftLabel="%"
             rightLabel="Kg"
             isToggled={unit === 'kg'}
-            onToggle={(e) => { setUnit(e.target.checked ? 'kg' : 'percent'); }}
+            onToggle={(e) => dispatch(change({
+              name: 'discountsUnit',
+              value: e.target.checked ? 'kg' : 'sacks'
+            }))}
           />
         </header>
         <DiscountChart
-          labels={discountTotal.talhoesDescontoTotal.map(i => i.talhao)}
-          data={discountTotal.talhoesDescontoTotal.map(i => unit === 'percent' ? i.descontoPorcentagem : i.descontoReal)}
+          labels={discount.talhoesDescontoTotal.map(i => i.talhao)}
+          data={discount.talhoesDescontoTotal.map(i => unit === 'percent' ? i.descontoPorcentagem : i.descontoReal)}
           unit={unit}
         />
       </div>
     </Container>
   );
-}
+});

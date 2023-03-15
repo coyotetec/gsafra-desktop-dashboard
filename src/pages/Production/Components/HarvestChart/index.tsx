@@ -8,7 +8,7 @@ import emptyIllustration from '../../../../assets/images/empty.svg';
 interface HarvestChartProps {
   labels: string[];
   data: number[];
-  unit: 'kg' | 'sacks';
+  unit: string;
 }
 
 const ITEMS_PER_PAGE = 7;

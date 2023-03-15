@@ -14,18 +14,18 @@ import {
   ArcElement,
   PieController
 } from 'chart.js';
-
 import { GlobalStyles } from '../../styles/GlobalStyles';
 import { Container, Content } from './styles';
-
-import 'primereact/resources/themes/lara-light-indigo/theme.css';  //theme
-import 'primereact/resources/primereact.min.css';                  //core css
-import 'primeicons/primeicons.css';                                //icons
-
 import { Router } from '../../Router';
 import { Sidebar } from '../Sidebar';
 import { ToastContainer } from '../Toast/ToastContainer';
 import { UserContextProvider } from '../../contexts/UserContext';
+import { Provider } from 'react-redux';
+import { store } from '../../redux/store';
+
+import 'primereact/resources/themes/lara-light-indigo/theme.css';  //theme
+import 'primereact/resources/primereact.min.css';                  //core css
+import 'primeicons/primeicons.css';                                //icons
 
 ChartJS.register(
   LinearScale,
@@ -52,15 +52,17 @@ ChartJS.defaults.font = {
 
 export function App() {
   return (
-    <UserContextProvider>
-      <Container>
-        <GlobalStyles />
-        <Sidebar />
-        <Content>
-          <Router />
-        </Content>
-      </Container>
-      <ToastContainer />
-    </UserContextProvider>
+    <Provider store={store}>
+      <UserContextProvider>
+        <Container>
+          <GlobalStyles />
+          <Sidebar />
+          <Content>
+            <Router />
+          </Content>
+        </Container>
+        <ToastContainer />
+      </UserContextProvider>
+    </Provider>
   );
 }
