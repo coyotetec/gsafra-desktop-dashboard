@@ -23,3 +23,4 @@ export type PermissionType =
   | 'vendas_preco_medio_por_mes'
   | 'resumo_estoque_graos'
   | 'estoque_graos_produtor'
+  | 'contas_receber_pagar'

@@ -27,6 +27,7 @@ export function Sidebar() {
           <p>FINANCEIRO</p>
           <NavLink to="/financeiro">Principal</NavLink>
           <NavLink to="/indicadores">Indicadores</NavLink>
+          <NavLink to="/contas-receber-pagar">Contas Receber x Pagar</NavLink>
           <p>ABASTECIMENTO</p>
           <NavLink to="/abastecimento/resumo-mensal">
             Mensal
