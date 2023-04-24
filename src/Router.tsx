@@ -16,6 +16,7 @@ import { Contracts } from './pages/Contracts';
 import { Sales } from './pages/Sales';
 import { SalesPackingList } from './pages/SalesPackingList';
 import { BeanStock } from './pages/BeanStock';
+import { ChartAccountsFinancial } from './pages/ChartAccountsFinancial';
 
 export function Router() {
   return (
@@ -37,6 +38,7 @@ export function Router() {
       <Route path="/vendas" element={<Sales />} />
       <Route path="/vendas/romaneios" element={<SalesPackingList />} />
       <Route path="/estoque-graos" element={<BeanStock />} />
+      <Route path="/contas-receber-pagar" element={<ChartAccountsFinancial />} />
     </Routes>
   );
 }

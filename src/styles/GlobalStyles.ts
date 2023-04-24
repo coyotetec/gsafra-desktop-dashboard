@@ -12,8 +12,13 @@ export const GlobalStyles = createGlobalStyle`
     background: #102830;
     color: #CFD4D6;
 
+    &::-webkit-scrollbar-corner {
+      background: #102830;
+    }
+
     &::-webkit-scrollbar {
       width: 12px;
+      height: 12px;
     }
 
     &::-webkit-scrollbar-track {

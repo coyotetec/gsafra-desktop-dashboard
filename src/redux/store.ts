@@ -1,6 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
+import accountsDataSlice from './features/accountsDataSlice';
+import accountsFiltersSlice from './features/accountsFiltersSlice';
 import beanStockDataSlice from './features/beanStockDataSlice';
-
 import beanStockFiltersSlice from './features/beanStockFiltersSlice';
 import chartAccountsListSlice from './features/chartAccountsListSlice';
 import contractDataSlice from './features/contractDataSlice';
@@ -84,6 +85,10 @@ export const store = configureStore({
     // Sales page
     salesFilters: salesFiltersSlice,
     salesData: salesDataSlice,
+
+    // Chart accounts financial page
+    accountsFilters: accountsFiltersSlice,
+    accountsData: accountsDataSlice,
   },
   middleware: (getDefaultMiddleware) => getDefaultMiddleware({
     serializableCheck: false

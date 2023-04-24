@@ -16,3 +16,14 @@ export interface PlanoContasTotal {
   descricao: string;
   total: number;
 }
+
+export interface PlanoContasFinancial {
+  codigo: string;
+  descricao: string;
+  month0: number;
+  month1: number;
+  month2: number;
+  month3: number;
+  month4: number;
+  month5: number;
+}
