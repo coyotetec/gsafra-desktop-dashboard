@@ -10,6 +10,7 @@ interface RangeDates {
 
 export interface FinancialFiltersState {
   safra: string;
+  status: string;
   totalizerRangeDates: RangeDates;
   cashFlowRangeDates: RangeDates;
   chartAccountsCreditRangeDates: RangeDates;
@@ -25,6 +26,7 @@ interface ChangePayload {
 
 const initialState: FinancialFiltersState = {
   safra: '_',
+  status: '_',
   totalizerRangeDates: {
     startDate: new Date(),
     endDate: addMonths(new Date(), 6),

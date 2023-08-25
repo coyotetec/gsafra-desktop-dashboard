@@ -21,7 +21,7 @@ export const CashFlow = forwardRef<componentsRefType>((props, ref) => {
   const isFirstRender = useRef(true);
 
   const {
-    financialFilters: { cashFlowRangeDates: { startDate, endDate }, safra },
+    financialFilters: { cashFlowRangeDates: { startDate, endDate }, safra, status },
     financialCashFlowData: cashFlow
   } = useSelector((state: RootState) => state);
   const dispatch = useDispatch();
@@ -87,7 +87,8 @@ export const CashFlow = forwardRef<componentsRefType>((props, ref) => {
       const cashFlowData = await FinancialService.findCashFlow(
         startDateParsed,
         endDateParsed,
-        safra !== '_' ? safra : undefined
+        safra !== '_' ? safra : undefined,
+        status !== '_' ? status : undefined,
       );
 
       dispatch(setData(cashFlowData));
@@ -96,7 +97,7 @@ export const CashFlow = forwardRef<componentsRefType>((props, ref) => {
 
     setIsLoading(false);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasPermission, startDate, endDate, safra, dispatch]);
+  }, [hasPermission, startDate, endDate, safra, dispatch, status]);
 
   useImperativeHandle(ref, () => ({
     loadData

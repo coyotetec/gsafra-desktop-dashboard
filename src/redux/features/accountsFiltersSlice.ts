@@ -4,6 +4,7 @@ import { addMonths, endOfMonth, startOfMonth } from 'date-fns';
 
 export interface AccountsFiltersState {
   options: string[];
+  status: string;
   showZeros: boolean;
   startDate: Date | null;
   endDate: Date | null;
@@ -11,11 +12,12 @@ export interface AccountsFiltersState {
 
 interface ChangePayload {
   name: keyof AccountsFiltersState;
-  value: string[] | boolean | Date | null;
+  value: string | string[] | boolean | Date | null;
 }
 
 const initialState: AccountsFiltersState = {
   options: ['payments', 'receivables', 'checks', 'creditCard'],
+  status: '_',
   showZeros: false,
   startDate: startOfMonth(new Date()),
   endDate: endOfMonth(addMonths(new Date(), 2)),
@@ -26,7 +28,7 @@ export const accountsFiltersSlice = createSlice({
   initialState,
   reducers: {
     change: (state, action: PayloadAction<ChangePayload>) => {
-      state[action.payload.name] = action.payload.value as string[] & boolean & Date & null;
+      state[action.payload.name] = action.payload.value as string & string[] & boolean & Date & null;
     },
   },
 });

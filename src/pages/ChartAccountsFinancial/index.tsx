@@ -3,7 +3,7 @@ import ptBRLocale from 'date-fns/locale/pt-BR';
 import { Column } from 'primereact/column';
 import { ColumnGroup } from 'primereact/columngroup';
 import { Row } from 'primereact/row';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Checkbox } from '../../components/Checkbox';
 import { DateInput } from '../../components/DateInput';
@@ -21,16 +21,17 @@ import { hasToFetch } from '../../utils/hasToFetch';
 import { toast } from '../../utils/toast';
 import { Container, Table, Loader } from './styles';
 import { parseChartAccounts } from './utils/parseChartAccounts';
+import { Select } from '../../components/Select';
 
 export function ChartAccountsFinancial() {
   const [isLoading, setIsLoading] = useState(true);
   const isFirstRender = useRef(true);
-
   const { hasPermission } = useUserContext();
 
   const {
     accountsFilters: {
       options,
+      status,
       showZeros,
       startDate,
       endDate
@@ -44,6 +45,69 @@ export function ChartAccountsFinancial() {
     }
   } = useSelector((state: RootState) => state);
   const dispatch = useDispatch();
+
+  const loadData = useCallback(async () => {
+    if (hasPermission('contas_receber_pagar')) {
+      setIsLoading(true);
+      if (isFirstRender.current) {
+        isFirstRender.current = false;
+
+        if (!hasToFetch(lastFetch)) {
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      if (!startDate || !endDate) {
+        setIsLoading(false);
+        toast({
+          type: 'danger',
+          text: 'Data incial e final são obrigatórias'
+        });
+        return;
+      }
+
+      if (endDate < startDate) {
+        setIsLoading(false);
+        toast({
+          type: 'danger',
+          text: 'Data final precisa ser maior que inicial!'
+        });
+        return;
+      }
+
+      const parsedStartDate = format(startDate, 'dd-MM-yyyy');
+      const parsedEndDate = format(endDate, 'dd-MM-yyyy');
+
+      const { data, total, eachMonthTotal } = await PlanoContaService.findPlanoContasFinancial(
+        options.join(','),
+        showZeros,
+        parsedStartDate,
+        parsedEndDate,
+        status !== '_' ? status : undefined
+      );
+      const monthsNames = eachMonthOfInterval({
+        start: startDate,
+        end: endDate,
+      }).map((date) =>
+        capitalizeFirstLetter(
+          format(date, 'MMM. \'de\' yy', {
+            locale: ptBRLocale,
+          })
+        )
+      );
+      const parsedData = parseChartAccounts(data, monthsNames);
+
+      dispatch(setData({
+        months: monthsNames,
+        accounts: parsedData,
+        eachMonthTotal,
+        total,
+      }));
+    }
+    setIsLoading(false);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch, options, showZeros, startDate, endDate, status]);
 
   function handleToggleSelectedOptions(option: string) {
     const newState = [...options];
@@ -77,74 +141,38 @@ export function ChartAccountsFinancial() {
   }
 
   useEffect(() => {
-    async function loadData() {
-      if (hasPermission('contas_receber_pagar')) {
-        setIsLoading(true);
-        if (isFirstRender.current) {
-          isFirstRender.current = false;
-
-          if (!hasToFetch(lastFetch)) {
-            setIsLoading(false);
-            return;
-          }
-        }
-
-        if (!startDate || !endDate) {
-          setIsLoading(false);
-          toast({
-            type: 'danger',
-            text: 'Data incial e final são obrigatórias'
-          });
-          return;
-        }
-
-        if (endDate < startDate) {
-          setIsLoading(false);
-          toast({
-            type: 'danger',
-            text: 'Data final precisa ser maior que inicial!'
-          });
-          return;
-        }
-
-        const parsedStartDate = format(startDate, 'dd-MM-yyyy');
-        const parsedEndDate = format(endDate, 'dd-MM-yyyy');
-
-        const { data, total, eachMonthTotal } = await PlanoContaService.findPlanoContasFinancial(
-          options.join(','),
-          showZeros,
-          parsedStartDate,
-          parsedEndDate
-        );
-        const monthsNames = eachMonthOfInterval({
-          start: startDate,
-          end: endDate,
-        }).map((date) =>
-          capitalizeFirstLetter(
-            format(date, 'MMM. \'de\' yy', {
-              locale: ptBRLocale,
-            })
-          )
-        );
-        const parsedData = parseChartAccounts(data, monthsNames);
-
-        dispatch(setData({
-          months: monthsNames,
-          accounts: parsedData,
-          eachMonthTotal,
-          total,
-        }));
-      }
-      setIsLoading(false);
-    }
-
     loadData();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, options, showZeros, startDate, endDate]);
+  }, [loadData]);
 
   return (
     <Container>
-      <Header title="Contas Receber x Pagar" />
+      <Header 
+        title="Contas Receber x Pagar" 
+        headerFilter={
+          <Select
+            options={[
+              {
+                value: '_',
+                label: 'Todos os Lançamentos',
+              }, 
+              {
+                value: 'real',
+                label: 'Lançamentos Reais',
+              }, 
+              {
+                value: 'provisional',
+                label: 'Lançamentos Provisórios',
+              }, 
+            ]}
+            value={status}
+            onChange={(value: string) => {
+              dispatch(change({ name: 'status', value: value }));
+            }}
+            width="280px"
+          />
+        }
+        refreshData={loadData}
+      />
       <div className="filters">
         <Checkbox
           name="payments"
@@ -180,7 +208,7 @@ export function ChartAccountsFinancial() {
           }))}
         />
       </div>
-      <header>
+      <header className='section-header'>
         <h3>PLANO DE CONTAS</h3>
         <div className="date-filter">
           <DateInput

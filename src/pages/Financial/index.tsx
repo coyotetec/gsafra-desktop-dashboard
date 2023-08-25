@@ -14,7 +14,7 @@ import { change } from '../../redux/features/financialFiltersSlice';
 import { componentsRefType } from '../../types/Types';
 
 export function Financial() {
-  const { safrasList, financialFilters: { safra } } = useSelector((state: RootState) => state);
+  const { safrasList, financialFilters: { safra, status } } = useSelector((state: RootState) => state);
   const dispatch = useDispatch();
   const totalizerRef = useRef<componentsRefType>({
     loadData() { return; },
@@ -51,19 +51,42 @@ export function Financial() {
       <Header
         title='Financeiro'
         headerFilter={(
-          <Select
-            options={[{
-              value: '_',
-              label: 'Todos os Lançamentos',
-            }, ...safrasList.options]}
-            placeholder="Safra"
-            noOptionsMessage="0 safras encontradas"
-            value={safra}
-            onChange={(value: string) => {
-              dispatch(change({ name: 'safra', value: value }));
-            }}
-            width="324px"
-          />
+          <>
+            <Select
+              options={[{
+                value: '_',
+                label: 'Todas as Safras',
+              }, ...safrasList.options]}
+              placeholder="Safra"
+              noOptionsMessage="0 safras encontradas"
+              value={safra}
+              onChange={(value: string) => {
+                dispatch(change({ name: 'safra', value: value }));
+              }}
+              width="324px"
+            />
+            <Select
+              options={[
+                {
+                value: '_',
+                label: 'Todos os Lançamentos',
+              }, 
+                {
+                value: 'real',
+                label: 'Lançamentos Reais',
+              }, 
+                {
+                value: 'provisional',
+                label: 'Lançamentos Provisórios',
+              }, 
+            ]}
+              value={status}
+              onChange={(value: string) => {
+                dispatch(change({ name: 'status', value: value }));
+              }}
+              width="280px"
+            />
+          </>
         )}
         refreshData={refreshData}
       />

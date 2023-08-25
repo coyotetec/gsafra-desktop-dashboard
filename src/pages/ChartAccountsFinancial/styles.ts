@@ -8,7 +8,7 @@ export const Container = styled.main`
     gap: 12px;
   }
 
-  header {
+  .section-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-end;

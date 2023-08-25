@@ -47,7 +47,8 @@ export const Totalizer = forwardRef<componentsRefType>((props, ref) => {
   const {
     financialFilters: {
       totalizerRangeDates: { startDate, endDate },
-      safra
+      safra,
+      status
     },
     financialTotalizersData: {
       payableTotalizer,
@@ -119,12 +120,13 @@ export const Totalizer = forwardRef<componentsRefType>((props, ref) => {
         FinancialService.findPayableTotal(
           startDateParsed,
           endDateParsed,
-          safra !== '_' ? safra : undefined
+          safra !== '_' ? safra : undefined,
+          status !== '_' ? status : undefined
         ),
         CheckService.findPayableCheckTotal(
           startDateParsed,
           endDateParsed,
-          safra !== '_' ? safra : undefined
+          safra !== '_' ? safra : undefined,
         )
       ]);
 
@@ -143,7 +145,7 @@ export const Totalizer = forwardRef<componentsRefType>((props, ref) => {
     }
     setIsPayableLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, endDate, hasPermission, safra, startDate, zeroTotal]);
+  }, [dispatch, endDate, hasPermission, safra, startDate, zeroTotal, status]);
 
   const loadReceivableTotal = useCallback(async () => {
     if (hasPermission('resumo_pendentes_recebimento')) {
@@ -181,7 +183,8 @@ export const Totalizer = forwardRef<componentsRefType>((props, ref) => {
         FinancialService.findReceivableTotal(
           startDateParsed,
           endDateParsed,
-          safra !== '_' ? safra : undefined
+          safra !== '_' ? safra : undefined,
+          status !== '_' ? status : undefined
         ),
         CheckService.findReceivableCheckTotal(
           startDateParsed,
@@ -204,7 +207,7 @@ export const Totalizer = forwardRef<componentsRefType>((props, ref) => {
     }
     setIsReceivableLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, endDate, hasPermission, safra, startDate, zeroTotal]);
+  }, [dispatch, endDate, hasPermission, safra, startDate, zeroTotal, status]);
 
   const loadCreditCardTotal = useCallback(async () => {
     if (hasPermission('resumo_cartao_credito')) {

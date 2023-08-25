@@ -30,14 +30,15 @@ class PlanoContasService {
     options: string,
     showZeros: boolean,
     startDate: string,
-    endDate: string
+    endDate: string,
+    status?: string,
   ): Promise<{
     total: number;
     data: PlanoContasFinancial[];
     eachMonthTotal: number[]
   }> {
     return api.get(
-      `/plano-conta/financeiro?options=${options}&showZeros=${showZeros}&startDate=${startDate}&endDate=${endDate}`
+      `/plano-conta/financeiro?options=${options}&showZeros=${showZeros}&startDate=${startDate}&endDate=${endDate}${status ? `&status=${status}` : ''}`
     );
   }
 }
