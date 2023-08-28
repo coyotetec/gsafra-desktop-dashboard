@@ -26,7 +26,7 @@ interface ChangePayload {
 
 const initialState: FinancialFiltersState = {
   safra: '_',
-  status: '_',
+  status: 'real',
   totalizerRangeDates: {
     startDate: new Date(),
     endDate: addMonths(new Date(), 6),

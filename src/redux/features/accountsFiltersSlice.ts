@@ -17,7 +17,7 @@ interface ChangePayload {
 
 const initialState: AccountsFiltersState = {
   options: ['payments', 'receivables', 'checks', 'creditCard'],
-  status: '_',
+  status: 'real',
   showZeros: false,
   startDate: startOfMonth(new Date()),
   endDate: endOfMonth(addMonths(new Date(), 2)),
