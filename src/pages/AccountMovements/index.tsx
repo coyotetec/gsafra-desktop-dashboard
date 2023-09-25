@@ -20,6 +20,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../redux/store';
 import { change } from '../../redux/features/financialFiltersSlice';
 import { Select } from '../../components/Select';
+import { MultiSelect } from '../../components/MultiSelect';
 
 export function AccountMovements() {
   const [isLoading, setIsLoading] = useState(true);
@@ -41,7 +42,9 @@ export function AccountMovements() {
       },
       chartAccountsCreditSelected: selectedCredit,
       chartAccountsDebitSelected: selectedDebit,
-      safra,
+      safras,
+      lastSelectedSafras,
+      status
     },
     safrasList
   } = useSelector((state: RootState) => state);
@@ -81,14 +84,14 @@ export function AccountMovements() {
         String(selectedChartAccount),
         startDateParsed,
         endDateParsed,
-        safra !== '_' ? safra : undefined
+        lastSelectedSafras.length > 0 ? lastSelectedSafras.join(',') : undefined,
       );
       setAccountMovements(accountMovementsData);
       setIsLoading(false);
     }
 
     loadData();
-  }, [selectedChartAccount, rangeDates, safra]);
+  }, [selectedChartAccount, rangeDates, lastSelectedSafras]);
 
   function handleExportExcel() {
     import('xlsx').then(xlsx => {
@@ -148,19 +151,46 @@ export function AccountMovements() {
         subtitle="VISÃO ANALÍTICA"
         canGoBack
         headerFilter={(
-          <Select
-            options={[{
-              value: '_',
-              label: 'Todos os Lançamentos',
-            }, ...safrasList.options]}
-            placeholder="Safra"
-            noOptionsMessage="0 safras encontradas"
-            value={safra}
-            onChange={(value: string) => {
-              dispatch(change({ name: 'safra', value: value }));
-            }}
-            width="324px"
-          />
+          <>
+            <MultiSelect
+              options={safrasList.options}
+              onChange={(value) => {
+                dispatch(change({ name: 'safras', value: value }));
+              }}
+              value={safras}
+              placeholder="Todas as Safras"
+              selectedItemsLabel='{0} Safras'
+              onClose={(value) => {
+                if (JSON.stringify(lastSelectedSafras) === JSON.stringify(value)) {
+                  return;
+                }
+
+                dispatch(change({ name: 'lastSelectedSafras', value }));
+              }}
+              width="324px"
+            />
+            <Select
+              options={[
+                {
+                  value: '_',
+                  label: 'Todos os Lançamentos',
+                },
+                {
+                  value: 'real',
+                  label: 'Lançamentos Reais',
+                },
+                {
+                  value: 'provisional',
+                  label: 'Lançamentos Provisórios',
+                },
+              ]}
+              value={status}
+              onChange={(value: string) => {
+                dispatch(change({ name: 'status', value: value }));
+              }}
+              width="280px"
+            />
+          </>
         )}
       />
       <div className="filters">
