@@ -47,8 +47,8 @@ export const Totalizer = forwardRef<componentsRefType>((props, ref) => {
   const {
     financialFilters: {
       totalizerRangeDates: { startDate, endDate },
-      safra,
-      status
+      status,
+      lastSelectedSafras: safras,
     },
     financialTotalizersData: {
       payableTotalizer,
@@ -120,13 +120,13 @@ export const Totalizer = forwardRef<componentsRefType>((props, ref) => {
         FinancialService.findPayableTotal(
           startDateParsed,
           endDateParsed,
-          safra !== '_' ? safra : undefined,
+          safras.length > 0 ? safras.join(',') : undefined,
           status !== '_' ? status : undefined
         ),
         CheckService.findPayableCheckTotal(
           startDateParsed,
           endDateParsed,
-          safra !== '_' ? safra : undefined,
+          safras.length > 0 ? safras.join(',') : undefined,
         )
       ]);
 
@@ -145,7 +145,7 @@ export const Totalizer = forwardRef<componentsRefType>((props, ref) => {
     }
     setIsPayableLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, endDate, hasPermission, safra, startDate, zeroTotal, status]);
+  }, [dispatch, endDate, hasPermission, safras, startDate, zeroTotal, status]);
 
   const loadReceivableTotal = useCallback(async () => {
     if (hasPermission('resumo_pendentes_recebimento')) {
@@ -183,13 +183,13 @@ export const Totalizer = forwardRef<componentsRefType>((props, ref) => {
         FinancialService.findReceivableTotal(
           startDateParsed,
           endDateParsed,
-          safra !== '_' ? safra : undefined,
+          safras.length > 0 ? safras.join(',') : undefined,
           status !== '_' ? status : undefined
         ),
         CheckService.findReceivableCheckTotal(
           startDateParsed,
           endDateParsed,
-          safra !== '_' ? safra : undefined
+          safras.length > 0 ? safras.join(',') : undefined,
         )
       ]);
       const sumReceivableTotalData = sumTotal(
@@ -207,7 +207,7 @@ export const Totalizer = forwardRef<componentsRefType>((props, ref) => {
     }
     setIsReceivableLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, endDate, hasPermission, safra, startDate, zeroTotal, status]);
+  }, [dispatch, endDate, hasPermission, safras, startDate, zeroTotal, status]);
 
   const loadCreditCardTotal = useCallback(async () => {
     if (hasPermission('resumo_cartao_credito')) {
@@ -246,7 +246,7 @@ export const Totalizer = forwardRef<componentsRefType>((props, ref) => {
       const creditCardTotalData = await CreditCardService.findTotal(
         startDateParsed,
         endDateParsed,
-        safra !== '_' ? safra : undefined
+        safras.length > 0 ? safras.join(',') : undefined,
       );
 
       dispatch(totalizersChange({
@@ -256,7 +256,7 @@ export const Totalizer = forwardRef<componentsRefType>((props, ref) => {
     }
     setIsCreditCardLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, endDate, hasPermission, safra, startDate]);
+  }, [dispatch, endDate, hasPermission, safras, startDate]);
 
   const loadData = useCallback(() => {
     loadPayableTotal();

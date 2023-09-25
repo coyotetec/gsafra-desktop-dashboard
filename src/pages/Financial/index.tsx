@@ -12,9 +12,10 @@ import { setSafrasData } from '../../redux/features/safrasListSlice';
 import { Select } from '../../components/Select';
 import { change } from '../../redux/features/financialFiltersSlice';
 import { componentsRefType } from '../../types/Types';
+import { MultiSelect } from '../../components/MultiSelect';
 
 export function Financial() {
-  const { safrasList, financialFilters: { safra, status } } = useSelector((state: RootState) => state);
+  const { safrasList, financialFilters: { safras, lastSelectedSafras, status } } = useSelector((state: RootState) => state);
   const dispatch = useDispatch();
   const totalizerRef = useRef<componentsRefType>({
     loadData() { return; },
@@ -52,34 +53,38 @@ export function Financial() {
         title='Financeiro'
         headerFilter={(
           <>
-            <Select
-              options={[{
-                value: '_',
-                label: 'Todas as Safras',
-              }, ...safrasList.options]}
-              placeholder="Safra"
-              noOptionsMessage="0 safras encontradas"
-              value={safra}
-              onChange={(value: string) => {
-                dispatch(change({ name: 'safra', value: value }));
+            <MultiSelect
+              options={safrasList.options}
+              onChange={(value) => {
+                dispatch(change({ name: 'safras', value: value }));
+              }}
+              value={safras}
+              placeholder="Todas as Safras"
+              selectedItemsLabel='{0} Safras'
+              onClose={(value) => {
+                if (JSON.stringify(lastSelectedSafras) === JSON.stringify(value)) {
+                  return;
+                }
+
+                dispatch(change({ name: 'lastSelectedSafras', value }));
               }}
               width="324px"
             />
             <Select
               options={[
                 {
-                value: '_',
-                label: 'Todos os Lançamentos',
-              }, 
+                  value: '_',
+                  label: 'Todos os Lançamentos',
+                },
                 {
-                value: 'real',
-                label: 'Lançamentos Reais',
-              }, 
+                  value: 'real',
+                  label: 'Lançamentos Reais',
+                },
                 {
-                value: 'provisional',
-                label: 'Lançamentos Provisórios',
-              }, 
-            ]}
+                  value: 'provisional',
+                  label: 'Lançamentos Provisórios',
+                },
+              ]}
               value={status}
               onChange={(value: string) => {
                 dispatch(change({ name: 'status', value: value }));

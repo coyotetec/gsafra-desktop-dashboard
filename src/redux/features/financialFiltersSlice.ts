@@ -9,7 +9,8 @@ interface RangeDates {
 }
 
 export interface FinancialFiltersState {
-  safra: string;
+  safras: string[];
+  lastSelectedSafras: string[];
   status: string;
   totalizerRangeDates: RangeDates;
   cashFlowRangeDates: RangeDates;
@@ -21,11 +22,12 @@ export interface FinancialFiltersState {
 
 interface ChangePayload {
   name: keyof FinancialFiltersState;
-  value: string | number | RangeDates | TreeSelectSelectionKeys | null;
+  value: string | string[] | number | RangeDates | TreeSelectSelectionKeys | null;
 }
 
 const initialState: FinancialFiltersState = {
-  safra: '_',
+  safras: [],
+  lastSelectedSafras: [],
   status: 'real',
   totalizerRangeDates: {
     startDate: new Date(),

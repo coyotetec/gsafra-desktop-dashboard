@@ -41,7 +41,7 @@ export const ChartAccounts = forwardRef<componentsRefType>((props, ref) => {
       },
       chartAccountsCreditSelected: selectedCredit,
       chartAccountsDebitSelected: selectedDebit,
-      safra,
+      lastSelectedSafras: safras,
     },
     chartAccountsList,
     financialChartAccountsData: {
@@ -92,7 +92,7 @@ export const ChartAccounts = forwardRef<componentsRefType>((props, ref) => {
         String(selectedCredit),
         startDateParsed,
         endDateParsed,
-        safra !== '_' ? safra : undefined
+        safras.length > 0 ? safras.join(',') : undefined,
       );
 
       dispatch(setData({
@@ -104,7 +104,7 @@ export const ChartAccounts = forwardRef<componentsRefType>((props, ref) => {
 
     setCreditTotalIsLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [creditEndDate, creditStartDate, dispatch, hasPermission, safra, selectedCredit]);
+  }, [creditEndDate, creditStartDate, dispatch, hasPermission, safras, selectedCredit]);
 
   const loadDebitTotal = useCallback(async () => {
     if (hasPermission('debitos_compensados')) {
@@ -145,7 +145,7 @@ export const ChartAccounts = forwardRef<componentsRefType>((props, ref) => {
         String(selectedDebit),
         startDateParsed,
         endDateParsed,
-        safra !== '_' ? safra : undefined
+        safras.length > 0 ? safras.join(',') : undefined,
       );
 
       dispatch(setData({
@@ -157,7 +157,7 @@ export const ChartAccounts = forwardRef<componentsRefType>((props, ref) => {
 
     setDebitTotalIsLoading(false);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debitEndDate, debitStartDate, dispatch, hasPermission, safra, selectedDebit]);
+  }, [debitEndDate, debitStartDate, dispatch, hasPermission, safras, selectedDebit]);
 
   const loadData = useCallback(() => {
     loadCreditTotal();
