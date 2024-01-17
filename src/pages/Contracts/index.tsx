@@ -4,7 +4,10 @@ import { Header } from '../../components/Header';
 import { Select } from '../../components/Select';
 import { useUserContext } from '../../contexts/UserContext';
 import { setContracts } from '../../redux/features/contractDataSlice';
-import { change, setFirstSafra } from '../../redux/features/contractFiltersSlice';
+import {
+  change,
+  setFirstSafra,
+} from '../../redux/features/contractFiltersSlice';
 import { setSafrasData } from '../../redux/features/safrasListSlice';
 import { RootState } from '../../redux/store';
 import ContratoService from '../../services/ContratoService';
@@ -19,19 +22,14 @@ export function Contracts() {
   const [isLoading, setIsLoading] = useState(true);
   const isFirstRender = useRef(true);
   const packingListRef = useRef<componentsRefType>({
-    loadData: () => {
-      return;
-    },
+    loadData: () => null,
   });
 
   const { hasPermission } = useUserContext();
 
   const {
     contractFilters: { safra },
-    contractData: {
-      contractOptions,
-      contractsLastFetch
-    },
+    contractData: { contractOptions, contractsLastFetch },
     safrasList,
   } = useSelector((state: RootState) => state);
   const dispatch = useDispatch();
@@ -71,10 +69,14 @@ export function Contracts() {
     async function loadSafras() {
       if (hasToFetch(safrasList.lastFetch)) {
         const safrasData = await SafraService.findSafras();
-        dispatch(setSafrasData(safrasData.map((item) => ({
-          value: String(item.id),
-          label: item.nome
-        }))));
+        dispatch(
+          setSafrasData(
+            safrasData.map((item) => ({
+              value: String(item.id),
+              label: item.nome,
+            })),
+          ),
+        );
       }
 
       dispatch(setFirstSafra(safrasList.options[0]?.value || '_'));
@@ -92,23 +94,21 @@ export function Contracts() {
       <Header
         title="Contratos"
         refreshData={refreshData}
-        headerFilter={(
+        headerFilter={
           <Select
             options={safrasList.options}
             placeholder="Safra"
             noOptionsMessage="0 safras encontradas"
             value={safra}
             onChange={(value: string) => {
-              dispatch(change({ name: 'safra', value: value }));
+              dispatch(change({ name: 'safra', value }));
             }}
             width="324px"
           />
-        )}
+        }
       />
       <Totalizers isLoading={isLoading} />
-      {contractOptions.length > 0 && (
-        <PackingList ref={packingListRef} />
-      )}
+      {contractOptions.length > 0 && <PackingList ref={packingListRef} />}
     </Container>
   );
 }

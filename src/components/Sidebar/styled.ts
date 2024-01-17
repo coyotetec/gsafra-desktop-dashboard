@@ -5,7 +5,7 @@ export const Container = styled.aside`
 `;
 
 export const Content = styled.div`
-  background: #30454C;
+  background: #30454c;
   border-right: 1px solid #506167;
   position: sticky;
   top: 0;
@@ -21,7 +21,7 @@ export const Content = styled.div`
     display: flex;
     align-items: center;
     gap: 8px;
-    color: #F7FBFE;
+    color: #f7fbfe;
   }
 
   nav {
@@ -36,21 +36,21 @@ export const Content = styled.div`
     }
 
     &::-webkit-scrollbar-track {
-      background: #30454C;
+      background: #30454c;
       border-radius: 999px;
     }
 
     &::-webkit-scrollbar-thumb {
       background-color: #506167;
       border-radius: 999px;
-      border: 3px solid #30454C;
+      border: 3px solid #30454c;
     }
 
     p {
       font-size: 12px;
       font-weight: 600;
       text-transform: uppercase;
-      color: #9FA9AC;
+      color: #9fa9ac;
 
       & + a {
         margin-top: 12px;
@@ -60,7 +60,7 @@ export const Content = styled.div`
     a {
       padding: 12px;
       display: block;
-      color: #CFD4D6;
+      color: #cfd4d6;
       font-weight: 500;
       text-decoration: none;
       border-radius: 8px;

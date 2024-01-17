@@ -28,7 +28,7 @@ const initialState: FuelingPatrimonyFiltersState = {
   patrimony: '_',
   fuel: '_',
   storeroom: '_',
-  cost: 'medio'
+  cost: 'medio',
 };
 
 export const fuelingPatrimonyFiltersSlice = createSlice({

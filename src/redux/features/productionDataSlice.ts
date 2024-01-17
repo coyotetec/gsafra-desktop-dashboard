@@ -32,7 +32,7 @@ const initialState: ProductionDataState = {
     totalDescontoSafra: 0,
     talhoesDescontoTotal: [],
     lastFetch: null,
-  }
+  },
 };
 
 export const productionDataSlice = createSlice({
@@ -43,9 +43,9 @@ export const productionDataSlice = createSlice({
       state[payload.name] = {
         ...payload.data,
         lastFetch: new Date(),
-      } as ColheitaTotal & ColheitaDescontoTotal & { lastFetch: Date | null; };
-    }
-  }
+      } as ColheitaTotal & ColheitaDescontoTotal & { lastFetch: Date | null };
+    },
+  },
 });
 
 export const { setData } = productionDataSlice.actions;

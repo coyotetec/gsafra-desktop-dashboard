@@ -29,20 +29,14 @@ export function ChartAccountsFinancial() {
   const { hasPermission } = useUserContext();
 
   const {
-    accountsFilters: {
-      options,
-      status,
-      showZeros,
-      startDate,
-      endDate
-    },
+    accountsFilters: { options, status, showZeros, startDate, endDate },
     accountsData: {
       accountsNodes,
       accountsTotal,
       eachMonthTotal,
       months,
       lastFetch,
-    }
+    },
   } = useSelector((state: RootState) => state);
   const dispatch = useDispatch();
 
@@ -62,7 +56,7 @@ export function ChartAccountsFinancial() {
         setIsLoading(false);
         toast({
           type: 'danger',
-          text: 'Data incial e final são obrigatórias'
+          text: 'Data incial e final são obrigatórias',
         });
         return;
       }
@@ -71,7 +65,7 @@ export function ChartAccountsFinancial() {
         setIsLoading(false);
         toast({
           type: 'danger',
-          text: 'Data final precisa ser maior que inicial!'
+          text: 'Data final precisa ser maior que inicial!',
         });
         return;
       }
@@ -79,34 +73,37 @@ export function ChartAccountsFinancial() {
       const parsedStartDate = format(startDate, 'dd-MM-yyyy');
       const parsedEndDate = format(endDate, 'dd-MM-yyyy');
 
-      const { data, total, eachMonthTotal } = await PlanoContaService.findPlanoContasFinancial(
-        options.join(','),
-        showZeros,
-        parsedStartDate,
-        parsedEndDate,
-        status !== '_' ? status : undefined
-      );
+      const { data, total, eachMonthTotal } =
+        await PlanoContaService.findPlanoContasFinancial(
+          options.join(','),
+          showZeros,
+          parsedStartDate,
+          parsedEndDate,
+          status !== '_' ? status : undefined,
+        );
       const monthsNames = eachMonthOfInterval({
         start: startDate,
         end: endDate,
       }).map((date) =>
         capitalizeFirstLetter(
-          format(date, 'MMM. \'de\' yy', {
+          format(date, "MMM. 'de' yy", {
             locale: ptBRLocale,
-          })
-        )
+          }),
+        ),
       );
       const parsedData = parseChartAccounts(data, monthsNames);
 
-      dispatch(setData({
-        months: monthsNames,
-        accounts: parsedData,
-        eachMonthTotal,
-        total,
-      }));
+      dispatch(
+        setData({
+          months: monthsNames,
+          accounts: parsedData,
+          eachMonthTotal,
+          total,
+        }),
+      );
     }
     setIsLoading(false);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, options, showZeros, startDate, endDate, status]);
 
   function handleToggleSelectedOptions(option: string) {
@@ -116,28 +113,34 @@ export function ChartAccountsFinancial() {
     if (optionIndex === -1) {
       newState.push(option);
 
-      return dispatch(change({
-        name: 'options',
-        value: newState
-      }));
+      return dispatch(
+        change({
+          name: 'options',
+          value: newState,
+        }),
+      );
     }
 
     if (newState.length === 1) {
       toast({
         type: 'danger',
-        text: 'É obrigatório pelo menos uma opção marcada'
+        text: 'É obrigatório pelo menos uma opção marcada',
       });
 
-      return dispatch(change({
-        name: 'options',
-        value: newState
-      }));
+      return dispatch(
+        change({
+          name: 'options',
+          value: newState,
+        }),
+      );
     }
 
-    dispatch(change({
-      name: 'options',
-      value: newState.filter((item) => item !== option)
-    }));
+    dispatch(
+      change({
+        name: 'options',
+        value: newState.filter((item) => item !== option),
+      }),
+    );
   }
 
   useEffect(() => {
@@ -146,27 +149,27 @@ export function ChartAccountsFinancial() {
 
   return (
     <Container>
-      <Header 
-        title="Contas Receber x Pagar" 
+      <Header
+        title="Contas Receber x Pagar"
         headerFilter={
           <Select
             options={[
               {
                 value: '_',
                 label: 'Todos os Lançamentos',
-              }, 
+              },
               {
                 value: 'real',
                 label: 'Lançamentos Reais',
-              }, 
+              },
               {
                 value: 'provisional',
                 label: 'Lançamentos Provisórios',
-              }, 
+              },
             ]}
             value={status}
             onChange={(value: string) => {
-              dispatch(change({ name: 'status', value: value }));
+              dispatch(change({ name: 'status', value }));
             }}
             width="280px"
           />
@@ -202,34 +205,42 @@ export function ChartAccountsFinancial() {
           name="zeros"
           label="Mostrar Contas Zeradas"
           checked={showZeros}
-          onChange={() => dispatch(change({
-            name: 'showZeros',
-            value: !showZeros
-          }))}
+          onChange={() =>
+            dispatch(
+              change({
+                name: 'showZeros',
+                value: !showZeros,
+              }),
+            )
+          }
         />
       </div>
-      <header className='section-header'>
+      <header className="section-header">
         <h3>PLANO DE CONTAS</h3>
         <div className="date-filter">
           <DateInput
             onChangeDate={(date) => {
-              dispatch(change({
-                name: 'startDate',
-                value: date
-              }));
+              dispatch(
+                change({
+                  name: 'startDate',
+                  value: date,
+                }),
+              );
             }}
-            placeholder='Data Inicial'
+            placeholder="Data Inicial"
             defaultDate={startDate}
           />
           <strong>à</strong>
           <DateInput
             onChangeDate={(date) => {
-              dispatch(change({
-                name: 'endDate',
-                value: date
-              }));
+              dispatch(
+                change({
+                  name: 'endDate',
+                  value: date,
+                }),
+              );
             }}
-            placeholder='Data Final'
+            placeholder="Data Final"
             defaultDate={endDate}
           />
         </div>
@@ -247,7 +258,7 @@ export function ChartAccountsFinancial() {
           scrollable
           scrollHeight="460px"
           style={{ width: '100%' }}
-          footerColumnGroup={(
+          footerColumnGroup={
             <ColumnGroup>
               <Row>
                 <Column style={{ width: '340px' }} />
@@ -264,7 +275,7 @@ export function ChartAccountsFinancial() {
                 />
               </Row>
             </ColumnGroup>
-          )}
+          }
         >
           <Column
             field="name"

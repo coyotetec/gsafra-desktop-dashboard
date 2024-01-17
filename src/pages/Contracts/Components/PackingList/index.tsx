@@ -2,7 +2,14 @@ import { format } from 'date-fns';
 import { Column } from 'primereact/column';
 import { DataTablePFSEvent } from 'primereact/datatable';
 import { PaginatorTemplate } from 'primereact/paginator';
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { componentsRefType } from '../../../../types/Types';
 import { DateInput } from '../../../../components/DateInput';
@@ -11,7 +18,10 @@ import { Select } from '../../../../components/Select';
 import { Spinner } from '../../../../components/Spinner';
 import { useUserContext } from '../../../../contexts/UserContext';
 import { setPackingList } from '../../../../redux/features/contractDataSlice';
-import { change, setFirstContract } from '../../../../redux/features/contractFiltersSlice';
+import {
+  change,
+  setFirstContract,
+} from '../../../../redux/features/contractFiltersSlice';
 import { RootState } from '../../../../redux/store';
 import ContratoService from '../../../../services/ContratoService';
 import { hasToFetch } from '../../../../utils/hasToFetch';
@@ -27,15 +37,8 @@ export const PackingList = forwardRef<componentsRefType>((props, ref) => {
   const { hasPermission } = useUserContext();
 
   const {
-    contractFilters: {
-      selectedContract,
-      packingListRangeDates: rangeDates
-    },
-    contractData: {
-      contractOptions,
-      packingList,
-      packingListLastFetch,
-    }
+    contractFilters: { selectedContract, packingListRangeDates: rangeDates },
+    contractData: { contractOptions, packingList, packingListLastFetch },
   } = useSelector((state: RootState) => state);
   const dispatch = useDispatch();
 
@@ -57,17 +60,25 @@ export const PackingList = forwardRef<componentsRefType>((props, ref) => {
         return;
       }
 
-      if (rangeDates.endDate && rangeDates.startDate && rangeDates.endDate < rangeDates.startDate) {
+      if (
+        rangeDates.endDate &&
+        rangeDates.startDate &&
+        rangeDates.endDate < rangeDates.startDate
+      ) {
         setIsLoading(false);
         toast({
           type: 'danger',
-          text: 'Data final precisa ser maior que inicial!'
+          text: 'Data final precisa ser maior que inicial!',
         });
         return;
       }
 
-      const startDateParsed = rangeDates.startDate ? format(rangeDates.startDate, 'dd-MM-yyyy') : '';
-      const endDateParsed = rangeDates.endDate ? format(rangeDates.endDate, 'dd-MM-yyyy') : '';
+      const startDateParsed = rangeDates.startDate
+        ? format(rangeDates.startDate, 'dd-MM-yyyy')
+        : '';
+      const endDateParsed = rangeDates.endDate
+        ? format(rangeDates.endDate, 'dd-MM-yyyy')
+        : '';
 
       const packingListData = await ContratoService.findRomaneios({
         contratoId: Number(selectedContract),
@@ -79,11 +90,21 @@ export const PackingList = forwardRef<componentsRefType>((props, ref) => {
     }
     setIsLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, hasPermission, rangeDates.endDate, rangeDates.startDate, selectedContract]);
+  }, [
+    dispatch,
+    hasPermission,
+    rangeDates.endDate,
+    rangeDates.startDate,
+    selectedContract,
+  ]);
 
-  useImperativeHandle(ref, () => ({
-    loadData
-  }), [loadData]);
+  useImperativeHandle(
+    ref,
+    () => ({
+      loadData,
+    }),
+    [loadData],
+  );
 
   useEffect(() => {
     if (contractOptions.length > 0) {
@@ -96,7 +117,7 @@ export const PackingList = forwardRef<componentsRefType>((props, ref) => {
   }, [loadData]);
 
   function formatNumber(number: number, sufix?: string) {
-    return `${new Intl.NumberFormat('id').format(number)}${sufix ? sufix : ''}`;
+    return `${new Intl.NumberFormat('id').format(number)}${sufix || ''}`;
   }
 
   function handlePage(event: DataTablePFSEvent) {
@@ -106,7 +127,7 @@ export const PackingList = forwardRef<componentsRefType>((props, ref) => {
 
   const paginatorTemplate: PaginatorTemplate = {
     layout: 'CurrentPageReport PrevPageLink NextPageLink',
-    'CurrentPageReport': (options) => {
+    CurrentPageReport: (options) => {
       return (
         <span style={{ userSelect: 'none' }}>
           {options.first} - {options.last} de {options.totalRecords} Romaneios
@@ -122,25 +143,31 @@ export const PackingList = forwardRef<componentsRefType>((props, ref) => {
         <div className="filters">
           <Select
             options={contractOptions}
-            onChange={(value: string) => dispatch(change({
-              name: 'selectedContract',
-              value
-            }))}
+            onChange={(value: string) =>
+              dispatch(
+                change({
+                  name: 'selectedContract',
+                  value,
+                }),
+              )
+            }
             value={selectedContract}
             width="320px"
           />
           <div className="date-filter">
             <DateInput
               onChangeDate={(date) => {
-                dispatch(change({
-                  name: 'packingListRangeDates',
-                  value: {
-                    startDate: date,
-                    endDate: rangeDates.endDate
-                  }
-                }));
+                dispatch(
+                  change({
+                    name: 'packingListRangeDates',
+                    value: {
+                      startDate: date,
+                      endDate: rangeDates.endDate,
+                    },
+                  }),
+                );
               }}
-              placeholder='Data Inicial'
+              placeholder="Data Inicial"
               defaultDate={rangeDates.startDate}
               height="48px"
               width="160px"
@@ -150,15 +177,17 @@ export const PackingList = forwardRef<componentsRefType>((props, ref) => {
             <strong>à</strong>
             <DateInput
               onChangeDate={(date) => {
-                dispatch(change({
-                  name: 'packingListRangeDates',
-                  value: {
-                    startDate: rangeDates.startDate,
-                    endDate: date
-                  }
-                }));
+                dispatch(
+                  change({
+                    name: 'packingListRangeDates',
+                    value: {
+                      startDate: rangeDates.startDate,
+                      endDate: date,
+                    },
+                  }),
+                );
               }}
-              placeholder='Data Final'
+              placeholder="Data Final"
               defaultDate={rangeDates.endDate}
               height="48px"
               width="160px"
@@ -186,9 +215,17 @@ export const PackingList = forwardRef<componentsRefType>((props, ref) => {
           onPage={handlePage}
           paginatorClassName="justify-content-end"
         >
-          <Column field="data" header="Data" body={(rowData) => format(new Date(rowData.data), 'dd/MM/yyyy')} />
+          <Column
+            field="data"
+            header="Data"
+            body={(rowData) => format(new Date(rowData.data), 'dd/MM/yyyy')}
+          />
           <Column field="numeroOrdem" header="Romaneio" />
-          <Column field="quantidade" header="Quantidade" body={(rowData) => formatNumber(rowData.quantidade, ' Kg')} />
+          <Column
+            field="quantidade"
+            header="Quantidade"
+            body={(rowData) => formatNumber(rowData.quantidade, ' Kg')}
+          />
           <Column field="localSaida" header="Local de Saída" />
           <Column field="motorista" header="Motorista" />
           <Column field="placa" header="Placa" />
@@ -197,3 +234,5 @@ export const PackingList = forwardRef<componentsRefType>((props, ref) => {
     </Container>
   );
 });
+
+PackingList.displayName = 'PackingList';

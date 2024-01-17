@@ -1,4 +1,10 @@
-import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useFirstRender } from '../hooks/useFirstRender';
 import UserService from '../services/UserService';
@@ -10,12 +16,12 @@ interface UserContextProviderProps {
 
 type PropsUserContext = {
   hasPermission: (permission: PermissionType) => boolean;
-}
+};
 
 const DEFAULT_VALUE: PropsUserContext = {
   hasPermission() {
     return false;
-  }
+  },
 };
 const UserContext = createContext<PropsUserContext>(DEFAULT_VALUE);
 
@@ -24,6 +30,7 @@ export function UserContextProvider({ children }: UserContextProviderProps) {
   const isFirstRender = useFirstRender();
 
   const [query] = useSearchParams();
+  const idEmpresa = query.get('idEmpresa');
   const idUsuario = query.get('idUsuario');
   const databaseName = query.get('dbNome');
 
@@ -32,18 +39,22 @@ export function UserContextProvider({ children }: UserContextProviderProps) {
       if (isFirstRender && idUsuario) {
         const permissionsData = await UserService.findPermissions(
           Number(idUsuario),
-          databaseName ? databaseName : undefined
+          idEmpresa || undefined,
+          databaseName || undefined,
         );
         setPermissions([...permissionsData]);
       }
     }
 
     loadData();
-  }, [idUsuario, isFirstRender, databaseName]);
+  }, [idUsuario, isFirstRender, databaseName, idEmpresa]);
 
-  const hasPermission = useCallback((permissionCode: PermissionType) => {
-    return permissions.includes(permissionCode);
-  }, [permissions]);
+  const hasPermission = useCallback(
+    (permissionCode: PermissionType) => {
+      return permissions.includes(permissionCode);
+    },
+    [permissions],
+  );
 
   return (
     <UserContext.Provider value={{ hasPermission }}>

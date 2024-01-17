@@ -1,4 +1,12 @@
-import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import React, {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   ArrowCircleDown,
   ArrowCircleRight,
@@ -58,30 +66,33 @@ export const Totalizer = forwardRef<componentsRefType>((props, ref) => {
   } = useSelector((state: RootState) => state);
   const dispatch = useDispatch();
 
-  const zeroTotal = useMemo<Total>(() => ({
-    quantity: 0,
-    total: 0,
-    totalNextSeven: {
+  const zeroTotal = useMemo<Total>(
+    () => ({
       quantity: 0,
       total: 0,
-    },
-    totalNextFifteen: {
-      quantity: 0,
-      total: 0
-    }
-  }), []);
+      totalNextSeven: {
+        quantity: 0,
+        total: 0,
+      },
+      totalNextFifteen: {
+        quantity: 0,
+        total: 0,
+      },
+    }),
+    [],
+  );
 
   const { hasPermission } = useUserContext();
   const [, setQuery] = useSearchParams();
 
   const {
     shouldRender: shouldPayableRender,
-    animatedElementRef: animatedPayableRef
+    animatedElementRef: animatedPayableRef,
   } = useAnimatedUnmount(showPayableDetails);
 
   const {
     shouldRender: shouldReceivableRender,
-    animatedElementRef: animatedReceivableRef
+    animatedElementRef: animatedReceivableRef,
   } = useAnimatedUnmount(showReceivableDetails);
 
   const loadPayableTotal = useCallback(async () => {
@@ -98,17 +109,19 @@ export const Totalizer = forwardRef<componentsRefType>((props, ref) => {
       }
 
       if (endDate && startDate && endDate < startDate) {
-        dispatch(totalizersChange({
-          name: 'payableTotalizer',
-          value: {
-            accounts: zeroTotal,
-            check: zeroTotal,
-            total: zeroTotal,
-          },
-        }));
+        dispatch(
+          totalizersChange({
+            name: 'payableTotalizer',
+            value: {
+              accounts: zeroTotal,
+              check: zeroTotal,
+              total: zeroTotal,
+            },
+          }),
+        );
         toast({
           type: 'danger',
-          text: 'Data final precisa ser maior que inicial!'
+          text: 'Data final precisa ser maior que inicial!',
         });
         return;
       }
@@ -121,27 +134,30 @@ export const Totalizer = forwardRef<componentsRefType>((props, ref) => {
           startDateParsed,
           endDateParsed,
           safras.length > 0 ? safras.join(',') : undefined,
-          status !== '_' ? status : undefined
+          status !== '_' ? status : undefined,
         ),
         CheckService.findPayableCheckTotal(
           startDateParsed,
           endDateParsed,
           safras.length > 0 ? safras.join(',') : undefined,
-        )
+        ),
       ]);
 
-      const sumPayableTotalData = sumTotal(
-        [payableTotalData, payableCheckTotalData]
-      );
+      const sumPayableTotalData = sumTotal([
+        payableTotalData,
+        payableCheckTotalData,
+      ]);
 
-      dispatch(totalizersChange({
-        name: 'payableTotalizer',
-        value: {
-          accounts: payableTotalData,
-          check: payableCheckTotalData,
-          total: sumPayableTotalData,
-        },
-      }));
+      dispatch(
+        totalizersChange({
+          name: 'payableTotalizer',
+          value: {
+            accounts: payableTotalData,
+            check: payableCheckTotalData,
+            total: sumPayableTotalData,
+          },
+        }),
+      );
     }
     setIsPayableLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -161,17 +177,19 @@ export const Totalizer = forwardRef<componentsRefType>((props, ref) => {
       }
 
       if (endDate && startDate && endDate < startDate) {
-        dispatch(totalizersChange({
-          name: 'receivableTotalizer',
-          value: {
-            accounts: zeroTotal,
-            check: zeroTotal,
-            total: zeroTotal,
-          },
-        }));
+        dispatch(
+          totalizersChange({
+            name: 'receivableTotalizer',
+            value: {
+              accounts: zeroTotal,
+              check: zeroTotal,
+              total: zeroTotal,
+            },
+          }),
+        );
         toast({
           type: 'danger',
-          text: 'Data final precisa ser maior que inicial!'
+          text: 'Data final precisa ser maior que inicial!',
         });
         return;
       }
@@ -179,31 +197,36 @@ export const Totalizer = forwardRef<componentsRefType>((props, ref) => {
       const startDateParsed = startDate ? format(startDate, 'dd-MM-yyyy') : '';
       const endDateParsed = endDate ? format(endDate, 'dd-MM-yyyy') : '';
 
-      const [receivableTotalData, receivableCheckTotalData] = await Promise.all([
-        FinancialService.findReceivableTotal(
-          startDateParsed,
-          endDateParsed,
-          safras.length > 0 ? safras.join(',') : undefined,
-          status !== '_' ? status : undefined
-        ),
-        CheckService.findReceivableCheckTotal(
-          startDateParsed,
-          endDateParsed,
-          safras.length > 0 ? safras.join(',') : undefined,
-        )
-      ]);
-      const sumReceivableTotalData = sumTotal(
-        [receivableTotalData, receivableCheckTotalData]
+      const [receivableTotalData, receivableCheckTotalData] = await Promise.all(
+        [
+          FinancialService.findReceivableTotal(
+            startDateParsed,
+            endDateParsed,
+            safras.length > 0 ? safras.join(',') : undefined,
+            status !== '_' ? status : undefined,
+          ),
+          CheckService.findReceivableCheckTotal(
+            startDateParsed,
+            endDateParsed,
+            safras.length > 0 ? safras.join(',') : undefined,
+          ),
+        ],
       );
+      const sumReceivableTotalData = sumTotal([
+        receivableTotalData,
+        receivableCheckTotalData,
+      ]);
 
-      dispatch(totalizersChange({
-        name: 'receivableTotalizer',
-        value: {
-          accounts: receivableTotalData,
-          check: receivableCheckTotalData,
-          total: sumReceivableTotalData,
-        },
-      }));
+      dispatch(
+        totalizersChange({
+          name: 'receivableTotalizer',
+          value: {
+            accounts: receivableTotalData,
+            check: receivableCheckTotalData,
+            total: sumReceivableTotalData,
+          },
+        }),
+      );
     }
     setIsReceivableLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -223,19 +246,21 @@ export const Totalizer = forwardRef<componentsRefType>((props, ref) => {
       }
 
       if (endDate && startDate && endDate < startDate) {
-        dispatch(totalizersChange({
-          name: 'receivableTotalizer',
-          value: {
-            quantity: 0,
-            total: 0,
-            availableLimit: 0,
-            totalLimit: 0,
-            usagePercentage: 0,
-          },
-        }));
+        dispatch(
+          totalizersChange({
+            name: 'receivableTotalizer',
+            value: {
+              quantity: 0,
+              total: 0,
+              availableLimit: 0,
+              totalLimit: 0,
+              usagePercentage: 0,
+            },
+          }),
+        );
         toast({
           type: 'danger',
-          text: 'Data final precisa ser maior que inicial!'
+          text: 'Data final precisa ser maior que inicial!',
         });
         return;
       }
@@ -249,10 +274,12 @@ export const Totalizer = forwardRef<componentsRefType>((props, ref) => {
         safras.length > 0 ? safras.join(',') : undefined,
       );
 
-      dispatch(totalizersChange({
-        name: 'creditCardTotalizer',
-        value: creditCardTotalData,
-      }));
+      dispatch(
+        totalizersChange({
+          name: 'creditCardTotalizer',
+          value: creditCardTotalData,
+        }),
+      );
     }
     setIsCreditCardLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -264,9 +291,13 @@ export const Totalizer = forwardRef<componentsRefType>((props, ref) => {
     loadCreditCardTotal();
   }, [loadCreditCardTotal, loadPayableTotal, loadReceivableTotal]);
 
-  useImperativeHandle(ref, () => ({
-    loadData
-  }), [loadData]);
+  useImperativeHandle(
+    ref,
+    () => ({
+      loadData,
+    }),
+    [loadData],
+  );
 
   useEffect(() => {
     loadData();
@@ -276,8 +307,14 @@ export const Totalizer = forwardRef<componentsRefType>((props, ref) => {
     if (period === 0) {
       setQuery((prevValue) => {
         prevValue.set('tela', type);
-        prevValue.set('dataInicial', startDate ? format(startDate, 'dd-MM-yyyy') : '_');
-        prevValue.set('dataFinal', endDate ? format(endDate, 'dd-MM-yyyy') : '_');
+        prevValue.set(
+          'dataInicial',
+          startDate ? format(startDate, 'dd-MM-yyyy') : '_',
+        );
+        prevValue.set(
+          'dataFinal',
+          endDate ? format(endDate, 'dd-MM-yyyy') : '_',
+        );
 
         return prevValue;
       });
@@ -289,7 +326,10 @@ export const Totalizer = forwardRef<componentsRefType>((props, ref) => {
       setQuery((prevValue) => {
         prevValue.set('tela', type);
         prevValue.set('dataInicial', format(startDate, 'dd-MM-yyyy'));
-        prevValue.set('dataFinal', format(addDays(startDate, period), 'dd-MM-yyyy'));
+        prevValue.set(
+          'dataFinal',
+          format(addDays(startDate, period), 'dd-MM-yyyy'),
+        );
 
         return prevValue;
       });
@@ -303,27 +343,33 @@ export const Totalizer = forwardRef<componentsRefType>((props, ref) => {
         <div>
           <DateInput
             onChangeDate={(date) => {
-              dispatch(change({
-                name: 'totalizerRangeDates', value: {
-                  startDate: date,
-                  endDate
-                }
-              }));
+              dispatch(
+                change({
+                  name: 'totalizerRangeDates',
+                  value: {
+                    startDate: date,
+                    endDate,
+                  },
+                }),
+              );
             }}
-            placeholder='Data Inicial'
+            placeholder="Data Inicial"
             defaultDate={startDate}
           />
           <strong>à</strong>
           <DateInput
             onChangeDate={(date) => {
-              dispatch(change({
-                name: 'totalizerRangeDates', value: {
-                  startDate,
-                  endDate: date
-                }
-              }));
+              dispatch(
+                change({
+                  name: 'totalizerRangeDates',
+                  value: {
+                    startDate,
+                    endDate: date,
+                  },
+                }),
+              );
             }}
-            placeholder='Data Final'
+            placeholder="Data Final"
             defaultDate={endDate}
           />
         </div>
@@ -347,17 +393,19 @@ export const Totalizer = forwardRef<componentsRefType>((props, ref) => {
               type="button"
               onClick={() => setShowPayableDetails((prevState) => !prevState)}
             >
-              <ArrowCircleRight size={24} color="#F7FBFE" weight='fill' />
+              <ArrowCircleRight size={24} color="#F7FBFE" weight="fill" />
             </button>
           </span>
           <small>{payableTotalizer.total.quantity} itens</small>
           <footer>
-            <span>Próximos 7 dias:
+            <span>
+              Próximos 7 dias:
               <small>
                 {currencyFormat(payableTotalizer.total.totalNextSeven.total)}
               </small>
             </span>
-            <span>Próximos 15 dias:
+            <span>
+              Próximos 15 dias:
               <small>
                 {currencyFormat(payableTotalizer.total.totalNextFifteen.total)}
               </small>
@@ -380,21 +428,27 @@ export const Totalizer = forwardRef<componentsRefType>((props, ref) => {
             {currencyFormat(receivableTotalizer.total.total)}
             <button
               type="button"
-              onClick={() => setShowReceivableDetails((prevState) => !prevState)}
+              onClick={() =>
+                setShowReceivableDetails((prevState) => !prevState)
+              }
             >
-              <ArrowCircleRight size={24} color="#F7FBFE" weight='fill' />
+              <ArrowCircleRight size={24} color="#F7FBFE" weight="fill" />
             </button>
           </span>
           <small>{receivableTotalizer.total.quantity} itens</small>
           <footer>
-            <span>Próximos 7 dias:
+            <span>
+              Próximos 7 dias:
               <small>
                 {currencyFormat(receivableTotalizer.total.totalNextSeven.total)}
               </small>
             </span>
-            <span>Próximos 15 dias:
+            <span>
+              Próximos 15 dias:
               <small>
-                {currencyFormat(receivableTotalizer.total.totalNextFifteen.total)}
+                {currencyFormat(
+                  receivableTotalizer.total.totalNextFifteen.total,
+                )}
               </small>
             </span>
           </footer>
@@ -417,12 +471,15 @@ export const Totalizer = forwardRef<componentsRefType>((props, ref) => {
               type="button"
               className="modal-button"
               style={{
-                transform: 'translateY(0)'
+                transform: 'translateY(0)',
               }}
-              onClick={() => handleOpenDetailsModal({
-                type: 'CA',
-                period: 0
-              })}>
+              onClick={() =>
+                handleOpenDetailsModal({
+                  type: 'CA',
+                  period: 0,
+                })
+              }
+            >
               <ArrowSquareOut size={24} color="#00D47E" weight="fill" />
             </button>
           </span>
@@ -432,16 +489,19 @@ export const Totalizer = forwardRef<componentsRefType>((props, ref) => {
               <div
                 className="progress-bar-inner"
                 style={{
-                  width: `${(creditCardTotalizer.usagePercentage) > 100
-                    ? 100
-                    : creditCardTotalizer.usagePercentage
-                  }%`
+                  width: `${
+                    creditCardTotalizer.usagePercentage > 100
+                      ? 100
+                      : creditCardTotalizer.usagePercentage
+                  }%`,
                 }}
               ></div>
             </div>
             <span>
               Limite restante:
-              <small>{currencyFormat(creditCardTotalizer.availableLimit)}</small>
+              <small>
+                {currencyFormat(creditCardTotalizer.availableLimit)}
+              </small>
             </span>
           </footer>
         </div>
@@ -461,49 +521,64 @@ export const Totalizer = forwardRef<componentsRefType>((props, ref) => {
             </button>
             <section>
               <strong>Contas a Pagar</strong>
-              <span>
-                {currencyFormat(payableTotalizer.accounts.total)}
-              </span>
+              <span>{currencyFormat(payableTotalizer.accounts.total)}</span>
               <small>({payableTotalizer.accounts.quantity} itens)</small>
               <button
                 type="button"
                 className="modal-button"
-                onClick={() => handleOpenDetailsModal({
-                  type: 'CP',
-                  period: 0
-                })}>
+                onClick={() =>
+                  handleOpenDetailsModal({
+                    type: 'CP',
+                    period: 0,
+                  })
+                }
+              >
                 <ArrowSquareOut size={24} color="#00D47E" weight="fill" />
               </button>
               <ul>
                 <li>
                   Próximos 7 dias:
                   <small>
-                    {currencyFormat(payableTotalizer.accounts.totalNextSeven.total)}
+                    {currencyFormat(
+                      payableTotalizer.accounts.totalNextSeven.total,
+                    )}
                   </small>
-                  {startDate && (<button
-                    type="button"
-                    className="modal-button"
-                    onClick={() => handleOpenDetailsModal({
-                      type: 'CP',
-                      period: 7
-                    })}>
-                    <ArrowSquareOut size={20} color="#00D47E" weight="fill" />
-                  </button>)}
+                  {startDate && (
+                    <button
+                      type="button"
+                      className="modal-button"
+                      onClick={() =>
+                        handleOpenDetailsModal({
+                          type: 'CP',
+                          period: 7,
+                        })
+                      }
+                    >
+                      <ArrowSquareOut size={20} color="#00D47E" weight="fill" />
+                    </button>
+                  )}
                 </li>
                 <li>
                   Próximos 15 dias:
                   <small>
-                    {currencyFormat(payableTotalizer.accounts.totalNextFifteen.total)}
+                    {currencyFormat(
+                      payableTotalizer.accounts.totalNextFifteen.total,
+                    )}
                   </small>
-                  {startDate && (<button
-                    type="button"
-                    className="modal-button"
-                    onClick={() => handleOpenDetailsModal({
-                      type: 'CP',
-                      period: 15
-                    })}>
-                    <ArrowSquareOut size={20} color="#00D47E" weight="fill" />
-                  </button>)}
+                  {startDate && (
+                    <button
+                      type="button"
+                      className="modal-button"
+                      onClick={() =>
+                        handleOpenDetailsModal({
+                          type: 'CP',
+                          period: 15,
+                        })
+                      }
+                    >
+                      <ArrowSquareOut size={20} color="#00D47E" weight="fill" />
+                    </button>
+                  )}
                 </li>
               </ul>
             </section>
@@ -512,49 +587,64 @@ export const Totalizer = forwardRef<componentsRefType>((props, ref) => {
 
             <section>
               <strong>Cheques a Pagar</strong>
-              <span>
-                {currencyFormat(payableTotalizer.check.total)}
-              </span>
+              <span>{currencyFormat(payableTotalizer.check.total)}</span>
               <small>({payableTotalizer.check.quantity} itens)</small>
               <button
                 type="button"
                 className="modal-button"
-                onClick={() => handleOpenDetailsModal({
-                  type: 'CHP',
-                  period: 0
-                })}>
+                onClick={() =>
+                  handleOpenDetailsModal({
+                    type: 'CHP',
+                    period: 0,
+                  })
+                }
+              >
                 <ArrowSquareOut size={24} color="#00D47E" weight="fill" />
               </button>
               <ul>
                 <li>
                   Próximos 7 dias:
                   <small>
-                    {currencyFormat(payableTotalizer.check.totalNextSeven.total)}
+                    {currencyFormat(
+                      payableTotalizer.check.totalNextSeven.total,
+                    )}
                   </small>
-                  {startDate && (<button
-                    type="button"
-                    className="modal-button"
-                    onClick={() => handleOpenDetailsModal({
-                      type: 'CHP',
-                      period: 7
-                    })}>
-                    <ArrowSquareOut size={20} color="#00D47E" weight="fill" />
-                  </button>)}
+                  {startDate && (
+                    <button
+                      type="button"
+                      className="modal-button"
+                      onClick={() =>
+                        handleOpenDetailsModal({
+                          type: 'CHP',
+                          period: 7,
+                        })
+                      }
+                    >
+                      <ArrowSquareOut size={20} color="#00D47E" weight="fill" />
+                    </button>
+                  )}
                 </li>
                 <li>
                   Próximos 15 dias:
                   <small>
-                    {currencyFormat(payableTotalizer.check.totalNextFifteen.total)}
+                    {currencyFormat(
+                      payableTotalizer.check.totalNextFifteen.total,
+                    )}
                   </small>
-                  {startDate && (<button
-                    type="button"
-                    className="modal-button"
-                    onClick={() => handleOpenDetailsModal({
-                      type: 'CHP',
-                      period: 15
-                    })}>
-                    <ArrowSquareOut size={20} color="#00D47E" weight="fill" />
-                  </button>)}
+                  {startDate && (
+                    <button
+                      type="button"
+                      className="modal-button"
+                      onClick={() =>
+                        handleOpenDetailsModal({
+                          type: 'CHP',
+                          period: 15,
+                        })
+                      }
+                    >
+                      <ArrowSquareOut size={20} color="#00D47E" weight="fill" />
+                    </button>
+                  )}
                 </li>
               </ul>
             </section>
@@ -567,7 +657,10 @@ export const Totalizer = forwardRef<componentsRefType>((props, ref) => {
           <DetailTitle isLeaving={!showReceivableDetails}>
             DETALHES: PENDENTES DE RECEBIMENTO
           </DetailTitle>
-          <Detail ref={animatedReceivableRef} isLeaving={!showReceivableDetails}>
+          <Detail
+            ref={animatedReceivableRef}
+            isLeaving={!showReceivableDetails}
+          >
             <button
               className="close-button"
               onClick={() => setShowReceivableDetails(false)}
@@ -576,49 +669,64 @@ export const Totalizer = forwardRef<componentsRefType>((props, ref) => {
             </button>
             <section>
               <strong>Contas a Receber</strong>
-              <span>
-                {currencyFormat(receivableTotalizer.accounts.total)}
-              </span>
+              <span>{currencyFormat(receivableTotalizer.accounts.total)}</span>
               <small>({receivableTotalizer.accounts.quantity} itens)</small>
               <button
                 type="button"
                 className="modal-button"
-                onClick={() => handleOpenDetailsModal({
-                  type: 'CR',
-                  period: 0
-                })}>
+                onClick={() =>
+                  handleOpenDetailsModal({
+                    type: 'CR',
+                    period: 0,
+                  })
+                }
+              >
                 <ArrowSquareOut size={24} color="#00D47E" weight="fill" />
               </button>
               <ul>
                 <li>
                   Próximos 7 dias:
                   <small>
-                    {currencyFormat(receivableTotalizer.accounts.totalNextSeven.total)}
+                    {currencyFormat(
+                      receivableTotalizer.accounts.totalNextSeven.total,
+                    )}
                   </small>
-                  {startDate && (<button
-                    type="button"
-                    className="modal-button"
-                    onClick={() => handleOpenDetailsModal({
-                      type: 'CR',
-                      period: 7
-                    })}>
-                    <ArrowSquareOut size={20} color="#00D47E" weight="fill" />
-                  </button>)}
+                  {startDate && (
+                    <button
+                      type="button"
+                      className="modal-button"
+                      onClick={() =>
+                        handleOpenDetailsModal({
+                          type: 'CR',
+                          period: 7,
+                        })
+                      }
+                    >
+                      <ArrowSquareOut size={20} color="#00D47E" weight="fill" />
+                    </button>
+                  )}
                 </li>
                 <li>
                   Próximos 15 dias:
                   <small>
-                    {currencyFormat(receivableTotalizer.accounts.totalNextFifteen.total)}
+                    {currencyFormat(
+                      receivableTotalizer.accounts.totalNextFifteen.total,
+                    )}
                   </small>
-                  {startDate && (<button
-                    type="button"
-                    className="modal-button"
-                    onClick={() => handleOpenDetailsModal({
-                      type: 'CR',
-                      period: 15
-                    })}>
-                    <ArrowSquareOut size={20} color="#00D47E" weight="fill" />
-                  </button>)}
+                  {startDate && (
+                    <button
+                      type="button"
+                      className="modal-button"
+                      onClick={() =>
+                        handleOpenDetailsModal({
+                          type: 'CR',
+                          period: 15,
+                        })
+                      }
+                    >
+                      <ArrowSquareOut size={20} color="#00D47E" weight="fill" />
+                    </button>
+                  )}
                 </li>
               </ul>
             </section>
@@ -627,49 +735,64 @@ export const Totalizer = forwardRef<componentsRefType>((props, ref) => {
 
             <section>
               <strong>Cheques a Receber</strong>
-              <span>
-                {currencyFormat(receivableTotalizer.check.total)}
-              </span>
+              <span>{currencyFormat(receivableTotalizer.check.total)}</span>
               <small>({receivableTotalizer.check.quantity} itens)</small>
               <button
                 type="button"
                 className="modal-button"
-                onClick={() => handleOpenDetailsModal({
-                  type: 'CHR',
-                  period: 0
-                })}>
+                onClick={() =>
+                  handleOpenDetailsModal({
+                    type: 'CHR',
+                    period: 0,
+                  })
+                }
+              >
                 <ArrowSquareOut size={24} color="#00D47E" weight="fill" />
               </button>
               <ul>
                 <li>
                   Próximos 7 dias:
                   <small>
-                    {currencyFormat(receivableTotalizer.check.totalNextSeven.total)}
+                    {currencyFormat(
+                      receivableTotalizer.check.totalNextSeven.total,
+                    )}
                   </small>
-                  {startDate && (<button
-                    type="button"
-                    className="modal-button"
-                    onClick={() => handleOpenDetailsModal({
-                      type: 'CHR',
-                      period: 7
-                    })}>
-                    <ArrowSquareOut size={20} color="#00D47E" weight="fill" />
-                  </button>)}
+                  {startDate && (
+                    <button
+                      type="button"
+                      className="modal-button"
+                      onClick={() =>
+                        handleOpenDetailsModal({
+                          type: 'CHR',
+                          period: 7,
+                        })
+                      }
+                    >
+                      <ArrowSquareOut size={20} color="#00D47E" weight="fill" />
+                    </button>
+                  )}
                 </li>
                 <li>
                   Próximos 15 dias:
                   <small>
-                    {currencyFormat(receivableTotalizer.check.totalNextFifteen.total)}
+                    {currencyFormat(
+                      receivableTotalizer.check.totalNextFifteen.total,
+                    )}
                   </small>
-                  {startDate && (<button
-                    type="button"
-                    className="modal-button"
-                    onClick={() => handleOpenDetailsModal({
-                      type: 'CHR',
-                      period: 15
-                    })}>
-                    <ArrowSquareOut size={20} color="#00D47E" weight="fill" />
-                  </button>)}
+                  {startDate && (
+                    <button
+                      type="button"
+                      className="modal-button"
+                      onClick={() =>
+                        handleOpenDetailsModal({
+                          type: 'CHR',
+                          period: 15,
+                        })
+                      }
+                    >
+                      <ArrowSquareOut size={20} color="#00D47E" weight="fill" />
+                    </button>
+                  )}
                 </li>
               </ul>
             </section>
@@ -679,3 +802,5 @@ export const Totalizer = forwardRef<componentsRefType>((props, ref) => {
     </Container>
   );
 });
+
+Totalizer.displayName = 'Totalizer';

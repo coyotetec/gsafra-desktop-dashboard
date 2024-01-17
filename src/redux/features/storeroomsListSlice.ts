@@ -13,7 +13,7 @@ export interface StoreroomsListState {
 
 const initialState: StoreroomsListState = {
   options: [],
-  lastFetch: null
+  lastFetch: null,
 };
 
 export const storeroomsListSlice = createSlice({
@@ -24,7 +24,7 @@ export const storeroomsListSlice = createSlice({
       state.options = action.payload;
       state.lastFetch = new Date();
     },
-  }
+  },
 });
 
 export const { setStoreroomsData } = storeroomsListSlice.actions;

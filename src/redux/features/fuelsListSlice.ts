@@ -13,7 +13,7 @@ export interface FuelsListState {
 
 const initialState: FuelsListState = {
   options: [],
-  lastFetch: null
+  lastFetch: null,
 };
 
 export const fuelsListSlice = createSlice({
@@ -24,7 +24,7 @@ export const fuelsListSlice = createSlice({
       state.options = action.payload;
       state.lastFetch = new Date();
     },
-  }
+  },
 });
 
 export const { setFuelsData } = fuelsListSlice.actions;

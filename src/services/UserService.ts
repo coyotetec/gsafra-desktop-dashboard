@@ -2,9 +2,19 @@ import { PermissionType } from '../types/User';
 import { api } from './utils/api';
 
 class SafraService {
-  findPermissions(userId: number, databaseName?: string): Promise<PermissionType[]> {
+  findPermissions(
+    userId: number,
+    empresaId?: string,
+    databaseName?: string,
+  ): Promise<PermissionType[]> {
+    if (import.meta.env.VITE_ENVIRONMENT === 'cloud' && empresaId) {
+      api.setDefaultHeaders({
+        'X-Id-Empresa': empresaId,
+      });
+    }
+
     api.setDefaultHeaders({
-      'X-Database-Name': databaseName ? databaseName : 'default'
+      'X-Database-Name': databaseName || 'default',
     });
 
     return api.get(`/usuario/${userId}/permissoes`);

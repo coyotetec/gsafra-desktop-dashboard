@@ -24,7 +24,7 @@ export const Container = styled.main`
     margin-bottom: 32px;
     display: block;
     margin-top: 8px;
-    color: #00D47E;
+    color: #00d47e;
     text-decoration: none;
     font-size: 14px;
     font-weight: 600;

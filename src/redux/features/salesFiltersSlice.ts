@@ -27,7 +27,7 @@ const initialState: SalesFiltersState = {
   safra: '_',
   deliveryStatus: '_',
   clientAvarageUnit: 'sacks',
-  monthlyAvarageUnit: 'sacks'
+  monthlyAvarageUnit: 'sacks',
 };
 
 export const salesFiltersSlice = createSlice({
@@ -41,7 +41,7 @@ export const salesFiltersSlice = createSlice({
       if (state.safra === '_') {
         state.safra = action.payload;
       }
-    }
+    },
   },
 });
 

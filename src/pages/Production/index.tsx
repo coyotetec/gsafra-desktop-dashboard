@@ -4,7 +4,10 @@ import { Header } from '../../components/Header';
 import { Select } from '../../components/Select';
 import { useUserContext } from '../../contexts/UserContext';
 import { setData } from '../../redux/features/productionDataSlice';
-import { change, setFirstSafra } from '../../redux/features/productionFiltersSlice';
+import {
+  change,
+  setFirstSafra,
+} from '../../redux/features/productionFiltersSlice';
 import { setSafrasData } from '../../redux/features/safrasListSlice';
 import { RootState } from '../../redux/store';
 import ColheitaService from '../../services/ColheitaService';
@@ -20,7 +23,7 @@ export function Production() {
   const [isHarvestLoading, setIsHarvestLoading] = useState(true);
   const isFirstRender = useRef(true);
   const discountRef = useRef<componentsRefType>({
-    loadData() { return; },
+    loadData: () => null,
   });
 
   const {
@@ -52,16 +55,17 @@ export function Production() {
 
       const harvestTotalData = await ColheitaService.findTotal(safra);
 
-      dispatch(setData({
-        name: 'harvest',
-        data: harvestTotalData,
-      }));
+      dispatch(
+        setData({
+          name: 'harvest',
+          data: harvestTotalData,
+        }),
+      );
     }
 
     setIsHarvestLoading(false);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, hasPermission, safra]);
-
 
   const refreshData = useCallback(() => {
     loadData();
@@ -72,10 +76,14 @@ export function Production() {
     async function loadSafras() {
       if (hasToFetch(safrasList.lastFetch)) {
         const safrasData = await SafraService.findSafras();
-        dispatch(setSafrasData(safrasData.map((item) => ({
-          value: String(item.id),
-          label: item.nome
-        }))));
+        dispatch(
+          setSafrasData(
+            safrasData.map((item) => ({
+              value: String(item.id),
+              label: item.nome,
+            })),
+          ),
+        );
       }
 
       dispatch(setFirstSafra(safrasList.options[0]?.value || '_'));
@@ -92,26 +100,22 @@ export function Production() {
     <Container>
       <Header
         title="Produção"
-        headerFilter={(
+        headerFilter={
           <Select
             options={safrasList.options}
             placeholder="Safra"
             noOptionsMessage="0 safras encontradas"
             value={safra}
             onChange={(value: string) => {
-              dispatch(change({ name: 'safra', value: value }));
+              dispatch(change({ name: 'safra', value }));
             }}
             width="324px"
           />
-        )}
+        }
         refreshData={refreshData}
       />
-      <Harvest
-        isLoading={isHarvestLoading}
-      />
-      <Productivity
-        isLoading={isHarvestLoading}
-      />
+      <Harvest isLoading={isHarvestLoading} />
+      <Productivity isLoading={isHarvestLoading} />
       <Discount ref={discountRef} />
     </Container>
   );

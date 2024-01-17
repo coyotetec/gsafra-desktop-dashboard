@@ -49,7 +49,7 @@ interface HectareCostMessageProps {
 
 export const HectareCostMessage = styled.div<HectareCostMessageProps>`
   margin-left: auto;
-  background: #30454C;
+  background: #30454c;
   border-radius: 8px;
   border: 1px solid #506167;
   font-size: 12px;
@@ -58,9 +58,11 @@ export const HectareCostMessage = styled.div<HectareCostMessageProps>`
   margin-top: 12px;
   animation: ${messageIn} 0.3s ease-in-out;
 
-  ${({ isLeaving }) => isLeaving && css`
-    animation: ${messageOut} 0.2s forwards;
-  `}
+  ${({ isLeaving }) =>
+    isLeaving &&
+    css`
+      animation: ${messageOut} 0.2s forwards;
+    `}
 
   div {
     background: #506167;

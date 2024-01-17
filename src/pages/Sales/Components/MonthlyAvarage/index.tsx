@@ -1,4 +1,11 @@
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from 'react';
 import { Spinner } from '../../../../components/Spinner';
 import { Container, Loader } from './styles';
 import { Switch } from '../../../../components/Switch';
@@ -22,7 +29,10 @@ interface MonthlyAvarageProps {
   safraName: string;
 }
 
-export const MonthlyAvarage = forwardRef<componentsRefType, MonthlyAvarageProps>(({ safraName }, ref) => {
+export const MonthlyAvarage = forwardRef<
+  componentsRefType,
+  MonthlyAvarageProps
+>(({ safraName }, ref) => {
   const [isLoading, setIsLoading] = useState(true);
   const chartRef = useRef(null);
   const isFirstRender = useRef(true);
@@ -34,10 +44,7 @@ export const MonthlyAvarage = forwardRef<componentsRefType, MonthlyAvarageProps>
       deliveryStatus,
       monthlyAvarageUnit: unit,
     },
-    salesData: {
-      monthlyAvarage,
-      monthlyAvarageLastFetch,
-    }
+    salesData: { monthlyAvarage, monthlyAvarageLastFetch },
   } = useSelector((state: RootState) => state);
   const dispatch = useDispatch();
 
@@ -61,18 +68,26 @@ export const MonthlyAvarage = forwardRef<componentsRefType, MonthlyAvarageProps>
         return;
       }
 
-      if (rangeDates.endDate && rangeDates.startDate && rangeDates.endDate < rangeDates.startDate) {
+      if (
+        rangeDates.endDate &&
+        rangeDates.startDate &&
+        rangeDates.endDate < rangeDates.startDate
+      ) {
         setIsLoading(false);
         toast({
           type: 'danger',
-          text: 'Data final precisa ser maior que inicial!'
+          text: 'Data final precisa ser maior que inicial!',
         });
         return;
       }
 
       const deliveryStatusParsed = deliveryStatus !== '_' ? deliveryStatus : '';
-      const startDateParsed = rangeDates.startDate ? format(rangeDates.startDate, 'dd-MM-yyyy') : '';
-      const endDateParsed = rangeDates.endDate ? format(rangeDates.endDate, 'dd-MM-yyyy') : '';
+      const startDateParsed = rangeDates.startDate
+        ? format(rangeDates.startDate, 'dd-MM-yyyy')
+        : '';
+      const endDateParsed = rangeDates.endDate
+        ? format(rangeDates.endDate, 'dd-MM-yyyy')
+        : '';
 
       const monthlyAvarageData = await VendaService.findMediaMes({
         safraId: Number(safra),
@@ -84,16 +99,27 @@ export const MonthlyAvarage = forwardRef<componentsRefType, MonthlyAvarageProps>
       dispatch(setMonthlyAvarage(monthlyAvarageData));
     }
     setIsLoading(false);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [deliveryStatus, dispatch, hasPermission, rangeDates.endDate, rangeDates.startDate, safra]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    deliveryStatus,
+    dispatch,
+    hasPermission,
+    rangeDates.endDate,
+    rangeDates.startDate,
+    safra,
+  ]);
 
   useEffect(() => {
     loadData();
   }, [loadData]);
 
-  useImperativeHandle(ref, () => ({
-    loadData
-  }), [loadData]);
+  useImperativeHandle(
+    ref,
+    () => ({
+      loadData,
+    }),
+    [loadData],
+  );
 
   function handleSaveChart() {
     const chartElement = chartRef.current;
@@ -114,7 +140,6 @@ export const MonthlyAvarage = forwardRef<componentsRefType, MonthlyAvarageProps>
       a.click();
     });
   }
-
 
   return (
     <Container>
@@ -139,27 +164,35 @@ export const MonthlyAvarage = forwardRef<componentsRefType, MonthlyAvarageProps>
               {currencyFormat(monthlyAvarage.mediaSafraSaca)}
             </span>
           </div>
-          <div className='left-side'>
+          <div className="left-side">
             <Switch
               leftLabel="Saca"
               rightLabel="Kg"
               isToggled={unit === 'kg'}
-              onToggle={(e) => dispatch(change({
-                name: 'monthlyAvarageUnit',
-                value: e.target.checked ? 'kg' : 'sacks'
-              }))}
+              onToggle={(e) =>
+                dispatch(
+                  change({
+                    name: 'monthlyAvarageUnit',
+                    value: e.target.checked ? 'kg' : 'sacks',
+                  }),
+                )
+              }
             />
             <button onClick={handleSaveChart}>
-              <DownloadSimple size={24} color="#F7FBFE" weight='regular' />
+              <DownloadSimple size={24} color="#F7FBFE" weight="regular" />
             </button>
           </div>
         </header>
         <MonthlyAvarageChart
-          labels={monthlyAvarage.mediaMes.map(i => i.mes)}
-          data={monthlyAvarage.mediaMes.map(i => unit === 'sacks' ? i.precoMedioSaca : i.precoMedioKg)}
+          labels={monthlyAvarage.mediaMes.map((i) => i.mes)}
+          data={monthlyAvarage.mediaMes.map((i) =>
+            unit === 'sacks' ? i.precoMedioSaca : i.precoMedioKg,
+          )}
           unit={unit}
         />
       </div>
     </Container>
   );
 });
+
+MonthlyAvarage.displayName = 'MonthlyAvarage';

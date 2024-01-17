@@ -15,12 +15,19 @@ interface FinancialViewChartProps {
   allData: ViewTotal[];
 }
 
-export function FinancialViewChart({ allData, labels, data }: FinancialViewChartProps) {
+export function FinancialViewChart({
+  allData,
+  labels,
+  data,
+}: FinancialViewChartProps) {
   const [currentPage, setCurrentPage] = useState(0);
-  const dataToShow = useMemo(() => ({
-    labels: labels.slice(currentPage * 7, (currentPage * 7) + 7),
-    data: data.slice(currentPage * 7, (currentPage * 7) + 7)
-  }), [currentPage, labels, data]);
+  const dataToShow = useMemo(
+    () => ({
+      labels: labels.slice(currentPage * 7, currentPage * 7 + 7),
+      data: data.slice(currentPage * 7, currentPage * 7 + 7),
+    }),
+    [currentPage, labels, data],
+  );
 
   useEffect(() => {
     setCurrentPage(0);
@@ -35,7 +42,7 @@ export function FinancialViewChart({ allData, labels, data }: FinancialViewChart
   return (
     <Container>
       {dataToShow.data.length === 0 ? (
-        <div className='empty'>
+        <div className="empty">
           <img src={emptyIllustration} alt="Ilustração de vazio" />
           <strong>Nenhum dado encontrado</strong>
           <span>Tente inserir outro intervalo de datas.</span>
@@ -44,7 +51,9 @@ export function FinancialViewChart({ allData, labels, data }: FinancialViewChart
         <ChartContainer>
           <Bar
             data={{
-              labels: dataToShow.labels.map(i => `${i.slice(0, 40)}${i.length > 40 ? '...' : ''}`),
+              labels: dataToShow.labels.map(
+                (i) => `${i.slice(0, 40)}${i.length > 40 ? '...' : ''}`,
+              ),
               datasets: [
                 {
                   data: dataToShow.data,
@@ -58,8 +67,8 @@ export function FinancialViewChart({ allData, labels, data }: FinancialViewChart
                     '#5C6BC0',
                   ],
                   barThickness: 12,
-                }
-              ]
+                },
+              ],
             }}
             plugins={[ChartDataLabels]}
             options={{
@@ -71,11 +80,11 @@ export function FinancialViewChart({ allData, labels, data }: FinancialViewChart
                   beginAtZero: true,
                   display: false,
                   grid: {
-                    display: false
+                    display: false,
                   },
                   stacked: true,
                   min: 0,
-                  max: higherValue <= 0 ? 1 : higherValue * 1.5
+                  max: higherValue <= 0 ? 1 : higherValue * 1.5,
                 },
                 y: {
                   beginAtZero: true,
@@ -84,7 +93,7 @@ export function FinancialViewChart({ allData, labels, data }: FinancialViewChart
                       size: 12,
                     },
                   },
-                }
+                },
               },
               plugins: {
                 legend: {
@@ -110,7 +119,7 @@ export function FinancialViewChart({ allData, labels, data }: FinancialViewChart
 
                     return currencyFormat(item?.totalReal || 0);
                   },
-                }
+                },
               },
             }}
           />
@@ -120,19 +129,19 @@ export function FinancialViewChart({ allData, labels, data }: FinancialViewChart
         <footer>
           {currentPage > 0 && (
             <button
-              aria-label='página anterior'
+              aria-label="página anterior"
               onClick={() => setCurrentPage((prevState) => prevState - 1)}
             >
-              <ArrowLeft size={20} color="#F7FBFE" weight='regular' />
+              <ArrowLeft size={20} color="#F7FBFE" weight="regular" />
             </button>
           )}
 
-          {((currentPage * 7) + 7) < data.length && (
+          {currentPage * 7 + 7 < data.length && (
             <button
-              aria-label='próxima página'
+              aria-label="próxima página"
               onClick={() => setCurrentPage((prevState) => prevState + 1)}
             >
-              <ArrowRight size={20} color="#F7FBFE" weight='regular' />
+              <ArrowRight size={20} color="#F7FBFE" weight="regular" />
             </button>
           )}
         </footer>

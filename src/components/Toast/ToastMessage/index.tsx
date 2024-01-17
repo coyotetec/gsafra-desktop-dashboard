@@ -1,4 +1,4 @@
-import { CheckCircle,  XCircle } from 'phosphor-react';
+import { CheckCircle, XCircle } from 'phosphor-react';
 import { useEffect } from 'react';
 import { Message } from '../ToastContainer';
 import { Container } from './styles';
@@ -30,8 +30,12 @@ export function ToastMessage({ message, onRemoveMessage }: ToastMessageProps) {
       tabIndex={0}
       role="button"
     >
-      {message.type === 'danger' && <XCircle size={24} color="#F7FBFE" weight="bold" />}
-      {message.type === 'success' && <CheckCircle size={24} color="#F7FBFE" weight="bold" />}
+      {message.type === 'danger' && (
+        <XCircle size={24} color="#F7FBFE" weight="bold" />
+      )}
+      {message.type === 'success' && (
+        <CheckCircle size={24} color="#F7FBFE" weight="bold" />
+      )}
       <strong>{message.text}</strong>
     </Container>
   );

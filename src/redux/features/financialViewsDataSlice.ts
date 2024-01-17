@@ -27,7 +27,14 @@ export interface FinancialViewsDataState {
 interface ChangeViewPayload {
   id: number;
   name: keyof FinancialView;
-  value: number | string | ViewTotal[] | ViewTotalizer[] | RangeDates | Date | null;
+  value:
+    | number
+    | string
+    | ViewTotal[]
+    | ViewTotalizer[]
+    | RangeDates
+    | Date
+    | null;
 }
 
 const initialState: FinancialViewsDataState = {
@@ -48,13 +55,14 @@ export const financialViewsDataSlice = createSlice({
         total: [],
         totalizers: [],
         rangeDates: {
-          startDate: view.periodoPadraoMeses === 0
-            ? startOfMonth(new Date())
-            : view.periodoPadraoMeses === -2
-              ? startOfYear(new Date())
-              : view.periodoPadraoMeses === -1
-                ? null
-                : subMonths(new Date(), view.periodoPadraoMeses),
+          startDate:
+            view.periodoPadraoMeses === 0
+              ? startOfMonth(new Date())
+              : view.periodoPadraoMeses === -2
+                ? startOfYear(new Date())
+                : view.periodoPadraoMeses === -1
+                  ? null
+                  : subMonths(new Date(), view.periodoPadraoMeses),
           endDate: view.periodoPadraoMeses === -1 ? null : new Date(),
         },
         lastFetch: null,
@@ -63,16 +71,21 @@ export const financialViewsDataSlice = createSlice({
     },
     changeView: (state, { payload }: PayloadAction<ChangeViewPayload>) => {
       const selectedViewIndex = state.views.findIndex(
-        (view) => view.id === payload.id
+        (view) => view.id === payload.id,
       );
 
       if (selectedViewIndex === -1) {
         return;
       }
 
-      state.views[selectedViewIndex][payload.name] = payload.value as number & string & ViewTotal[] & ViewTotalizer[] & RangeDates & Date;
+      state.views[selectedViewIndex][payload.name] = payload.value as number &
+        string &
+        ViewTotal[] &
+        ViewTotalizer[] &
+        RangeDates &
+        Date;
       state.views[selectedViewIndex].lastFetch = new Date();
-    }
+    },
   },
 });
 

@@ -6,6 +6,7 @@ import { Container } from './styles';
 import { currencyFormat } from '../../../../utils/currencyFormat';
 
 import emptyIllustration from '../../../../assets/images/empty.svg';
+import { useMemo } from 'react';
 
 interface CategoryCostChartProps {
   labels: string[];
@@ -14,11 +15,21 @@ interface CategoryCostChartProps {
   unit: string;
 }
 
-export function CategoryCostChart({ labels, data, percentages, unit }: CategoryCostChartProps) {
+export function CategoryCostChart({
+  labels,
+  data,
+  percentages,
+  unit,
+}: CategoryCostChartProps) {
+  const dataSum = useMemo(
+    () => data.reduce((acc, curr) => acc + curr, 0),
+    [data],
+  );
+
   return (
     <Container>
-      {data.length === 0 ? (
-        <div className='empty'>
+      {data.length === 0 || dataSum === 0 ? (
+        <div className="empty">
           <img src={emptyIllustration} alt="Ilustração de vazio" />
           <strong>Nenhum dado encontrado</strong>
           <span>Tente inserir outro intervalo de datas.</span>
@@ -48,9 +59,9 @@ export function CategoryCostChart({ labels, data, percentages, unit }: CategoryC
                   '#9c27b0',
                   '#5C6BC0',
                 ],
-                borderWidth: 2
-              }
-            ]
+                borderWidth: 2,
+              },
+            ],
           }}
           plugins={[ChartDataLabels]}
           options={{
@@ -73,8 +84,8 @@ export function CategoryCostChart({ labels, data, percentages, unit }: CategoryC
                       label += currencyFormat(context.parsed);
                     }
                     return `${label}${unit === 'hectareCost' ? '/ha' : ''}`;
-                  }
-                }
+                  },
+                },
               },
               datalabels: {
                 display(ctx) {
@@ -83,18 +94,18 @@ export function CategoryCostChart({ labels, data, percentages, unit }: CategoryC
                 },
                 font: {
                   weight: 600,
-                  size: 16
+                  size: 16,
                 },
                 formatter(value, ctx) {
                   const percentage = percentages[ctx.dataIndex];
                   const parsedPercentage = new Intl.NumberFormat('id', {
                     minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
+                    maximumFractionDigits: 2,
                   }).format(percentage);
 
                   return `${parsedPercentage}%`;
                 },
-              }
+              },
             },
           }}
         />

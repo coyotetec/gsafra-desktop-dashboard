@@ -30,7 +30,7 @@ export const Container = styled.div`
     padding: 16px;
     display: flex;
     flex-direction: column;
-    background: #30454C;
+    background: #30454c;
     border-radius: 8px;
     border: 1px solid #506167;
     margin-top: 8px;
@@ -51,12 +51,12 @@ export const Container = styled.div`
         }
 
         &.has-error span {
-          color: #FF5555;
+          color: #ff5555;
           font-size: 14px;
         }
 
         &.negative span {
-          color: #FF5555;
+          color: #ff5555;
         }
 
         strong {
@@ -84,7 +84,7 @@ export const Container = styled.div`
       }
 
       a {
-        color: #00D47E;
+        color: #00d47e;
         text-decoration: none;
         font-size: 14px;
         font-weight: 600;

@@ -1,7 +1,21 @@
 import { format } from 'date-fns';
-import { ArrowCircleDown, ArrowCircleRight, ArrowCircleUp, ChartLine, Scales, X } from 'phosphor-react';
+import {
+  ArrowCircleDown,
+  ArrowCircleRight,
+  ArrowCircleUp,
+  ChartLine,
+  Scales,
+  X,
+} from 'phosphor-react';
 import { Column } from 'primereact/column';
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { NotAllowed } from '../../../../components/NotAllowed';
 import { Spinner } from '../../../../components/Spinner';
@@ -21,30 +35,19 @@ export const Totalizers = forwardRef<componentsRefType>((props, ref) => {
   const isFirstRender = useRef(true);
 
   const {
-    beanStockFilters: {
-      crop,
-      rangeDates,
-      producer,
-      storage,
-      safra,
-    },
-    beanStockData: {
-      beanStock,
-      beanStcokLastFetch,
-    }
+    beanStockFilters: { crop, rangeDates, producer, storage, safra },
+    beanStockData: { beanStock, beanStcokLastFetch },
   } = useSelector((state: RootState) => state);
   const dispatch = useDispatch();
 
   const { hasPermission } = useUserContext();
 
-  const {
-    shouldRender: entriesShouldRender,
-    animatedElementRef: entriesRef
-  } = useAnimatedUnmount(entriesIsVisible);
+  const { shouldRender: entriesShouldRender, animatedElementRef: entriesRef } =
+    useAnimatedUnmount(entriesIsVisible);
 
   const {
     shouldRender: departuresShouldRender,
-    animatedElementRef: departuresRef
+    animatedElementRef: departuresRef,
   } = useAnimatedUnmount(departuresIsVisible);
 
   const loadData = useCallback(async () => {
@@ -66,10 +69,15 @@ export const Totalizers = forwardRef<componentsRefType>((props, ref) => {
       }
 
       const produtorIdParsed = producer !== '_' ? Number(producer) : undefined;
-      const armazenamentoIdParsed = storage !== '_' ? Number(storage) : undefined;
+      const armazenamentoIdParsed =
+        storage !== '_' ? Number(storage) : undefined;
       const safraIdParsed = safra !== '_' ? Number(safra) : undefined;
-      const startDateParsed = rangeDates.startDate ? format(rangeDates.startDate, 'dd-MM-yyyy') : '';
-      const endDateParsed = rangeDates.endDate ? format(rangeDates.endDate, 'dd-MM-yyyy') : '';
+      const startDateParsed = rangeDates.startDate
+        ? format(rangeDates.startDate, 'dd-MM-yyyy')
+        : '';
+      const endDateParsed = rangeDates.endDate
+        ? format(rangeDates.endDate, 'dd-MM-yyyy')
+        : '';
 
       const beanStockTotalData = await EstoqueGraosService.findTotal({
         culturaId: Number(crop),
@@ -77,7 +85,7 @@ export const Totalizers = forwardRef<componentsRefType>((props, ref) => {
         endDate: endDateParsed,
         produtorId: produtorIdParsed,
         armazenamentoId: armazenamentoIdParsed,
-        safraId: safraIdParsed
+        safraId: safraIdParsed,
       });
 
       dispatch(setBeanStock(beanStockTotalData));
@@ -85,21 +93,34 @@ export const Totalizers = forwardRef<componentsRefType>((props, ref) => {
       setBeanStock(beanStockTotalData);
     }
     setIsLoading(false);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [crop, dispatch, hasPermission, producer, rangeDates.endDate, rangeDates.startDate, safra, storage]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    crop,
+    dispatch,
+    hasPermission,
+    producer,
+    rangeDates.endDate,
+    rangeDates.startDate,
+    safra,
+    storage,
+  ]);
 
   useEffect(() => {
     loadData();
   }, [loadData]);
 
-  useImperativeHandle(ref, () => ({
-    loadData
-  }), [loadData]);
+  useImperativeHandle(
+    ref,
+    () => ({
+      loadData,
+    }),
+    [loadData],
+  );
 
   function formatNumber(number: number, sufix?: string) {
     return `${new Intl.NumberFormat('id', {
       maximumFractionDigits: 2,
-    }).format(number)}${sufix ? sufix : ''}`;
+    }).format(number)}${sufix || ''}`;
   }
 
   return (
@@ -135,11 +156,8 @@ export const Totalizers = forwardRef<componentsRefType>((props, ref) => {
           </strong>
           <span>
             {formatNumber(beanStock.entradas.pesoLiquido, ' Kg')}
-            <button
-              type="button"
-              onClick={() => setEntrieIsVisible(true)}
-            >
-              <ArrowCircleRight size={24} color="#F7FBFE" weight='fill' />
+            <button type="button" onClick={() => setEntrieIsVisible(true)}>
+              <ArrowCircleRight size={24} color="#F7FBFE" weight="fill" />
             </button>
           </span>
           <small>
@@ -159,14 +177,13 @@ export const Totalizers = forwardRef<componentsRefType>((props, ref) => {
           </strong>
           <span>
             {formatNumber(beanStock.saidas.pesoLiquido, ' Kg')}
-            <button
-              type="button"
-              onClick={() => setDepartureIsVisible(true)}
-            >
-              <ArrowCircleRight size={24} color="#F7FBFE" weight='fill' />
+            <button type="button" onClick={() => setDepartureIsVisible(true)}>
+              <ArrowCircleRight size={24} color="#F7FBFE" weight="fill" />
             </button>
           </span>
-          <small>{formatNumber(beanStock.saidas.pesoLiquido / 60, ' Sacas')}</small>
+          <small>
+            {formatNumber(beanStock.saidas.pesoLiquido / 60, ' Sacas')}
+          </small>
         </div>
         <div className="card">
           {!hasPermission('resumo_estoque_graos') && <NotAllowed />}
@@ -193,18 +210,42 @@ export const Totalizers = forwardRef<componentsRefType>((props, ref) => {
               <X size={20} color="#F7FBFE" />
             </button>
             <h3>ENTRADAS - VISÃO DETALHADA</h3>
-            <Table
-              value={[beanStock.entradas]}
-            >
-              <Column header="Peso (Bruto - Tara)" body={(rowData) => formatNumber(rowData?.peso, ' Kg')} />
-              <Column header="Desc. Classific." body={(rowData) => formatNumber(rowData?.descontoClassificacao, ' Kg')} />
-              <Column header="Taxa Recepção" body={(rowData) => formatNumber(rowData?.taxaRecepcao, ' Kg')} />
-              <Column header="Cota Capital" body={(rowData) => formatNumber(rowData?.cotaCapital, ' Kg')} />
-              <Column header="Taxa Armazenamento" body={(rowData) => formatNumber(rowData?.taxaArmazenamento, ' Kg')} />
-              <Column header="Quebra Técnica" body={(rowData) => formatNumber(rowData?.quebraTecnica, ' Kg')} />
-              <Column style={{ minWidth: 120 }} header="Peso Liquido" body={
-                (rowData) => <strong>{formatNumber(rowData?.pesoLiquido, ' Kg')}</strong>
-              } />
+            <Table value={[beanStock.entradas]}>
+              <Column
+                header="Peso (Bruto - Tara)"
+                body={(rowData) => formatNumber(rowData?.peso, ' Kg')}
+              />
+              <Column
+                header="Desc. Classific."
+                body={(rowData) =>
+                  formatNumber(rowData?.descontoClassificacao, ' Kg')
+                }
+              />
+              <Column
+                header="Taxa Recepção"
+                body={(rowData) => formatNumber(rowData?.taxaRecepcao, ' Kg')}
+              />
+              <Column
+                header="Cota Capital"
+                body={(rowData) => formatNumber(rowData?.cotaCapital, ' Kg')}
+              />
+              <Column
+                header="Taxa Armazenamento"
+                body={(rowData) =>
+                  formatNumber(rowData?.taxaArmazenamento, ' Kg')
+                }
+              />
+              <Column
+                header="Quebra Técnica"
+                body={(rowData) => formatNumber(rowData?.quebraTecnica, ' Kg')}
+              />
+              <Column
+                style={{ minWidth: 120 }}
+                header="Peso Liquido"
+                body={(rowData) => (
+                  <strong>{formatNumber(rowData?.pesoLiquido, ' Kg')}</strong>
+                )}
+              />
             </Table>
           </div>
         </DetailWrapper>
@@ -219,14 +260,24 @@ export const Totalizers = forwardRef<componentsRefType>((props, ref) => {
               <X size={20} color="#F7FBFE" />
             </button>
             <h3>SAÍDAS - VISÃO DETALHADA</h3>
-            <Table
-              value={[beanStock.saidas]}
-            >
-              <Column header="Peso (Bruto - Tara)" body={(rowData) => formatNumber(rowData?.peso, ' Kg')} />
-              <Column header="Desc. Classific." body={(rowData) => formatNumber(rowData?.descontoClassificacao, ' Kg')} />
-              <Column style={{ minWidth: 120 }} header="Peso Liquido" body={
-                (rowData) => <strong>{formatNumber(rowData?.pesoLiquido, ' Kg')}</strong>
-              } />
+            <Table value={[beanStock.saidas]}>
+              <Column
+                header="Peso (Bruto - Tara)"
+                body={(rowData) => formatNumber(rowData?.peso, ' Kg')}
+              />
+              <Column
+                header="Desc. Classific."
+                body={(rowData) =>
+                  formatNumber(rowData?.descontoClassificacao, ' Kg')
+                }
+              />
+              <Column
+                style={{ minWidth: 120 }}
+                header="Peso Liquido"
+                body={(rowData) => (
+                  <strong>{formatNumber(rowData?.pesoLiquido, ' Kg')}</strong>
+                )}
+              />
             </Table>
           </div>
         </DetailWrapper>
@@ -234,3 +285,5 @@ export const Totalizers = forwardRef<componentsRefType>((props, ref) => {
     </Container>
   );
 });
+
+Totalizers.displayName = 'Totalizers';

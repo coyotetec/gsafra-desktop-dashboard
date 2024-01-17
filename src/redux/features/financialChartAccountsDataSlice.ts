@@ -6,12 +6,12 @@ export interface FinancialChartAccountsDataState {
     labels: string[];
     data: number[];
     lastFetch: Date | null;
-  }
+  };
   debit: {
     labels: string[];
     data: number[];
     lastFetch: Date | null;
-  }
+  };
 }
 
 interface SetDatePayload {

@@ -21,7 +21,13 @@ interface CashFlowChartProps {
   isLoading: boolean;
 }
 
-export function CashFlowChart({ labels, cashFlow, startDate, endDate, isLoading }: CashFlowChartProps) {
+export function CashFlowChart({
+  labels,
+  cashFlow,
+  startDate,
+  endDate,
+  isLoading,
+}: CashFlowChartProps) {
   const chartRef = useRef(null);
 
   const { hasPermission } = useUserContext();
@@ -52,7 +58,6 @@ export function CashFlowChart({ labels, cashFlow, startDate, endDate, isLoading 
     });
   }
 
-
   return (
     <Container ref={chartRef}>
       {!hasPermission('fluxo_caixa') && <NotAllowed />}
@@ -67,11 +72,11 @@ export function CashFlowChart({ labels, cashFlow, startDate, endDate, isLoading 
           <span>{currencyFormat(cashFlow.currentBalance || 0)}</span>
         </div>
         <button onClick={handleSaveChart} data-html2canvas-ignore>
-          <DownloadSimple size={24} color="#F7FBFE" weight='regular' />
+          <DownloadSimple size={24} color="#F7FBFE" weight="regular" />
         </button>
       </header>
       {cashFlow.hasError ? (
-        <div className='empty'>
+        <div className="empty">
           <img src={emptyIllustration} alt="Ilustração de vazio" />
           <strong>Nenhum dado encontrado</strong>
           <span>Tente inserir outro intervalo de datas.</span>
@@ -95,7 +100,7 @@ export function CashFlowChart({ labels, cashFlow, startDate, endDate, isLoading 
                   data: getCashFlowItemData(cashFlow.cashFlowCreditsPlan),
                   backgroundColor: 'rgba(0, 212, 126, 0.5)',
                   borderColor: '#00D47E',
-                  borderWidth: 2
+                  borderWidth: 2,
                 },
                 {
                   type: 'bar' as const,
@@ -109,7 +114,7 @@ export function CashFlowChart({ labels, cashFlow, startDate, endDate, isLoading 
                   data: getCashFlowItemData(cashFlow.cashFlowDebitsPlan),
                   backgroundColor: 'rgba(255, 85, 85, 0.5)',
                   borderColor: '#FF5555',
-                  borderWidth: 2
+                  borderWidth: 2,
                 },
                 {
                   type: 'line' as const,
@@ -126,8 +131,8 @@ export function CashFlowChart({ labels, cashFlow, startDate, endDate, isLoading 
                   backgroundColor: 'rgba(24, 144, 255, 0.5)',
                   borderColor: 'rgba(24, 144, 255, 0.4)',
                   borderWidth: 2,
-                }
-              ]
+                },
+              ],
             }}
             options={{
               responsive: true,
@@ -139,7 +144,7 @@ export function CashFlowChart({ labels, cashFlow, startDate, endDate, isLoading 
                     callback(this, tickValue) {
                       return currencyFormat(Number(tickValue));
                     },
-                    maxTicksLimit: 12
+                    maxTicksLimit: 12,
                   },
                 },
               },
@@ -161,10 +166,10 @@ export function CashFlowChart({ labels, cashFlow, startDate, endDate, isLoading 
                         label += currencyFormat(context.parsed.y);
                       }
                       return label;
-                    }
-                  }
-                }
-              }
+                    },
+                  },
+                },
+              },
             }}
           />
         </div>

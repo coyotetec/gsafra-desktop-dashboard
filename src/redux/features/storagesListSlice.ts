@@ -13,7 +13,7 @@ export interface StoragesListState {
 
 const initialState: StoragesListState = {
   options: [],
-  lastFetch: null
+  lastFetch: null,
 };
 
 export const storagesListSlice = createSlice({
@@ -24,7 +24,7 @@ export const storagesListSlice = createSlice({
       state.options = action.payload;
       state.lastFetch = new Date();
     },
-  }
+  },
 });
 
 export const { setStoragesData } = storagesListSlice.actions;

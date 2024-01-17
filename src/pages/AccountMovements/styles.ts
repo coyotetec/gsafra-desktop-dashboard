@@ -30,7 +30,7 @@ export const Container = styled.main`
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #00D47E;
+      background: #00d47e;
       border-radius: 8px;
       margin-left: 8px;
       border: none;
@@ -41,7 +41,7 @@ export const Container = styled.main`
 export const Table = styled(DataTable)`
   margin-top: 12px;
   font-family: 'Montserrat', sans-serif;
-  color: #CFD4D6 !important;
+  color: #cfd4d6 !important;
   font-size: 14px;
 
   .p-datatable-wrapper {
@@ -57,7 +57,7 @@ export const Table = styled(DataTable)`
     tr {
       th {
         border-color: #748990 !important;
-        color: #CFD4D6;
+        color: #cfd4d6;
         background: #506167;
         padding: 8px 12px;
         font-weight: 600;
@@ -75,8 +75,8 @@ export const Table = styled(DataTable)`
     }
 
     tr {
-      color: #CFD4D6;
-      background: #30454C;
+      color: #cfd4d6;
+      background: #30454c;
 
       td {
         border-color: #506167 !important;
@@ -94,10 +94,12 @@ export const Table = styled(DataTable)`
   }
 
   .p-row-toggler {
-    color: #9FA9AC !important;
+    color: #9fa9ac !important;
     margin-right: 8px;
 
-    &:hover, &:active, &:focus {
+    &:hover,
+    &:active,
+    &:focus {
       background: transparent !important;
       border: none !important;
       box-shadow: none !important;

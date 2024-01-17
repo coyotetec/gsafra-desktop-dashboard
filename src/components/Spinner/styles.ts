@@ -31,11 +31,11 @@ export const Svg = styled.svg<SvgProps>`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: ${({size}) => size}px;
-  height: ${({size}) => size}px;
+  width: ${({ size }) => size}px;
+  height: ${({ size }) => size}px;
 
   .path {
-    stroke: #00D47E;
+    stroke: #00d47e;
     stroke-linecap: round;
     animation: ${dash} 1.5s ease-in-out infinite;
   }

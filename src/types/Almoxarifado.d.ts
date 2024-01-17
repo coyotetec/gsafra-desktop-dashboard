@@ -1,6 +1,6 @@
 export interface Almoxarifado {
   id: number;
-  nome: string,
+  nome: string;
   idFazenda: number;
   status: number;
 }

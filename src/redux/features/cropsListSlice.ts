@@ -13,7 +13,7 @@ export interface CropsListState {
 
 const initialState: CropsListState = {
   options: [],
-  lastFetch: null
+  lastFetch: null,
 };
 
 export const cropsListSlice = createSlice({
@@ -24,7 +24,7 @@ export const cropsListSlice = createSlice({
       state.options = action.payload;
       state.lastFetch = new Date();
     },
-  }
+  },
 });
 
 export const { setCropsData } = cropsListSlice.actions;

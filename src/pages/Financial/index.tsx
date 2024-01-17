@@ -15,16 +15,19 @@ import { componentsRefType } from '../../types/Types';
 import { MultiSelect } from '../../components/MultiSelect';
 
 export function Financial() {
-  const { safrasList, financialFilters: { safras, lastSelectedSafras, status } } = useSelector((state: RootState) => state);
+  const {
+    safrasList,
+    financialFilters: { safras, lastSelectedSafras, status },
+  } = useSelector((state: RootState) => state);
   const dispatch = useDispatch();
   const totalizerRef = useRef<componentsRefType>({
-    loadData() { return; },
+    loadData: () => null,
   });
   const cashFlowRef = useRef<componentsRefType>({
-    loadData() { return; },
+    loadData: () => null,
   });
   const chartAccountsRef = useRef<componentsRefType>({
-    loadData() { return; },
+    loadData: () => null,
   });
 
   const refreshData = useCallback(() => {
@@ -37,10 +40,14 @@ export function Financial() {
     async function loadSafras() {
       if (hasToFetch(safrasList.lastFetch)) {
         const safrasData = await SafraService.findSafras();
-        dispatch(setSafrasData(safrasData.map((item) => ({
-          value: String(item.id),
-          label: item.nome
-        }))));
+        dispatch(
+          setSafrasData(
+            safrasData.map((item) => ({
+              value: String(item.id),
+              label: item.nome,
+            })),
+          ),
+        );
       }
     }
 
@@ -50,19 +57,21 @@ export function Financial() {
   return (
     <Container>
       <Header
-        title='Financeiro'
-        headerFilter={(
+        title="Financeiro"
+        headerFilter={
           <>
             <MultiSelect
               options={safrasList.options}
               onChange={(value) => {
-                dispatch(change({ name: 'safras', value: value }));
+                dispatch(change({ name: 'safras', value }));
               }}
               value={safras}
               placeholder="Todas as Safras"
-              selectedItemsLabel='{0} Safras'
+              selectedItemsLabel="{0} Safras"
               onClose={(value) => {
-                if (JSON.stringify(lastSelectedSafras) === JSON.stringify(value)) {
+                if (
+                  JSON.stringify(lastSelectedSafras) === JSON.stringify(value)
+                ) {
                   return;
                 }
 
@@ -87,12 +96,12 @@ export function Financial() {
               ]}
               value={status}
               onChange={(value: string) => {
-                dispatch(change({ name: 'status', value: value }));
+                dispatch(change({ name: 'status', value }));
               }}
               width="280px"
             />
           </>
-        )}
+        }
         refreshData={refreshData}
       />
       <Totalizer ref={totalizerRef} />

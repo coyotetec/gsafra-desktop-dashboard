@@ -23,22 +23,46 @@ export function Router() {
     <Routes>
       <Route path="/" element={<Navigate to="/financeiro" />} />
       <Route path="/financeiro" element={<Financial />} />
-      <Route path="/financeiro/movimento-contas/analitica" element={<AccountMovements />} />
+      <Route
+        path="/financeiro/movimento-contas/analitica"
+        element={<AccountMovements />}
+      />
       <Route path="/indicadores" element={<FinancialViews />} />
       <Route path="/indicadores/:id" element={<FinancialViewsDetails />} />
-      <Route path="/abastecimento/resumo-mensal" element={<FuelingMonthlyReview />} />
-      <Route path="/abastecimento/resumo-mensal/analitica" element={<FuelingMonthlyDetails />} />
-      <Route path="/abastecimento/resumo-patrimonio" element={<FuelingPatrimonyReview />} />
-      <Route path="/abastecimento/resumo-patrimonio/analitica" element={<FuelingPatrimonyDetails />} />
-      <Route path="/abastecimento/resumo-combustivel" element={<FuelingFuelReview />} />
-      <Route path="/abastecimento/resumo-combustivel/analitica" element={<FuelingFuelDetails />} />
+      <Route
+        path="/abastecimento/resumo-mensal"
+        element={<FuelingMonthlyReview />}
+      />
+      <Route
+        path="/abastecimento/resumo-mensal/analitica"
+        element={<FuelingMonthlyDetails />}
+      />
+      <Route
+        path="/abastecimento/resumo-patrimonio"
+        element={<FuelingPatrimonyReview />}
+      />
+      <Route
+        path="/abastecimento/resumo-patrimonio/analitica"
+        element={<FuelingPatrimonyDetails />}
+      />
+      <Route
+        path="/abastecimento/resumo-combustivel"
+        element={<FuelingFuelReview />}
+      />
+      <Route
+        path="/abastecimento/resumo-combustivel/analitica"
+        element={<FuelingFuelDetails />}
+      />
       <Route path="/producao" element={<Production />} />
       <Route path="/custo-producao" element={<ProductionCost />} />
       <Route path="/contratos" element={<Contracts />} />
       <Route path="/vendas" element={<Sales />} />
       <Route path="/vendas/romaneios" element={<SalesPackingList />} />
       <Route path="/estoque-graos" element={<BeanStock />} />
-      <Route path="/contas-receber-pagar" element={<ChartAccountsFinancial />} />
+      <Route
+        path="/contas-receber-pagar"
+        element={<ChartAccountsFinancial />}
+      />
     </Routes>
   );
 }

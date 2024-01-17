@@ -10,14 +10,21 @@ import { Container, Loader } from './styles';
 
 interface PatrimonyReviewProps {
   title: string;
-  isLoading: boolean
+  isLoading: boolean;
   total: number;
   labels: string[];
   data: number[];
   isCurrency?: boolean;
 }
 
-export function PatrimonyReview({ title, total, labels, data, isCurrency, isLoading }: PatrimonyReviewProps) {
+export function PatrimonyReview({
+  title,
+  total,
+  labels,
+  data,
+  isCurrency,
+  isLoading,
+}: PatrimonyReviewProps) {
   const chartRef = useRef(null);
   const { hasPermission } = useUserContext();
 
@@ -58,10 +65,12 @@ export function PatrimonyReview({ title, total, labels, data, isCurrency, isLoad
         <header>
           <div>
             <strong>Total: </strong>
-            <span>{isCurrency ? currencyFormat(total) : formatNumber(total)}</span>
+            <span>
+              {isCurrency ? currencyFormat(total) : formatNumber(total)}
+            </span>
           </div>
           <button onClick={handleSaveChart} data-html2canvas-ignore>
-            <DownloadSimple size={24} color="#F7FBFE" weight='regular' />
+            <DownloadSimple size={24} color="#F7FBFE" weight="regular" />
           </button>
         </header>
         <PatrimonyReviewChart

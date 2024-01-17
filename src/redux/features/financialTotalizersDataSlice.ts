@@ -38,8 +38,8 @@ const zeroTotal: Total = {
   },
   totalNextFifteen: {
     quantity: 0,
-    total: 0
-  }
+    total: 0,
+  },
 };
 
 const initialState: FinancialTotalizersDataState = {
@@ -62,7 +62,7 @@ const initialState: FinancialTotalizersDataState = {
     totalLimit: 0,
     usagePercentage: 0,
     lastFetch: null,
-  }
+  },
 };
 
 export const financialTotalizersDataSlice = createSlice({
@@ -74,7 +74,7 @@ export const financialTotalizersDataSlice = createSlice({
         ...payload.value,
         lastFetch: new Date(),
       } as PendingTotal & CreditCardTotal & { lastFetch: Date | null };
-    }
+    },
   },
 });
 

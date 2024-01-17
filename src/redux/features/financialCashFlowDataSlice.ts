@@ -33,7 +33,7 @@ export const financialCashFlowDataSlice = createSlice({
     },
     setLabels: (state, { payload }: PayloadAction<string[]>) => {
       state.labels = payload;
-    }
+    },
   },
 });
 

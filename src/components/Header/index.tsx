@@ -28,13 +28,11 @@ export function Header({
       )}
       <div>
         <h1>{title}</h1>
-        {subtitle && (
-          <h2>{subtitle}</h2>
-        )}
+        {subtitle && <h2>{subtitle}</h2>}
       </div>
       {headerFilter && headerFilter}
       {refreshData && (
-        <button className='refresh-button' onClick={refreshData}>
+        <button className="refresh-button" onClick={refreshData}>
           <ArrowClockwise size={24} color="#CFD4D6" weight="bold" />
         </button>
       )}

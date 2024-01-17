@@ -5,16 +5,16 @@ function findChildren(
   parent: any,
   items: any[],
   index: number,
-  months: string[]
+  months: string[],
 ): TreeNode {
   const children = items.filter(
     (item) =>
       item.codigo.split('.').length === index + 1 &&
-      item.codigo.startsWith(`${parent.codigo}.`)
+      item.codigo.startsWith(`${parent.codigo}.`),
   );
   const data: any = {
     name: `${parent.codigo} - ${parent.descricao}`,
-    total: parent.total
+    total: parent.total,
   };
 
   months.forEach((month, index) => {
@@ -31,14 +31,21 @@ function findChildren(
   return {
     key: parent.codigo,
     data,
-    children: children.map((child) => findChildren(child, items, index + 1, months)),
+    children: children.map((child) =>
+      findChildren(child, items, index + 1, months),
+    ),
   };
 }
 
-export function parseChartAccounts(chartAccounts: PlanoContasFinancial[], months: string[]) {
+export function parseChartAccounts(
+  chartAccounts: PlanoContasFinancial[],
+  months: string[],
+) {
   const firstParents = chartAccounts.filter(
-    (item) => item.codigo.split('.').length === 1
+    (item) => item.codigo.split('.').length === 1,
   );
 
-  return firstParents.map((parent) => findChildren(parent, chartAccounts, 1, months));
+  return firstParents.map((parent) =>
+    findChildren(parent, chartAccounts, 1, months),
+  );
 }

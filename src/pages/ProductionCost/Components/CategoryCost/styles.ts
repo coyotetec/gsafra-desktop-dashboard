@@ -27,13 +27,12 @@ export const Container = styled.div`
     }
   }
 
-
   .card {
     width: 100%;
     padding: 16px;
     display: flex;
     flex-direction: column;
-    background: #30454C;
+    background: #30454c;
     border-radius: 8px;
     border: 1px solid #506167;
     margin-top: 8px;

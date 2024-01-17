@@ -50,9 +50,10 @@ export const beanStockFiltersSlice = createSlice({
       if (state.selectedProducerDetail === '_') {
         state.selectedProducerDetail = action.payload;
       }
-    }
+    },
   },
 });
 
-export const { change, setFirstCrop, setFirstProducerDetails } = beanStockFiltersSlice.actions;
+export const { change, setFirstCrop, setFirstProducerDetails } =
+  beanStockFiltersSlice.actions;
 export default beanStockFiltersSlice.reducer;

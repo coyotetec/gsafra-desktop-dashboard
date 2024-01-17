@@ -30,20 +30,20 @@ export function DateInput({
       dd: {
         mask: IMask.MaskedRange,
         from: 1,
-        to: 31
+        to: 31,
       },
       MM: {
         mask: IMask.MaskedRange,
         from: 1,
-        to: 12
+        to: 12,
       },
       yyyy: {
         mask: IMask.MaskedRange,
         from: 2000,
-        to: 9999
-      }
+        to: 9999,
+      },
     },
-    parse: (str) => parse(str, 'dd/MM/yyyy', new Date),
+    parse: (str) => parse(str, 'dd/MM/yyyy', new Date()),
     format: (date) => format(date, 'dd/MM/yyyy'),
   });
 

@@ -1,4 +1,11 @@
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from 'react';
 import { Spinner } from '../../../../components/Spinner';
 import { Container, Loader } from './styles';
 import CustoProducaoService from '../../../../services/CustoProducaoService';
@@ -28,9 +35,7 @@ export const CategoryCost = forwardRef<componentsRefType>((props, ref) => {
       lastSelectedSafras: safras,
       talhao,
     },
-    productionCostData: {
-      categoryCost
-    }
+    productionCostData: { categoryCost },
   } = useSelector((state: RootState) => state);
   const dispatch = useDispatch();
 
@@ -54,17 +59,25 @@ export const CategoryCost = forwardRef<componentsRefType>((props, ref) => {
         return;
       }
 
-      if (rangeDates.endDate && rangeDates.startDate && rangeDates.endDate < rangeDates.startDate) {
+      if (
+        rangeDates.endDate &&
+        rangeDates.startDate &&
+        rangeDates.endDate < rangeDates.startDate
+      ) {
         setIsLoading(false);
         toast({
           type: 'danger',
-          text: 'Data final precisa ser maior que inicial!'
+          text: 'Data final precisa ser maior que inicial!',
         });
         return;
       }
 
-      const startDateParsed = rangeDates.startDate ? format(rangeDates.startDate, 'dd-MM-yyyy') : '';
-      const endDateParsed = rangeDates.endDate ? format(rangeDates.endDate, 'dd-MM-yyyy') : '';
+      const startDateParsed = rangeDates.startDate
+        ? format(rangeDates.startDate, 'dd-MM-yyyy')
+        : '';
+      const endDateParsed = rangeDates.endDate
+        ? format(rangeDates.endDate, 'dd-MM-yyyy')
+        : '';
 
       const categoryCostData = await CustoProducaoService.findCustoCategoria({
         safraId: safras.join(','),
@@ -73,22 +86,35 @@ export const CategoryCost = forwardRef<componentsRefType>((props, ref) => {
         endDate: endDateParsed,
       });
 
-      dispatch(setData({
-        name: 'categoryCost',
-        data: categoryCostData
-      }));
+      dispatch(
+        setData({
+          name: 'categoryCost',
+          data: categoryCostData,
+        }),
+      );
     }
     setIsLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, hasPermission, rangeDates.endDate, rangeDates.startDate, safras, talhao]);
+  }, [
+    dispatch,
+    hasPermission,
+    rangeDates.endDate,
+    rangeDates.startDate,
+    safras,
+    talhao,
+  ]);
 
   useEffect(() => {
     loadData();
   }, [loadData]);
 
-  useImperativeHandle(ref, () => ({
-    loadData
-  }), [loadData]);
+  useImperativeHandle(
+    ref,
+    () => ({
+      loadData,
+    }),
+    [loadData],
+  );
 
   function handleSaveChart() {
     const chartElement = chartRef.current;
@@ -125,23 +151,32 @@ export const CategoryCost = forwardRef<componentsRefType>((props, ref) => {
         <header>
           <div className="total">
             <span>
-              <strong>{unit === 'hectareCost' ? 'Custo Total/ha: ' : 'Custo Total: '}</strong>
-              {unit === 'hectareCost' && currencyFormat(categoryCost.totalCustoPorHectare)}
+              <strong>
+                {unit === 'hectareCost' ? 'Custo Total/ha: ' : 'Custo Total: '}
+              </strong>
+              {unit === 'hectareCost' &&
+                currencyFormat(categoryCost.totalCustoPorHectare)}
               {unit === 'cost' && currencyFormat(categoryCost.totalCusto)}
               {unit === 'percent' && currencyFormat(categoryCost.totalCusto)}
             </span>
           </div>
           <button onClick={handleSaveChart} data-html2canvas-ignore>
-            <DownloadSimple size={24} color="#F7FBFE" weight='regular' />
+            <DownloadSimple size={24} color="#F7FBFE" weight="regular" />
           </button>
         </header>
         <CategoryCostChart
           labels={categoryCost.totalCustoCategoria.map((i) => i.categoria)}
-          data={categoryCost.totalCustoCategoria.map((i) => unit === 'hectareCost' ? i.totalPorHectare : i.total)}
-          percentages={categoryCost.totalCustoCategoria.map((i) => i.porcentagem)}
+          data={categoryCost.totalCustoCategoria.map((i) =>
+            unit === 'hectareCost' ? i.totalPorHectare : i.total,
+          )}
+          percentages={categoryCost.totalCustoCategoria.map(
+            (i) => i.porcentagem,
+          )}
           unit={unit}
         />
       </div>
     </Container>
   );
 });
+
+CategoryCost.displayName = 'CategoryCost';

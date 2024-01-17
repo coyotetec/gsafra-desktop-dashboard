@@ -22,7 +22,13 @@ export interface FinancialFiltersState {
 
 interface ChangePayload {
   name: keyof FinancialFiltersState;
-  value: string | string[] | number | RangeDates | TreeSelectSelectionKeys | null;
+  value:
+    | string
+    | string[]
+    | number
+    | RangeDates
+    | TreeSelectSelectionKeys
+    | null;
 }
 
 const initialState: FinancialFiltersState = {
@@ -54,7 +60,9 @@ export const financialFiltersSlice = createSlice({
   initialState,
   reducers: {
     change: (state, action: PayloadAction<ChangePayload>) => {
-      state[action.payload.name] = action.payload.value as RangeDates & string & number;
+      state[action.payload.name] = action.payload.value as RangeDates &
+        string &
+        number;
     },
   },
 });

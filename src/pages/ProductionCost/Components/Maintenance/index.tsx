@@ -1,4 +1,11 @@
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from 'react';
 import { Spinner } from '../../../../components/Spinner';
 import { Container, Loader } from './styles';
 import { ActivityChart } from '../ActivityChart';
@@ -28,9 +35,7 @@ export const Maintenance = forwardRef<componentsRefType>((props, ref) => {
       talhao,
       maintenanceUnit: unit,
     },
-    productionCostData: {
-      maintenanceCost
-    }
+    productionCostData: { maintenanceCost },
   } = useSelector((state: RootState) => state);
   const dispatch = useDispatch();
 
@@ -54,41 +59,63 @@ export const Maintenance = forwardRef<componentsRefType>((props, ref) => {
         return;
       }
 
-      if (rangeDates.endDate && rangeDates.startDate && rangeDates.endDate < rangeDates.startDate) {
+      if (
+        rangeDates.endDate &&
+        rangeDates.startDate &&
+        rangeDates.endDate < rangeDates.startDate
+      ) {
         setIsLoading(false);
         toast({
           type: 'danger',
-          text: 'Data final precisa ser maior que inicial!'
+          text: 'Data final precisa ser maior que inicial!',
         });
         return;
       }
 
-      const startDateParsed = rangeDates.startDate ? format(rangeDates.startDate, 'dd-MM-yyyy') : '';
-      const endDateParsed = rangeDates.endDate ? format(rangeDates.endDate, 'dd-MM-yyyy') : '';
+      const startDateParsed = rangeDates.startDate
+        ? format(rangeDates.startDate, 'dd-MM-yyyy')
+        : '';
+      const endDateParsed = rangeDates.endDate
+        ? format(rangeDates.endDate, 'dd-MM-yyyy')
+        : '';
 
-      const maintenanceCostData = await CustoProducaoService.findCustoManutencao({
-        safraId: safras.join(','),
-        talhaoId: talhao ? Number(talhao) : undefined,
-        startDate: startDateParsed,
-        endDate: endDateParsed,
-      });
+      const maintenanceCostData =
+        await CustoProducaoService.findCustoManutencao({
+          safraId: safras.join(','),
+          talhaoId: talhao ? Number(talhao) : undefined,
+          startDate: startDateParsed,
+          endDate: endDateParsed,
+        });
 
-      dispatch(setData({
-        name: 'maintenanceCost',
-        data: maintenanceCostData
-      }));
+      dispatch(
+        setData({
+          name: 'maintenanceCost',
+          data: maintenanceCostData,
+        }),
+      );
     }
     setIsLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, hasPermission, rangeDates.endDate, rangeDates.startDate, safras, talhao]);
+  }, [
+    dispatch,
+    hasPermission,
+    rangeDates.endDate,
+    rangeDates.startDate,
+    safras,
+    talhao,
+  ]);
 
   useEffect(() => {
     loadData();
   }, [loadData]);
 
-  useImperativeHandle(ref, () => ({
-    loadData
-  }), [loadData]);
+  useImperativeHandle(
+    ref,
+    () => ({
+      loadData,
+    }),
+    [loadData],
+  );
 
   return (
     <Container>
@@ -105,39 +132,56 @@ export const Maintenance = forwardRef<componentsRefType>((props, ref) => {
         <header>
           <div className="total">
             <span>
-              <strong>{parentUnit === 'hectareCost' ? 'Custo Total/ha: ' : 'Custo Total: '}</strong>
-              {parentUnit === 'hectareCost' && currencyFormat(maintenanceCost.inputsTotalPorHectareSafra)}
-              {parentUnit === 'cost' && currencyFormat(maintenanceCost.inputsTotalSafra)}
-              {parentUnit === 'percent' && currencyFormat(maintenanceCost.inputsTotalSafra)}
+              <strong>
+                {parentUnit === 'hectareCost'
+                  ? 'Custo Total/ha: '
+                  : 'Custo Total: '}
+              </strong>
+              {parentUnit === 'hectareCost' &&
+                currencyFormat(maintenanceCost.inputsTotalPorHectareSafra)}
+              {parentUnit === 'cost' &&
+                currencyFormat(maintenanceCost.inputsTotalSafra)}
+              {parentUnit === 'percent' &&
+                currencyFormat(maintenanceCost.inputsTotalSafra)}
             </span>
           </div>
           <Switch
-            leftLabel={parentUnit === 'cost'
-              ? 'R$'
-              : parentUnit === 'hectareCost'
-                ? 'R$/ha'
-                : '%'}
+            leftLabel={
+              parentUnit === 'cost'
+                ? 'R$'
+                : parentUnit === 'hectareCost'
+                  ? 'R$/ha'
+                  : '%'
+            }
             rightLabel="Quantidade"
             isToggled={unit === 'qty'}
-            onToggle={(e) => dispatch(change({
-              name: 'maintenanceUnit',
-              value: e.target.checked ? 'qty' : 'parent'
-            }))}
+            onToggle={(e) =>
+              dispatch(
+                change({
+                  name: 'maintenanceUnit',
+                  value: e.target.checked ? 'qty' : 'parent',
+                }),
+              )
+            }
           />
         </header>
         <ActivityChart
-          labels={maintenanceCost.inputsTotal.map(i => i.insumo)}
-          units={maintenanceCost.inputsTotal.map(i => i.unidade)}
-          data={maintenanceCost.inputsTotal.map(i => unit === 'qty'
-            ? i.quantidade
-            : parentUnit === 'cost'
-              ? i.total
-              : parentUnit === 'hectareCost'
-                ? i.totalPorHectare
-                : i.porcentagem)}
+          labels={maintenanceCost.inputsTotal.map((i) => i.insumo)}
+          units={maintenanceCost.inputsTotal.map((i) => i.unidade)}
+          data={maintenanceCost.inputsTotal.map((i) =>
+            unit === 'qty'
+              ? i.quantidade
+              : parentUnit === 'cost'
+                ? i.total
+                : parentUnit === 'hectareCost'
+                  ? i.totalPorHectare
+                  : i.porcentagem,
+          )}
           unit={unit === 'parent' ? parentUnit : unit}
         />
       </div>
     </Container>
   );
 });
+
+Maintenance.displayName = 'Maintenance';

@@ -12,7 +12,7 @@ import {
   BarController,
   Colors,
   ArcElement,
-  PieController
+  PieController,
 } from 'chart.js';
 import { GlobalStyles } from '../../styles/GlobalStyles';
 import { Container, Content } from './styles';
@@ -23,9 +23,9 @@ import { UserContextProvider } from '../../contexts/UserContext';
 import { Provider } from 'react-redux';
 import { store } from '../../redux/store';
 
-import 'primereact/resources/themes/lara-light-indigo/theme.css';  //theme
-import 'primereact/resources/primereact.min.css';                  //core css
-import 'primeicons/primeicons.css';                                //icons
+import 'primereact/resources/themes/lara-light-indigo/theme.css'; // theme
+import 'primereact/resources/primereact.min.css'; // core css
+import 'primeicons/primeicons.css'; // icons
 
 ChartJS.register(
   LinearScale,

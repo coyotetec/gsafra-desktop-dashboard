@@ -36,7 +36,7 @@ export const Content = styled.header`
     padding: 16px;
     display: flex;
     flex-direction: column;
-    background: #30454C;
+    background: #30454c;
     border-radius: 8px;
     border: 1px solid #506167;
     margin-top: 8px;
@@ -55,7 +55,7 @@ export const Content = styled.header`
       }
 
       a {
-        color: #00D47E;
+        color: #00d47e;
         text-decoration: none;
         font-size: 14px;
         font-weight: 600;

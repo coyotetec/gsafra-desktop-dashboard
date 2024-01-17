@@ -1,4 +1,11 @@
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from 'react';
 import { Spinner } from '../../../../components/Spinner';
 import { Container, Loader } from './styles';
 import { ActivityChart } from '../ActivityChart';
@@ -28,9 +35,7 @@ export const Activity = forwardRef<componentsRefType>((props, ref) => {
       talhao,
       activityUnit: unit,
     },
-    productionCostData: {
-      activityCost
-    }
+    productionCostData: { activityCost },
   } = useSelector((state: RootState) => state);
   const dispatch = useDispatch();
 
@@ -54,17 +59,25 @@ export const Activity = forwardRef<componentsRefType>((props, ref) => {
         return;
       }
 
-      if (rangeDates.endDate && rangeDates.startDate && rangeDates.endDate < rangeDates.startDate) {
+      if (
+        rangeDates.endDate &&
+        rangeDates.startDate &&
+        rangeDates.endDate < rangeDates.startDate
+      ) {
         setIsLoading(false);
         toast({
           type: 'danger',
-          text: 'Data final precisa ser maior que inicial!'
+          text: 'Data final precisa ser maior que inicial!',
         });
         return;
       }
 
-      const startDateParsed = rangeDates.startDate ? format(rangeDates.startDate, 'dd-MM-yyyy') : '';
-      const endDateParsed = rangeDates.endDate ? format(rangeDates.endDate, 'dd-MM-yyyy') : '';
+      const startDateParsed = rangeDates.startDate
+        ? format(rangeDates.startDate, 'dd-MM-yyyy')
+        : '';
+      const endDateParsed = rangeDates.endDate
+        ? format(rangeDates.endDate, 'dd-MM-yyyy')
+        : '';
 
       const activityCostData = await CustoProducaoService.findCustoAtividade({
         safraId: safras.join(','),
@@ -73,22 +86,35 @@ export const Activity = forwardRef<componentsRefType>((props, ref) => {
         endDate: endDateParsed,
       });
 
-      dispatch(setData({
-        name: 'activityCost',
-        data: activityCostData
-      }));
+      dispatch(
+        setData({
+          name: 'activityCost',
+          data: activityCostData,
+        }),
+      );
     }
     setIsLoading(false);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, hasPermission, rangeDates.endDate, rangeDates.startDate, safras, talhao]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    dispatch,
+    hasPermission,
+    rangeDates.endDate,
+    rangeDates.startDate,
+    safras,
+    talhao,
+  ]);
 
   useEffect(() => {
     loadData();
   }, [loadData]);
 
-  useImperativeHandle(ref, () => ({
-    loadData
-  }), [loadData]);
+  useImperativeHandle(
+    ref,
+    () => ({
+      loadData,
+    }),
+    [loadData],
+  );
 
   return (
     <Container>
@@ -105,39 +131,56 @@ export const Activity = forwardRef<componentsRefType>((props, ref) => {
         <header>
           <div className="total">
             <span>
-              <strong>{parentUnit === 'hectareCost' ? 'Custo Total/ha: ' : 'Custo Total: '}</strong>
-              {parentUnit === 'hectareCost' && currencyFormat(activityCost.inputsTotalPorHectareSafra)}
-              {parentUnit === 'cost' && currencyFormat(activityCost.inputsTotalSafra)}
-              {parentUnit === 'percent' && currencyFormat(activityCost.inputsTotalSafra)}
+              <strong>
+                {parentUnit === 'hectareCost'
+                  ? 'Custo Total/ha: '
+                  : 'Custo Total: '}
+              </strong>
+              {parentUnit === 'hectareCost' &&
+                currencyFormat(activityCost.inputsTotalPorHectareSafra)}
+              {parentUnit === 'cost' &&
+                currencyFormat(activityCost.inputsTotalSafra)}
+              {parentUnit === 'percent' &&
+                currencyFormat(activityCost.inputsTotalSafra)}
             </span>
           </div>
           <Switch
-            leftLabel={parentUnit === 'cost'
-              ? 'R$'
-              : parentUnit === 'hectareCost'
-                ? 'R$/ha'
-                : '%'}
+            leftLabel={
+              parentUnit === 'cost'
+                ? 'R$'
+                : parentUnit === 'hectareCost'
+                  ? 'R$/ha'
+                  : '%'
+            }
             rightLabel="Quantidade"
             isToggled={unit === 'qty'}
-            onToggle={(e) => dispatch(change({
-              name: 'activityUnit',
-              value: e.target.checked ? 'qty' : 'parent'
-            }))}
+            onToggle={(e) =>
+              dispatch(
+                change({
+                  name: 'activityUnit',
+                  value: e.target.checked ? 'qty' : 'parent',
+                }),
+              )
+            }
           />
         </header>
         <ActivityChart
-          labels={activityCost.inputsTotal.map(i => i.insumo)}
-          units={activityCost.inputsTotal.map(i => i.unidade)}
-          data={activityCost.inputsTotal.map(i => unit === 'qty'
-            ? i.quantidade
-            : parentUnit === 'cost'
-              ? i.total
-              : parentUnit === 'hectareCost'
-                ? i.totalPorHectare
-                : i.porcentagem)}
+          labels={activityCost.inputsTotal.map((i) => i.insumo)}
+          units={activityCost.inputsTotal.map((i) => i.unidade)}
+          data={activityCost.inputsTotal.map((i) =>
+            unit === 'qty'
+              ? i.quantidade
+              : parentUnit === 'cost'
+                ? i.total
+                : parentUnit === 'hectareCost'
+                  ? i.totalPorHectare
+                  : i.porcentagem,
+          )}
           unit={unit === 'parent' ? parentUnit : unit}
         />
       </div>
     </Container>
   );
 });
+
+Activity.displayName = 'Activity';

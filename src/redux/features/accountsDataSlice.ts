@@ -31,7 +31,7 @@ export const accountsDataSlice = createSlice({
         total: number;
         eachMonthTotal: number[];
         months: string[];
-      }>
+      }>,
     ) => {
       state.accountsNodes = payload.accounts;
       state.accountsTotal = payload.total;

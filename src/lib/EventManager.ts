@@ -18,9 +18,10 @@ export default class EventManager<P> {
       return;
     }
 
-    const updatedListeners = this.listeners.get(event)?.filter(
-      (listener) => listener !== listenerToRemove,
-    ) || [];
+    const updatedListeners =
+      this.listeners
+        .get(event)
+        ?.filter((listener) => listener !== listenerToRemove) || [];
 
     this.listeners.set(event, updatedListeners);
   }

@@ -1,4 +1,11 @@
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from 'react';
 import { format } from 'date-fns';
 import { Container, Loader } from './styles';
 
@@ -35,9 +42,7 @@ export const TalhaoCost = forwardRef<componentsRefType>((props, ref) => {
       selectedSafrasOptions,
       talhaoSelectedSafra: selectedSafra,
     },
-    productionCostData: {
-      talhaoCost
-    }
+    productionCostData: { talhaoCost },
   } = useSelector((state: RootState) => state);
   const dispatch = useDispatch();
 
@@ -61,17 +66,25 @@ export const TalhaoCost = forwardRef<componentsRefType>((props, ref) => {
         return;
       }
 
-      if (rangeDates.endDate && rangeDates.startDate && rangeDates.endDate < rangeDates.startDate) {
+      if (
+        rangeDates.endDate &&
+        rangeDates.startDate &&
+        rangeDates.endDate < rangeDates.startDate
+      ) {
         setIsLoading(false);
         toast({
           type: 'danger',
-          text: 'Data final precisa ser maior que inicial!'
+          text: 'Data final precisa ser maior que inicial!',
         });
         return;
       }
 
-      const startDateParsed = rangeDates.startDate ? format(rangeDates.startDate, 'dd-MM-yyyy') : '';
-      const endDateParsed = rangeDates.endDate ? format(rangeDates.endDate, 'dd-MM-yyyy') : '';
+      const startDateParsed = rangeDates.startDate
+        ? format(rangeDates.startDate, 'dd-MM-yyyy')
+        : '';
+      const endDateParsed = rangeDates.endDate
+        ? format(rangeDates.endDate, 'dd-MM-yyyy')
+        : '';
 
       const talhaoCostData = await CustoProducaoService.findCustoTalhao({
         safraId: selectedSafra === '_' ? safras.join(',') : selectedSafra,
@@ -79,14 +92,23 @@ export const TalhaoCost = forwardRef<componentsRefType>((props, ref) => {
         endDate: endDateParsed,
       });
 
-      dispatch(setData({
-        name: 'talhaoCost',
-        data: talhaoCostData
-      }));
+      dispatch(
+        setData({
+          name: 'talhaoCost',
+          data: talhaoCostData,
+        }),
+      );
     }
     setIsLoading(false);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, hasPermission, rangeDates.endDate, rangeDates.startDate, safras, selectedSafra]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    dispatch,
+    hasPermission,
+    rangeDates.endDate,
+    rangeDates.startDate,
+    safras,
+    selectedSafra,
+  ]);
 
   useEffect(() => {
     if (isFirstRender.current) {
@@ -101,9 +123,13 @@ export const TalhaoCost = forwardRef<componentsRefType>((props, ref) => {
     loadData();
   }, [loadData]);
 
-  useImperativeHandle(ref, () => ({
-    loadData
-  }), [loadData]);
+  useImperativeHandle(
+    ref,
+    () => ({
+      loadData,
+    }),
+    [loadData],
+  );
 
   function handleSaveChart() {
     const chartElement = chartRef.current;
@@ -131,17 +157,20 @@ export const TalhaoCost = forwardRef<componentsRefType>((props, ref) => {
         <h3>CUSTOS POR TALHÃO (VARIEDADE)</h3>
         {selectedSafrasOptions.length >= 2 && (
           <Select
-            options={[{
-              value: '_',
-              label: 'Todas as Safras Selecionadas'
-            }, ...selectedSafrasOptions]}
+            options={[
+              {
+                value: '_',
+                label: 'Todas as Safras Selecionadas',
+              },
+              ...selectedSafrasOptions,
+            ]}
             value={selectedSafra}
             onChange={(value: string) => {
               dispatch(change({ name: 'talhaoSelectedSafra', value }));
             }}
             height="40px"
             width="324px"
-            placeholder='Selecione uma safra'
+            placeholder="Selecione uma safra"
           />
         )}
       </header>
@@ -155,27 +184,34 @@ export const TalhaoCost = forwardRef<componentsRefType>((props, ref) => {
         <header>
           <div className="total">
             <span>
-              <strong>{unit === 'hectareCost' ? 'Custo Total/ha: ' : 'Custo Total: '}</strong>
-              {unit === 'hectareCost' && currencyFormat(talhaoCost.totalCustoPorHectare)}
+              <strong>
+                {unit === 'hectareCost' ? 'Custo Total/ha: ' : 'Custo Total: '}
+              </strong>
+              {unit === 'hectareCost' &&
+                currencyFormat(talhaoCost.totalCustoPorHectare)}
               {unit === 'cost' && currencyFormat(talhaoCost.totalCusto)}
               {unit === 'percent' && currencyFormat(talhaoCost.totalCusto)}
             </span>
           </div>
           <button onClick={handleSaveChart} data-html2canvas-ignore>
-            <DownloadSimple size={24} color="#F7FBFE" weight='regular' />
+            <DownloadSimple size={24} color="#F7FBFE" weight="regular" />
           </button>
         </header>
         <TalhaoCostChart
-          labels={talhaoCost.totalCustoTalhao.map(i => i.talhaoVariedade)}
-          safras={talhaoCost.totalCustoTalhao.map(i => i.safra)}
-          data={talhaoCost.totalCustoTalhao.map(i => unit === 'cost'
-            ? i.total
-            : unit === 'hectareCost'
-              ? i.totalPorHectare
-              : i.porcentagem)}
+          labels={talhaoCost.totalCustoTalhao.map((i) => i.talhaoVariedade)}
+          safras={talhaoCost.totalCustoTalhao.map((i) => i.safra)}
+          data={talhaoCost.totalCustoTalhao.map((i) =>
+            unit === 'cost'
+              ? i.total
+              : unit === 'hectareCost'
+                ? i.totalPorHectare
+                : i.porcentagem,
+          )}
           unit={unit}
         />
       </div>
     </Container>
   );
 });
+
+TalhaoCost.displayName = 'TalhaoCost';

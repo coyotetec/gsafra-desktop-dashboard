@@ -14,12 +14,25 @@ interface PatrimonyReviewChartProps {
 
 const ITEMS_PER_PAGE = 7;
 
-export function PatrimonyReviewChart({ labels, data, isCurrency }: PatrimonyReviewChartProps) {
+export function PatrimonyReviewChart({
+  labels,
+  data,
+  isCurrency,
+}: PatrimonyReviewChartProps) {
   const [currentPage, setCurrentPage] = useState(0);
-  const dataToShow = useMemo(() => ({
-    labels: labels.slice(currentPage * ITEMS_PER_PAGE, (currentPage * ITEMS_PER_PAGE) + ITEMS_PER_PAGE),
-    data: data.slice(currentPage * ITEMS_PER_PAGE, (currentPage * ITEMS_PER_PAGE) + ITEMS_PER_PAGE),
-  }), [currentPage, labels, data]);
+  const dataToShow = useMemo(
+    () => ({
+      labels: labels.slice(
+        currentPage * ITEMS_PER_PAGE,
+        currentPage * ITEMS_PER_PAGE + ITEMS_PER_PAGE,
+      ),
+      data: data.slice(
+        currentPage * ITEMS_PER_PAGE,
+        currentPage * ITEMS_PER_PAGE + ITEMS_PER_PAGE,
+      ),
+    }),
+    [currentPage, labels, data],
+  );
 
   useEffect(() => {
     setCurrentPage(0);
@@ -32,13 +45,13 @@ export function PatrimonyReviewChart({ labels, data, isCurrency }: PatrimonyRevi
   }, [dataToShow]);
 
   function formatNumber(number: number, sufix?: string) {
-    return `${new Intl.NumberFormat('id').format(number)}${sufix ? sufix : ''}`;
+    return `${new Intl.NumberFormat('id').format(number)}${sufix || ''}`;
   }
 
   return (
     <Container>
       {data.length === 0 ? (
-        <div className='empty'>
+        <div className="empty">
           <img src={emptyIllustration} alt="Ilustração de vazio" />
           <strong>Nenhum dado encontrado</strong>
           <span>Tente inserir outro intervalo de datas.</span>
@@ -47,7 +60,9 @@ export function PatrimonyReviewChart({ labels, data, isCurrency }: PatrimonyRevi
         <ChartContainer>
           <Bar
             data={{
-              labels: dataToShow.labels.map(i => `${i.slice(0, 40)}${i.length > 40 ? '...' : ''}`),
+              labels: dataToShow.labels.map(
+                (i) => `${i.slice(0, 40)}${i.length > 40 ? '...' : ''}`,
+              ),
               datasets: [
                 {
                   label: 'Total',
@@ -63,7 +78,7 @@ export function PatrimonyReviewChart({ labels, data, isCurrency }: PatrimonyRevi
                   ],
                   barThickness: 12,
                 },
-              ]
+              ],
             }}
             plugins={[ChartDataLabels]}
             options={{
@@ -75,7 +90,7 @@ export function PatrimonyReviewChart({ labels, data, isCurrency }: PatrimonyRevi
                   beginAtZero: true,
                   display: false,
                   grid: {
-                    display: false
+                    display: false,
                   },
                   min: 0,
                   max: higherValue <= 0 ? 1 : higherValue * 1.5,
@@ -87,7 +102,7 @@ export function PatrimonyReviewChart({ labels, data, isCurrency }: PatrimonyRevi
                       size: 12,
                     },
                   },
-                }
+                },
               },
               plugins: {
                 legend: {
@@ -104,9 +119,11 @@ export function PatrimonyReviewChart({ labels, data, isCurrency }: PatrimonyRevi
                     weight: 600,
                   },
                   formatter(value) {
-                    return isCurrency ? currencyFormat(value) : formatNumber(value, ' lts');
+                    return isCurrency
+                      ? currencyFormat(value)
+                      : formatNumber(value, ' lts');
                   },
-                }
+                },
               },
             }}
           />
@@ -116,19 +133,19 @@ export function PatrimonyReviewChart({ labels, data, isCurrency }: PatrimonyRevi
         <footer>
           {currentPage > 0 && (
             <button
-              aria-label='página anterior'
+              aria-label="página anterior"
               onClick={() => setCurrentPage((prevState) => prevState - 1)}
             >
-              <ArrowLeft size={20} color="#F7FBFE" weight='regular' />
+              <ArrowLeft size={20} color="#F7FBFE" weight="regular" />
             </button>
           )}
 
-          {((currentPage * ITEMS_PER_PAGE) + ITEMS_PER_PAGE) < data.length && (
+          {currentPage * ITEMS_PER_PAGE + ITEMS_PER_PAGE < data.length && (
             <button
-              aria-label='próxima página'
+              aria-label="próxima página"
               onClick={() => setCurrentPage((prevState) => prevState + 1)}
             >
-              <ArrowRight size={20} color="#F7FBFE" weight='regular' />
+              <ArrowRight size={20} color="#F7FBFE" weight="regular" />
             </button>
           )}
         </footer>

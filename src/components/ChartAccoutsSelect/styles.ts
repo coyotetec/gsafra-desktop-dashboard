@@ -9,7 +9,6 @@ export const StyledTreeSelect = styled(TreeSelect)`
   font-size: 16px !important;
   font-family: 'Montserrat', sans-serif !important;
 
-
   &:not(.p-disabled):hover,
   &:not(.p-disabled).p-focus {
     border-color: #748990 !important;
@@ -33,6 +32,6 @@ export const StyledTreeSelect = styled(TreeSelect)`
   }
 
   .p-treeselect-trigger {
-    color: #CFD4D6;
+    color: #cfd4d6;
   }
 `;

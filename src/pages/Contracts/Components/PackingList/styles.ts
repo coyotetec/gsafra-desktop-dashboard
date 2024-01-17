@@ -52,7 +52,7 @@ export const Loader = styled.div`
 export const Table = styled(DataTable)`
   margin-top: 12px;
   font-family: 'Montserrat', sans-serif;
-  color: #CFD4D6 !important;
+  color: #cfd4d6 !important;
   font-size: 14px;
 
   .p-datatable-wrapper {
@@ -68,7 +68,7 @@ export const Table = styled(DataTable)`
     tr {
       th {
         border-color: #748990 !important;
-        color: #CFD4D6;
+        color: #cfd4d6;
         background: #506167;
         padding: 8px 12px;
         font-weight: 600;
@@ -86,8 +86,8 @@ export const Table = styled(DataTable)`
     }
 
     tr {
-      color: #CFD4D6;
-      background: #30454C;
+      color: #cfd4d6;
+      background: #30454c;
 
       td {
         border-color: #506167 !important;
@@ -106,7 +106,7 @@ export const Table = styled(DataTable)`
 
   .p-paginator {
     font-family: 'Montserrat', sans-serif;
-    color: #CFD4D6 !important;
+    color: #cfd4d6 !important;
     background: transparent !important;
     border: none;
     padding: 0;
@@ -124,7 +124,7 @@ export const Table = styled(DataTable)`
       }
 
       .p-paginator-icon {
-        color: #CFD4D6;
+        color: #cfd4d6;
       }
     }
   }

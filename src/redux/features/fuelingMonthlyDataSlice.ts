@@ -27,7 +27,9 @@ export const fuelingMonthlyDataSlice = createSlice({
   reducers: {
     setData: (state, { payload }: PayloadAction<SetDatePayload>) => {
       for (const key of Object.keys(payload)) {
-        state[key as keyof SetDatePayload] = payload[key as keyof SetDatePayload] as string[] & number[] & number;
+        state[key as keyof SetDatePayload] = payload[
+          key as keyof SetDatePayload
+        ] as string[] & number[] & number;
       }
       state.lastFetch = new Date();
     },

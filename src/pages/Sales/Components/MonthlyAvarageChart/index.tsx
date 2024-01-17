@@ -9,11 +9,15 @@ interface MonthlyAvarageChartProps {
   unit: string;
 }
 
-export function MonthlyAvarageChart({ labels, data, unit }: MonthlyAvarageChartProps) {
+export function MonthlyAvarageChart({
+  labels,
+  data,
+  unit,
+}: MonthlyAvarageChartProps) {
   return (
     <Container>
       {data.length === 0 ? (
-        <div className='empty'>
+        <div className="empty">
           <img src={emptyIllustration} alt="Ilustração de vazio" />
           <strong>Nenhum dado encontrado</strong>
           <span>Tente selecionar outra safra.</span>
@@ -22,16 +26,16 @@ export function MonthlyAvarageChart({ labels, data, unit }: MonthlyAvarageChartP
         <ChartContainer>
           <Line
             data={{
-              labels: labels,
+              labels,
               datasets: [
                 {
-                  data: data,
+                  data,
                   backgroundColor: '#1890FF',
                   borderColor: '#1890FF',
                   borderWidth: 3,
                   spanGaps: true,
                 },
-              ]
+              ],
             }}
             options={{
               responsive: true,
@@ -43,7 +47,7 @@ export function MonthlyAvarageChart({ labels, data, unit }: MonthlyAvarageChartP
                     callback(this, tickValue) {
                       return currencyFormat(Number(tickValue));
                     },
-                    maxTicksLimit: 12
+                    maxTicksLimit: 12,
                   },
                 },
               },
@@ -55,8 +59,8 @@ export function MonthlyAvarageChart({ labels, data, unit }: MonthlyAvarageChartP
                   callbacks: {
                     label: function (context) {
                       return `${currencyFormat(context.parsed.y)}/${unit === 'sacks' ? 'Saca' : 'Kg'}`;
-                    }
-                  }
+                    },
+                  },
                 },
               },
             }}

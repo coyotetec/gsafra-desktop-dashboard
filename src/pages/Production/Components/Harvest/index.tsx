@@ -16,19 +16,15 @@ export function Harvest({ isLoading }: HarvestProps) {
   const {
     productionFilters: { productionUnit: unit },
     productionData: {
-      harvest: {
-        totalSafra,
-        sacasSafra,
-        talhoesTotal
-      }
-    }
+      harvest: { totalSafra, sacasSafra, talhoesTotal },
+    },
   } = useSelector((state: RootState) => state);
   const dispatch = useDispatch();
 
   const { hasPermission } = useUserContext();
 
   function formatNumber(number: number, sufix?: string) {
-    return `${new Intl.NumberFormat('id').format(number)}${sufix ? sufix : ''}`;
+    return `${new Intl.NumberFormat('id').format(number)}${sufix || ''}`;
   }
 
   return (
@@ -56,15 +52,19 @@ export function Harvest({ isLoading }: HarvestProps) {
             leftLabel="Sacas"
             rightLabel="Kg"
             isToggled={unit === 'kg'}
-            onToggle={(e) => dispatch(change({
-              name: 'productionUnit',
-              value: e.target.checked ? 'kg' : 'sacks'
-            }))}
+            onToggle={(e) =>
+              dispatch(
+                change({
+                  name: 'productionUnit',
+                  value: e.target.checked ? 'kg' : 'sacks',
+                }),
+              )
+            }
           />
         </header>
         <HarvestChart
-          labels={talhoesTotal.map(i => i.talhao)}
-          data={talhoesTotal.map(i => unit === 'sacks' ? i.sacas : i.total)}
+          labels={talhoesTotal.map((i) => i.talhao)}
+          data={talhoesTotal.map((i) => (unit === 'sacks' ? i.sacas : i.total))}
           unit={unit}
         />
       </div>

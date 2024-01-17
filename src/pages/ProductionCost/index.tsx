@@ -6,7 +6,10 @@ import { Header } from '../../components/Header';
 import { MultiSelect } from '../../components/MultiSelect';
 import { Select } from '../../components/Select';
 import useAnimatedUnmount from '../../hooks/useAnimatedUnmount';
-import { change, setFirstSafra } from '../../redux/features/productionCostFiltersSlice';
+import {
+  change,
+  setFirstSafra,
+} from '../../redux/features/productionCostFiltersSlice';
 import { setSafrasData } from '../../redux/features/safrasListSlice';
 import { RootState } from '../../redux/store';
 import SafraService from '../../services/SafraService';
@@ -30,7 +33,7 @@ type groupedOptionsType = {
   items: {
     label: string;
     value: string;
-  }[]
+  }[];
 }[];
 
 export function ProductionCost() {
@@ -40,19 +43,19 @@ export function ProductionCost() {
     { value: 'percent', label: 'Porcentagem (%)' },
   ];
   const categoryCostRef = useRef<componentsRefType>({
-    loadData() { return; },
+    loadData: () => null,
   });
   const talhaoCostRef = useRef<componentsRefType>({
-    loadData() { return; },
+    loadData: () => null,
   });
   const activityCostRef = useRef<componentsRefType>({
-    loadData() { return; },
+    loadData: () => null,
   });
   const maintenanceCostRef = useRef<componentsRefType>({
-    loadData() { return; },
+    loadData: () => null,
   });
   const fuelingCostRef = useRef<componentsRefType>({
-    loadData() { return; },
+    loadData: () => null,
   });
 
   const {
@@ -64,7 +67,7 @@ export function ProductionCost() {
       talhoesOptions,
       talhao,
       lastSelectedSafras,
-    }
+    },
   } = useSelector((state: RootState) => state);
   const dispatch = useDispatch();
 
@@ -76,71 +79,84 @@ export function ProductionCost() {
     fuelingCostRef.current.loadData();
   }, []);
 
-  const hectareCostMessageVisible = useMemo(() => (
-    unit === 'hectareCost' && lastSelectedSafras.length > 1
-  ), [lastSelectedSafras, unit]);
+  const hectareCostMessageVisible = useMemo(
+    () => unit === 'hectareCost' && lastSelectedSafras.length > 1,
+    [lastSelectedSafras, unit],
+  );
 
-  const {
-    shouldRender,
-    animatedElementRef
-  } = useAnimatedUnmount(hectareCostMessageVisible);
+  const { shouldRender, animatedElementRef } = useAnimatedUnmount(
+    hectareCostMessageVisible,
+  );
 
-  const loadTalhoes = useCallback(async (value: string[]) => {
-    dispatch(change({ name: 'talhao', value: null }));
+  const loadTalhoes = useCallback(
+    async (value: string[]) => {
+      dispatch(change({ name: 'talhao', value: null }));
 
-    if (JSON.stringify(lastSelectedSafras) === JSON.stringify(value)) {
-      return;
-    }
-
-    const parsedSafras = value.join(',');
-
-    dispatch(change({ name: 'lastSelectedSafras', value }));
-    dispatch(change({
-      name: 'selectedSafrasOptions',
-      value: value.map((i) => {
-        const safra = safrasList.options.find((option) => option.value === i) as {
-          value: string;
-          label: string;
-        };
-
-        return safra;
-      })
-    }));
-
-    const talhoesData = await TalhaoService.findTalhoes(parsedSafras);
-
-    const groupedTalhoes = talhoesData.reduce((acc, curr) => {
-      const safraIndex = acc.findIndex((i) => i.label === curr.safra);
-
-      if (safraIndex === -1) {
-        acc.push({
-          label: curr.safra,
-          items: [{
-            value: String(curr.id),
-            label: `${curr.talhao} (${curr.variedade})`
-          }]
-        });
-      } else {
-        acc[safraIndex].items.push({
-          value: String(curr.id),
-          label: `${curr.talhao} (${curr.variedade})`
-        });
+      if (JSON.stringify(lastSelectedSafras) === JSON.stringify(value)) {
+        return;
       }
 
-      return acc;
-    }, [] as groupedOptionsType);
+      const parsedSafras = value.join(',');
 
-    dispatch(change({ name: 'talhoesOptions', value: groupedTalhoes }));
-  }, [dispatch, lastSelectedSafras, safrasList.options]);
+      dispatch(change({ name: 'lastSelectedSafras', value }));
+      dispatch(
+        change({
+          name: 'selectedSafrasOptions',
+          value: value.map((i) => {
+            const safra = safrasList.options.find(
+              (option) => option.value === i,
+            ) as {
+              value: string;
+              label: string;
+            };
+
+            return safra;
+          }),
+        }),
+      );
+
+      const talhoesData = await TalhaoService.findTalhoes(parsedSafras);
+
+      const groupedTalhoes = talhoesData.reduce((acc, curr) => {
+        const safraIndex = acc.findIndex((i) => i.label === curr.safra);
+
+        if (safraIndex === -1) {
+          acc.push({
+            label: curr.safra,
+            items: [
+              {
+                value: String(curr.id),
+                label: `${curr.talhao} (${curr.variedade})`,
+              },
+            ],
+          });
+        } else {
+          acc[safraIndex].items.push({
+            value: String(curr.id),
+            label: `${curr.talhao} (${curr.variedade})`,
+          });
+        }
+
+        return acc;
+      }, [] as groupedOptionsType);
+
+      dispatch(change({ name: 'talhoesOptions', value: groupedTalhoes }));
+    },
+    [dispatch, lastSelectedSafras, safrasList.options],
+  );
 
   useEffect(() => {
     async function loadSafras() {
       if (hasToFetch(safrasList.lastFetch)) {
         const safrasData = await SafraService.findSafras();
-        dispatch(setSafrasData(safrasData.map((item) => ({
-          value: String(item.id),
-          label: item.nome
-        }))));
+        dispatch(
+          setSafrasData(
+            safrasData.map((item) => ({
+              value: String(item.id),
+              label: item.nome,
+            })),
+          ),
+        );
       }
 
       dispatch(setFirstSafra(safrasList.options[0]?.value || null));
@@ -150,23 +166,26 @@ export function ProductionCost() {
     }
 
     loadSafras();
-  }, [dispatch, safrasList.lastFetch, safrasList.options, loadTalhoes, talhoesOptions]);
+  }, [
+    dispatch,
+    safrasList.lastFetch,
+    safrasList.options,
+    loadTalhoes,
+    talhoesOptions,
+  ]);
 
   return (
     <Container>
-      <Header
-        title="Custo da Produção"
-        refreshData={refreshData}
-      />
+      <Header title="Custo da Produção" refreshData={refreshData} />
       <div className="filters">
         <MultiSelect
           options={safrasList.options}
           onChange={(value: string[]) => {
-            dispatch(change({ name: 'safras', value: value }));
+            dispatch(change({ name: 'safras', value }));
           }}
           value={safras}
           placeholder="Safras"
-          selectedItemsLabel='{0} Safras'
+          selectedItemsLabel="{0} Safras"
           onClose={loadTalhoes}
           label="Safras"
           width="100%"
@@ -177,7 +196,7 @@ export function ProductionCost() {
           noOptionsMessage="0 talhões encontrada"
           value={talhao}
           onChange={(value: string | null) => {
-            dispatch(change({ name: 'talhao', value: value }));
+            dispatch(change({ name: 'talhao', value }));
           }}
           label="Talhão"
           width="100%"
@@ -186,14 +205,17 @@ export function ProductionCost() {
         <div className="date-filter">
           <DateInput
             onChangeDate={(date) => {
-              dispatch(change({
-                name: 'rangeDates', value: {
-                  startDate: date,
-                  endDate: rangeDates.endDate
-                }
-              }));
+              dispatch(
+                change({
+                  name: 'rangeDates',
+                  value: {
+                    startDate: date,
+                    endDate: rangeDates.endDate,
+                  },
+                }),
+              );
             }}
-            placeholder='Data Inicial'
+            placeholder="Data Inicial"
             defaultDate={rangeDates.startDate}
             height="48px"
             width="100%"
@@ -204,14 +226,17 @@ export function ProductionCost() {
           <strong>à</strong>
           <DateInput
             onChangeDate={(date) => {
-              dispatch(change({
-                name: 'rangeDates', value: {
-                  startDate: rangeDates.startDate,
-                  endDate: date
-                }
-              }));
+              dispatch(
+                change({
+                  name: 'rangeDates',
+                  value: {
+                    startDate: rangeDates.startDate,
+                    endDate: date,
+                  },
+                }),
+              );
             }}
-            placeholder='Data Final'
+            placeholder="Data Final"
             defaultDate={rangeDates.endDate}
             height="48px"
             width="100%"
@@ -226,7 +251,7 @@ export function ProductionCost() {
           noOptionsMessage="0 unidades encontradas"
           value={unit}
           onChange={(value: string) => {
-            dispatch(change({ name: 'unit', value: value }));
+            dispatch(change({ name: 'unit', value }));
           }}
           label="Unidade"
           width="100%"
@@ -238,10 +263,11 @@ export function ProductionCost() {
           isLeaving={!hectareCostMessageVisible}
         >
           <div>
-            <Info size={20} color="#F7FBFE" weight='fill' />
+            <Info size={20} color="#F7FBFE" weight="fill" />
           </div>
           <span>
-            O custo médio por hectare é feito usando a soma das áreas de todos os talhões de todas as safras selecionadas.
+            O custo médio por hectare é feito usando a soma das áreas de todos
+            os talhões de todas as safras selecionadas.
           </span>
         </HectareCostMessage>
       )}

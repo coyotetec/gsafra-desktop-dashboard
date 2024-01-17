@@ -63,43 +63,57 @@ export function FuelingMonthlyReview() {
         }
       }
 
-      if (filters.rangeDates.endDate && filters.rangeDates.startDate && filters.rangeDates.endDate < filters.rangeDates.startDate) {
+      if (
+        filters.rangeDates.endDate &&
+        filters.rangeDates.startDate &&
+        filters.rangeDates.endDate < filters.rangeDates.startDate
+      ) {
         setIsDataLoading(false);
-        dispatch(setData({
-          labels: [],
-          values: [],
-          valuesTotal: 0,
-          quantities: [],
-          quantitiesTotal: 0
-        }));
+        dispatch(
+          setData({
+            labels: [],
+            values: [],
+            valuesTotal: 0,
+            quantities: [],
+            quantitiesTotal: 0,
+          }),
+        );
         toast({
           type: 'danger',
-          text: 'Data final precisa ser maior que inicial!'
+          text: 'Data final precisa ser maior que inicial!',
         });
         return;
       }
 
       const monthlyReviewData = await AbastecimentoService.findMonthlyReview({
         custo: filters.cost,
-        startDate: filters.rangeDates.startDate ? format(filters.rangeDates.startDate, 'dd-MM-yyyy') : '',
-        endDate: filters.rangeDates.endDate ? format(filters.rangeDates.endDate, 'dd-MM-yyyy') : '',
+        startDate: filters.rangeDates.startDate
+          ? format(filters.rangeDates.startDate, 'dd-MM-yyyy')
+          : '',
+        endDate: filters.rangeDates.endDate
+          ? format(filters.rangeDates.endDate, 'dd-MM-yyyy')
+          : '',
         idPatrimonio: filters.patrimony !== '_' ? filters.patrimony : undefined,
         idProdutoAlmoxarifado: filters.fuel !== '_' ? filters.fuel : undefined,
-        idAlmoxarifado: filters.storeroom !== '_' ? filters.storeroom : undefined,
-        idTipoPatrimonio: filters.patrimonyType !== '_' ? filters.patrimonyType : undefined,
+        idAlmoxarifado:
+          filters.storeroom !== '_' ? filters.storeroom : undefined,
+        idTipoPatrimonio:
+          filters.patrimonyType !== '_' ? filters.patrimonyType : undefined,
       });
 
-      dispatch(setData({
-        labels: monthlyReviewData.monthlyValue.map(item => item.month),
-        values: monthlyReviewData.monthlyValue.map(item => item.value),
-        valuesTotal: monthlyReviewData.monthlyValueTotal,
-        quantities: monthlyReviewData.monthlyQty.map(item => item.value),
-        quantitiesTotal: monthlyReviewData.monthlyQtyTotal
-      }));
+      dispatch(
+        setData({
+          labels: monthlyReviewData.monthlyValue.map((item) => item.month),
+          values: monthlyReviewData.monthlyValue.map((item) => item.value),
+          valuesTotal: monthlyReviewData.monthlyValueTotal,
+          quantities: monthlyReviewData.monthlyQty.map((item) => item.value),
+          quantitiesTotal: monthlyReviewData.monthlyQtyTotal,
+        }),
+      );
     }
 
     setIsDataLoading(false);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     dispatch,
     filters.cost,
@@ -109,7 +123,7 @@ export function FuelingMonthlyReview() {
     filters.rangeDates.endDate,
     filters.rangeDates.startDate,
     filters.storeroom,
-    hasPermission
+    hasPermission,
   ]);
 
   useEffect(() => {
@@ -118,34 +132,52 @@ export function FuelingMonthlyReview() {
 
       if (hasToFetch(patrimoniesList.lastFetch)) {
         const patrimoniosData = await PatrimonioService.findPatrimonios();
-        dispatch(setPatrimoniesData(patrimoniosData.map((item) => ({
-          value: String(item.id),
-          label: item.descricao
-        }))));
+        dispatch(
+          setPatrimoniesData(
+            patrimoniosData.map((item) => ({
+              value: String(item.id),
+              label: item.descricao,
+            })),
+          ),
+        );
       }
 
       if (hasToFetch(fuelsList.lastFetch)) {
-        const combustiveisData = await ProdutoAlmoxarifadoService.findCombustiveis();
-        dispatch(setFuelsData(combustiveisData.map(item => ({
-          value: String(item.id),
-          label: item.nome
-        }))));
+        const combustiveisData =
+          await ProdutoAlmoxarifadoService.findCombustiveis();
+        dispatch(
+          setFuelsData(
+            combustiveisData.map((item) => ({
+              value: String(item.id),
+              label: item.nome,
+            })),
+          ),
+        );
       }
 
       if (hasToFetch(storeroomsList.lastFetch)) {
         const almoxarifadosData = await AlmoxarifadoService.findAlmoxarifados();
-        dispatch(setStoreroomsData(almoxarifadosData.map(item => ({
-          value: String(item.id),
-          label: item.nome
-        }))));
+        dispatch(
+          setStoreroomsData(
+            almoxarifadosData.map((item) => ({
+              value: String(item.id),
+              label: item.nome,
+            })),
+          ),
+        );
       }
 
       if (hasToFetch(patrimonyTypesList.lastFetch)) {
-        const tiposPatrimonioData = await TipoPatrimonioService.findTiposPatrimonio();
-        dispatch(setPatrimonyTypesData(tiposPatrimonioData.map(item => ({
-          value: String(item.id),
-          label: item.nome
-        }))));
+        const tiposPatrimonioData =
+          await TipoPatrimonioService.findTiposPatrimonio();
+        dispatch(
+          setPatrimonyTypesData(
+            tiposPatrimonioData.map((item) => ({
+              value: String(item.id),
+              label: item.nome,
+            })),
+          ),
+        );
       }
 
       setIsLoading(false);
@@ -157,7 +189,7 @@ export function FuelingMonthlyReview() {
     patrimoniesList.lastFetch,
     fuelsList.lastFetch,
     storeroomsList.lastFetch,
-    patrimonyTypesList.lastFetch
+    patrimonyTypesList.lastFetch,
   ]);
 
   useEffect(() => {
@@ -167,22 +199,22 @@ export function FuelingMonthlyReview() {
   return (
     <Container>
       <Loader isLoading={isLoading} />
-      <Header
-        title="Resumo Mensal de Abastecimento"
-        refreshData={loadData}
-      />
+      <Header title="Resumo Mensal de Abastecimento" refreshData={loadData} />
       <div className="filters">
         <div className="date-filter">
           <DateInput
             onChangeDate={(date) => {
-              dispatch(change({
-                name: 'rangeDates', value: {
-                  startDate: date,
-                  endDate: filters.rangeDates.endDate
-                }
-              }));
+              dispatch(
+                change({
+                  name: 'rangeDates',
+                  value: {
+                    startDate: date,
+                    endDate: filters.rangeDates.endDate,
+                  },
+                }),
+              );
             }}
-            placeholder='Data Inicial'
+            placeholder="Data Inicial"
             defaultDate={filters.rangeDates.startDate}
             height="48px"
             width="100%"
@@ -193,14 +225,17 @@ export function FuelingMonthlyReview() {
           <strong>à</strong>
           <DateInput
             onChangeDate={(date) => {
-              dispatch(change({
-                name: 'rangeDates', value: {
-                  startDate: filters.rangeDates.startDate,
-                  endDate: date
-                }
-              }));
+              dispatch(
+                change({
+                  name: 'rangeDates',
+                  value: {
+                    startDate: filters.rangeDates.startDate,
+                    endDate: date,
+                  },
+                }),
+              );
             }}
-            placeholder='Data Final'
+            placeholder="Data Final"
             defaultDate={filters.rangeDates.endDate}
             height="48px"
             width="100%"
@@ -211,13 +246,16 @@ export function FuelingMonthlyReview() {
         </div>
 
         <Select
-          options={[{
-            value: '_',
-            label: 'Todos',
-          }, ...patrimoniesList.options]}
+          options={[
+            {
+              value: '_',
+              label: 'Todos',
+            },
+            ...patrimoniesList.options,
+          ]}
           value={filters.patrimony}
           onChange={(value: string) => {
-            dispatch(change({ name: 'patrimony', value: value }));
+            dispatch(change({ name: 'patrimony', value }));
           }}
           placeholder="Patrimonio"
           label="Patrimonio"
@@ -225,13 +263,16 @@ export function FuelingMonthlyReview() {
           width="100%"
         />
         <Select
-          options={[{
-            value: '_',
-            label: 'Todos',
-          }, ...fuelsList.options]}
+          options={[
+            {
+              value: '_',
+              label: 'Todos',
+            },
+            ...fuelsList.options,
+          ]}
           value={filters.fuel}
           onChange={(value: string) => {
-            dispatch(change({ name: 'fuel', value: value }));
+            dispatch(change({ name: 'fuel', value }));
           }}
           placeholder="Combustível"
           label="Combustível"
@@ -239,13 +280,16 @@ export function FuelingMonthlyReview() {
           width="100%"
         />
         <Select
-          options={[{
-            value: '_',
-            label: 'Todos',
-          }, ...storeroomsList.options]}
+          options={[
+            {
+              value: '_',
+              label: 'Todos',
+            },
+            ...storeroomsList.options,
+          ]}
           value={filters.storeroom}
           onChange={(value: string) => {
-            dispatch(change({ name: 'storeroom', value: value }));
+            dispatch(change({ name: 'storeroom', value }));
           }}
           placeholder="Local de Saída"
           label="Local de Saída"
@@ -256,20 +300,23 @@ export function FuelingMonthlyReview() {
           options={custos}
           value={filters.cost}
           onChange={(value: string) => {
-            dispatch(change({ name: 'cost', value: value }));
+            dispatch(change({ name: 'cost', value }));
           }}
           placeholder="Custo do Combustível"
           label="Custo do Combustível"
           width="100%"
         />
         <Select
-          options={[{
-            value: '_',
-            label: 'Todos',
-          }, ...patrimonyTypesList.options]}
+          options={[
+            {
+              value: '_',
+              label: 'Todos',
+            },
+            ...patrimonyTypesList.options,
+          ]}
           value={filters.patrimonyType}
           onChange={(value: string) => {
-            dispatch(change({ name: 'patrimonyType', value: value }));
+            dispatch(change({ name: 'patrimonyType', value }));
           }}
           placeholder="Tipo de Patrimônio"
           label="Tipo de Patrimônio"
@@ -282,7 +329,7 @@ export function FuelingMonthlyReview() {
       </Link>
       <MonthlyReview
         isLoading={isDataLoading}
-        title='VALORES ABASTECIDOS'
+        title="VALORES ABASTECIDOS"
         total={fuelingMonthly.valuesTotal}
         labels={fuelingMonthly.labels}
         data={fuelingMonthly.values}
@@ -290,7 +337,7 @@ export function FuelingMonthlyReview() {
       />
       <MonthlyReview
         isLoading={isDataLoading}
-        title='QUANTIDADES ABASTECIDAS'
+        title="QUANTIDADES ABASTECIDAS"
         total={fuelingMonthly.quantitiesTotal}
         labels={fuelingMonthly.labels}
         data={fuelingMonthly.quantities}

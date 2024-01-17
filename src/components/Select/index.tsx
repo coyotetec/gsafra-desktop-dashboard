@@ -11,7 +11,7 @@ type groupedOptionsType = {
   items: {
     label: string;
     value: string;
-  }[]
+  }[];
 }[];
 
 interface SelectProps {
@@ -47,7 +47,7 @@ export function Select({
   width,
   height,
   label,
-  isGrouped = false
+  isGrouped = false,
 }: SelectProps | SelectGroupProps) {
   return (
     <Wrapper>
@@ -63,14 +63,16 @@ export function Select({
         optionLabel="label"
         optionGroupLabel={isGrouped ? 'label' : undefined}
         optionGroupChildren={isGrouped ? 'items' : undefined}
-        optionGroupTemplate={isGrouped ? (option) => (
-          <OptionGroup>
-            <Leaf size={20} color="#00D47E" weight='bold' />
-            <span>
-              {option.label}
-            </span>
-          </OptionGroup>
-        ) : undefined}
+        optionGroupTemplate={
+          isGrouped
+            ? (option) => (
+                <OptionGroup>
+                  <Leaf size={20} color="#00D47E" weight="bold" />
+                  <span>{option.label}</span>
+                </OptionGroup>
+              )
+            : undefined
+        }
         showClear={isGrouped}
       />
     </Wrapper>

@@ -1,14 +1,14 @@
 import APIError from '../../errors/APIError';
 
 interface Options {
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE',
-  body?: object,
-  headers?: object,
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  body?: object;
+  headers?: object;
 }
 
 interface ReqOptions {
-  body?: object,
-  headers?: object,
+  body?: object;
+  headers?: object;
 }
 
 class HttpClient {

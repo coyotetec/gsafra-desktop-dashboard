@@ -23,17 +23,17 @@ export const Wrapper = styled.div`
 `;
 
 export const StyledCheckbox = styled.input.attrs(() => ({
-  type: 'checkbox'
+  type: 'checkbox',
 }))`
   appearance: none;
   width: 24px;
   height: 24px;
-  background: #30454C;
+  background: #30454c;
   border-radius: 4px;
   border: 1px solid #506167;
   cursor: pointer;
 
   &:checked {
-    background: #00D47E;
+    background: #00d47e;
   }
 `;

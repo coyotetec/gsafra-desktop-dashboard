@@ -1,5 +1,8 @@
 import { api } from './utils/api';
-import { EstoqueGraosProdutorTotal, EstoqueGraosTotal } from '../types/EstoqueGraos';
+import {
+  EstoqueGraosProdutorTotal,
+  EstoqueGraosTotal,
+} from '../types/EstoqueGraos';
 
 interface EstoqueGraosArgs {
   culturaId: number;
@@ -11,20 +14,42 @@ interface EstoqueGraosArgs {
 }
 
 class EstoqueGraosService {
-  findTotal({ culturaId, startDate, endDate, produtorId, armazenamentoId, safraId }: EstoqueGraosArgs): Promise<EstoqueGraosTotal> {
-    return api.get(`/estoque-graos/total?idCultura=${culturaId}&startDate=${startDate}&endDate=${endDate}
+  findTotal({
+    culturaId,
+    startDate,
+    endDate,
+    produtorId,
+    armazenamentoId,
+    safraId,
+  }: EstoqueGraosArgs): Promise<EstoqueGraosTotal> {
+    return api.get(
+      `/estoque-graos/total?idCultura=${culturaId}&startDate=${startDate}&endDate=${endDate}
     ${produtorId ? `&idProdutor=${produtorId}` : ''}
     ${armazenamentoId ? `&idArmazenamento=${armazenamentoId}` : ''}
     ${safraId ? `&idSafra=${safraId}` : ''}
-  `.replace(/(\r\n|\n|\r)/gm, '').replace(/\s+/g, ''));
+  `
+        .replace(/(\r\n|\n|\r)/gm, '')
+        .replace(/\s+/g, ''),
+    );
   }
 
-  findProducerTotal({ culturaId, startDate, endDate, produtorId, armazenamentoId, safraId }: EstoqueGraosArgs): Promise<EstoqueGraosProdutorTotal> {
-    return api.get(`/estoque-graos/produtor?idCultura=${culturaId}&startDate=${startDate}&endDate=${endDate}
+  findProducerTotal({
+    culturaId,
+    startDate,
+    endDate,
+    produtorId,
+    armazenamentoId,
+    safraId,
+  }: EstoqueGraosArgs): Promise<EstoqueGraosProdutorTotal> {
+    return api.get(
+      `/estoque-graos/produtor?idCultura=${culturaId}&startDate=${startDate}&endDate=${endDate}
     ${produtorId ? `&idProdutor=${produtorId}` : ''}
     ${armazenamentoId ? `&idArmazenamento=${armazenamentoId}` : ''}
     ${safraId ? `&idSafra=${safraId}` : ''}
-  `.replace(/(\r\n|\n|\r)/gm, '').replace(/\s+/g, ''));
+  `
+        .replace(/(\r\n|\n|\r)/gm, '')
+        .replace(/\s+/g, ''),
+    );
   }
 }
 

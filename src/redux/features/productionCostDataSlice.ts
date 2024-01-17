@@ -1,6 +1,10 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
-import { CustoCategoria, CustoIndividual, CustoTalhao } from '../../types/CustoProducao';
+import {
+  CustoCategoria,
+  CustoIndividual,
+  CustoTalhao,
+} from '../../types/CustoProducao';
 
 export interface ProductionCostDataState {
   categoryCost: CustoCategoria & {
@@ -66,9 +70,11 @@ export const productionCostDataSlice = createSlice({
       state[payload.name] = {
         ...payload.data,
         lastFetch: new Date(),
-      } as CustoCategoria & CustoTalhao & CustoIndividual & { lastFetch: Date | null; };
-    }
-  }
+      } as CustoCategoria &
+        CustoTalhao &
+        CustoIndividual & { lastFetch: Date | null };
+    },
+  },
 });
 
 export const { setData } = productionCostDataSlice.actions;

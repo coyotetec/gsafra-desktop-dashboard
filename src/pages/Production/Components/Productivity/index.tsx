@@ -16,19 +16,15 @@ export function Productivity({ isLoading }: ProductivityProps) {
   const {
     productionFilters: { productivityUnit: unit },
     productionData: {
-      harvest: {
-        totalPorHectareSafra,
-        sacasPorHectareSafra,
-        talhoesTotal
-      }
-    }
+      harvest: { totalPorHectareSafra, sacasPorHectareSafra, talhoesTotal },
+    },
   } = useSelector((state: RootState) => state);
   const dispatch = useDispatch();
 
   const { hasPermission } = useUserContext();
 
   function formatNumber(number: number, sufix?: string) {
-    return `${new Intl.NumberFormat('id').format(number)}${sufix ? sufix : ''}`;
+    return `${new Intl.NumberFormat('id').format(number)}${sufix || ''}`;
   }
 
   return (
@@ -56,15 +52,21 @@ export function Productivity({ isLoading }: ProductivityProps) {
             leftLabel="Sacas"
             rightLabel="Kg"
             isToggled={unit === 'kg'}
-            onToggle={(e) => dispatch(change({
-              name: 'productivityUnit',
-              value: e.target.checked ? 'kg' : 'sacks'
-            }))}
+            onToggle={(e) =>
+              dispatch(
+                change({
+                  name: 'productivityUnit',
+                  value: e.target.checked ? 'kg' : 'sacks',
+                }),
+              )
+            }
           />
         </header>
         <ProductivityChart
-          labels={talhoesTotal.map(i => i.talhao)}
-          data={talhoesTotal.map(i => unit === 'sacks' ? i.sacasPorHectare : i.totalPorHectare)}
+          labels={talhoesTotal.map((i) => i.talhao)}
+          data={talhoesTotal.map((i) =>
+            unit === 'sacks' ? i.sacasPorHectare : i.totalPorHectare,
+          )}
           unit={unit}
         />
       </div>

@@ -18,10 +18,10 @@ const containerVariants = {
     background: #506167;
   `,
   success: css`
-    background: #00D47E;
+    background: #00d47e;
   `,
   danger: css`
-    background: #FF5555;
+    background: #ff5555;
   `,
 };
 
@@ -32,7 +32,7 @@ interface ContainerProps {
 export const Container = styled.div<ContainerProps>`
   padding: 12px 16px;
   border-radius: 4px;
-  color: #F7FBFE;
+  color: #f7fbfe;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -40,7 +40,7 @@ export const Container = styled.div<ContainerProps>`
   outline: none;
   animation: ${messageIn} 0.3s;
 
-  ${({ type }) => type ? containerVariants[type] : containerVariants.default}
+  ${({ type }) => (type ? containerVariants[type] : containerVariants.default)}
 
   & + & {
     margin-top: 8px;

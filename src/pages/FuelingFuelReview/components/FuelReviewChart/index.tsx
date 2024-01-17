@@ -14,7 +14,12 @@ interface FuelReviewChartProps {
   total: number;
 }
 
-export function FuelReviewChart({ labels, data, isCurrency = false, total }: FuelReviewChartProps) {
+export function FuelReviewChart({
+  labels,
+  data,
+  isCurrency = false,
+  total,
+}: FuelReviewChartProps) {
   function formatNumber(number: number) {
     return `${new Intl.NumberFormat('id').format(number)} lts`;
   }
@@ -22,7 +27,7 @@ export function FuelReviewChart({ labels, data, isCurrency = false, total }: Fue
   return (
     <Container>
       {data.length === 0 ? (
-        <div className='empty'>
+        <div className="empty">
           <img src={emptyIllustration} alt="Ilustração de vazio" />
           <strong>Nenhum dado encontrado</strong>
           <span>Tente inserir outro intervalo de datas.</span>
@@ -52,9 +57,9 @@ export function FuelReviewChart({ labels, data, isCurrency = false, total }: Fue
                   '#9c27b0',
                   '#5C6BC0',
                 ],
-                borderWidth: 2
-              }
-            ]
+                borderWidth: 2,
+              },
+            ],
           }}
           plugins={[ChartDataLabels]}
           options={{
@@ -74,11 +79,13 @@ export function FuelReviewChart({ labels, data, isCurrency = false, total }: Fue
                       label += ': ';
                     }
                     if (context.parsed !== null) {
-                      label += isCurrency ? currencyFormat(context.parsed, 3) : formatNumber(context.parsed);
+                      label += isCurrency
+                        ? currencyFormat(context.parsed, 3)
+                        : formatNumber(context.parsed);
                     }
                     return label;
-                  }
-                }
+                  },
+                },
               },
               datalabels: {
                 display(ctx) {
@@ -87,18 +94,18 @@ export function FuelReviewChart({ labels, data, isCurrency = false, total }: Fue
                 },
                 font: {
                   weight: 600,
-                  size: 16
+                  size: 16,
                 },
                 formatter(value) {
                   const percentage = (value * 100) / total;
                   const parsedPercentage = new Intl.NumberFormat('id', {
                     minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
+                    maximumFractionDigits: 2,
                   }).format(percentage);
 
                   return `${parsedPercentage}%`;
                 },
-              }
+              },
             },
           }}
         />

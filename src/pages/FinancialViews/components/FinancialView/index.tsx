@@ -10,7 +10,7 @@ import { Spinner } from '../../../../components/Spinner';
 import { useUserContext } from '../../../../contexts/UserContext';
 import {
   changeView,
-  FinancialView as FinancialViewType
+  FinancialView as FinancialViewType,
 } from '../../../../redux/features/financialViewsDataSlice';
 import FinancialViewsService from '../../../../services/FinancialViewsService';
 import { currencyFormat } from '../../../../utils/currencyFormat';
@@ -28,7 +28,7 @@ export function FinancialView({
   periodoPadraoMeses,
   lastFetch,
   totalizers,
-  total
+  total,
 }: FinancialViewProps) {
   const [isLoading, setIsLoading] = useState(true);
   const chartRef = useRef(null);
@@ -52,50 +52,66 @@ export function FinancialView({
           }
         }
 
-        if (rangeDates.endDate && rangeDates.startDate && rangeDates.endDate < rangeDates.startDate) {
+        if (
+          rangeDates.endDate &&
+          rangeDates.startDate &&
+          rangeDates.endDate < rangeDates.startDate
+        ) {
           setIsLoading(false);
-          dispatch(changeView({
-            id,
-            name: 'total',
-            value: []
-          }));
-          dispatch(changeView({
-            id,
-            name: 'totalizers',
-            value: []
-          }));
+          dispatch(
+            changeView({
+              id,
+              name: 'total',
+              value: [],
+            }),
+          );
+          dispatch(
+            changeView({
+              id,
+              name: 'totalizers',
+              value: [],
+            }),
+          );
           toast({
             type: 'danger',
-            text: 'Data final precisa ser maior que inicial!'
+            text: 'Data final precisa ser maior que inicial!',
           });
           return;
         }
 
-        const startDateParsed = rangeDates.startDate ? format(rangeDates.startDate, 'dd-MM-yyyy') : '';
-        const endDateParsed = rangeDates.endDate ? format(rangeDates.endDate, 'dd-MM-yyyy') : '';
+        const startDateParsed = rangeDates.startDate
+          ? format(rangeDates.startDate, 'dd-MM-yyyy')
+          : '';
+        const endDateParsed = rangeDates.endDate
+          ? format(rangeDates.endDate, 'dd-MM-yyyy')
+          : '';
 
         const viewTotalData = await FinancialViewsService.findViewTotal(
           id,
           startDateParsed,
-          endDateParsed
+          endDateParsed,
         );
 
-        dispatch(changeView({
-          id,
-          name: 'total',
-          value: viewTotalData.data
-        }));
-        dispatch(changeView({
-          id,
-          name: 'totalizers',
-          value: viewTotalData.totalizadores
-        }));
+        dispatch(
+          changeView({
+            id,
+            name: 'total',
+            value: viewTotalData.data,
+          }),
+        );
+        dispatch(
+          changeView({
+            id,
+            name: 'totalizers',
+            value: viewTotalData.totalizadores,
+          }),
+        );
       }
       setIsLoading(false);
     }
 
     loadData();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasPermission, id, rangeDates, dispatch]);
 
   function handleSaveChart() {
@@ -113,11 +129,13 @@ export function FinancialView({
       const a = document.createElement('a');
       a.href = canvas.toDataURL('image/png');
       a.target = '_blank';
-      a.download = `${nome} ${periodoPadraoMeses === 0
-        ? 'Mês Atual'
-        : periodoPadraoMeses === -1
-          ? 'Todos os Lançamentos'
-          : `${rangeDates.startDate && format(rangeDates.startDate, 'dd-MM-yyyy')} À ${rangeDates.endDate && format(rangeDates.endDate, 'dd-MM-yyyy')}`}`;
+      a.download = `${nome} ${
+        periodoPadraoMeses === 0
+          ? 'Mês Atual'
+          : periodoPadraoMeses === -1
+            ? 'Todos os Lançamentos'
+            : `${rangeDates.startDate && format(rangeDates.startDate, 'dd-MM-yyyy')} À ${rangeDates.endDate && format(rangeDates.endDate, 'dd-MM-yyyy')}`
+      }`;
       a.click();
     });
   }
@@ -133,31 +151,35 @@ export function FinancialView({
         <div>
           <DateInput
             onChangeDate={(date) => {
-              dispatch(changeView({
-                id,
-                name: 'rangeDates',
-                value: {
-                  startDate: date,
-                  endDate: rangeDates.endDate
-                }
-              }));
+              dispatch(
+                changeView({
+                  id,
+                  name: 'rangeDates',
+                  value: {
+                    startDate: date,
+                    endDate: rangeDates.endDate,
+                  },
+                }),
+              );
             }}
-            placeholder='Data Inicial'
+            placeholder="Data Inicial"
             defaultDate={rangeDates.startDate}
           />
           <strong>à</strong>
           <DateInput
             onChangeDate={(date) => {
-              dispatch(changeView({
-                id,
-                name: 'rangeDates',
-                value: {
-                  startDate: rangeDates.startDate,
-                  endDate: date
-                }
-              }));
+              dispatch(
+                changeView({
+                  id,
+                  name: 'rangeDates',
+                  value: {
+                    startDate: rangeDates.startDate,
+                    endDate: date,
+                  },
+                }),
+              );
             }}
-            placeholder='Data Final'
+            placeholder="Data Final"
             defaultDate={rangeDates.endDate}
           />
         </div>
@@ -192,22 +214,35 @@ export function FinancialView({
             >
               <strong>{totalizer.nome}: </strong>
               {totalizer.error && <span>{totalizer.error}</span>}
-              {totalizer.formato === 1 && <span>{currencyFormat(Number(totalizer.total))}</span>}
-              {totalizer.formato === 2 && <span>{formatNumber(Number(totalizer.total))}%</span>}
-              {totalizer.formato === 3 || totalizer.formato === null && <span>{formatNumber(Number(totalizer.total))}</span>}
+              {totalizer.formato === 1 && (
+                <span>{currencyFormat(Number(totalizer.total))}</span>
+              )}
+              {totalizer.formato === 2 && (
+                <span>{formatNumber(Number(totalizer.total))}%</span>
+              )}
+              {totalizer.formato === 3 ||
+                (totalizer.formato === null && (
+                  <span>{formatNumber(Number(totalizer.total))}</span>
+                ))}
             </div>
           ))}
         </div>
         <footer data-html2canvas-ignore>
           <Link
-            to={`${id}?startDate=${rangeDates.startDate ? format(rangeDates.startDate, 'dd-MM-yyyy') : '_'
-            }&endDate=${rangeDates.endDate ? format(rangeDates.endDate, 'dd-MM-yyyy') : '_'
+            to={`${id}?startDate=${
+              rangeDates.startDate
+                ? format(rangeDates.startDate, 'dd-MM-yyyy')
+                : '_'
+            }&endDate=${
+              rangeDates.endDate
+                ? format(rangeDates.endDate, 'dd-MM-yyyy')
+                : '_'
             }&name=${nome}`}
           >
             Visão Detalhada
           </Link>
           <button onClick={handleSaveChart}>
-            <DownloadSimple size={24} color="#F7FBFE" weight='regular' />
+            <DownloadSimple size={24} color="#F7FBFE" weight="regular" />
           </button>
         </footer>
       </div>

@@ -7,7 +7,7 @@ export const Container = styled.div`
   flex-direction: column;
   gap: 20px;
   padding: 16px;
-  background: #30454C;
+  background: #30454c;
   border-radius: 8px;
   border: 1px solid #506167;
   position: relative;
@@ -50,19 +50,19 @@ export const Container = styled.div`
 
         .bar {
           height: 100%;
-          background: #00D47E;
+          background: #00d47e;
         }
 
         .overbar {
           height: 100%;
-          background: #FF5555;
+          background: #ff5555;
           position: absolute;
           right: 0;
           top: 0;
         }
 
         strong {
-          color: #F7FBFE;
+          color: #f7fbfe;
           font-weight: 600;
           position: absolute;
           left: 50%;
@@ -102,11 +102,11 @@ export const Container = styled.div`
       transition: all 0.3s ease-in-out;
       padding: 4px;
 
-      &[aria-label="página anterior"]:hover {
+      &[aria-label='página anterior']:hover {
         transform: translateX(-4px);
       }
 
-      &[aria-label="próxima página"]:hover {
+      &[aria-label='próxima página']:hover {
         transform: translateX(4px);
       }
     }
@@ -126,4 +126,3 @@ export const Loader = styled.div`
   justify-content: center;
   z-index: 999;
 `;
-

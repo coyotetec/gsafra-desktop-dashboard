@@ -6,7 +6,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { NotAllowed } from '../../../../components/NotAllowed';
 import { Select } from '../../../../components/Select';
 import { useUserContext } from '../../../../contexts/UserContext';
-import { change, setFirstProducerDetails } from '../../../../redux/features/beanStockFiltersSlice';
+import {
+  change,
+  setFirstProducerDetails,
+} from '../../../../redux/features/beanStockFiltersSlice';
 import { RootState } from '../../../../redux/store';
 import { EstoqueGraosProdutor } from '../../../../types/EstoqueGraos';
 import { Container, Table } from './styles';
@@ -14,7 +17,7 @@ import { Container, Table } from './styles';
 type optionType = {
   value: string;
   label: string;
-}[]
+}[];
 
 export function ProducerScaleDetails() {
   const chartRef = useRef(null);
@@ -22,25 +25,25 @@ export function ProducerScaleDetails() {
   const {
     beanStockFilters: { selectedProducerDetail },
     beanStockData: {
-      beanStockProducer: {
-        estoqueGraosProdutor
-      }
-    }
+      beanStockProducer: { estoqueGraosProdutor },
+    },
   } = useSelector((state: RootState) => state);
   const dispatch = useDispatch();
 
   const producersOptions = useMemo<optionType>(() => {
-    dispatch(setFirstProducerDetails(String(estoqueGraosProdutor[0].idProdutor)));
+    dispatch(
+      setFirstProducerDetails(String(estoqueGraosProdutor[0].idProdutor)),
+    );
 
     return estoqueGraosProdutor.map((item) => ({
       value: String(item.idProdutor),
-      label: item.produtor
+      label: item.produtor,
     }));
   }, [dispatch, estoqueGraosProdutor]);
 
   const selectedProducerBeansStock = useMemo<EstoqueGraosProdutor>(() => {
     const beanStock = estoqueGraosProdutor.find(
-      (item) => item.idProdutor === Number(selectedProducerDetail)
+      (item) => item.idProdutor === Number(selectedProducerDetail),
     );
 
     if (!beanStock) {
@@ -56,13 +59,13 @@ export function ProducerScaleDetails() {
           cotaCapital: 0,
           taxaArmazenamento: 0,
           quebraTecnica: 0,
-          pesoLiquido: 0
+          pesoLiquido: 0,
         },
         saidas: {
           peso: 0,
           descontoClassificacao: 0,
-          pesoLiquido: 0
-        }
+          pesoLiquido: 0,
+        },
       };
     }
 
@@ -74,7 +77,7 @@ export function ProducerScaleDetails() {
   function formatNumber(number: number, sufix?: string) {
     return `${new Intl.NumberFormat('id', {
       maximumFractionDigits: 2,
-    }).format(number)}${sufix ? sufix : ''}`;
+    }).format(number)}${sufix || ''}`;
   }
 
   function handleSaveChart() {
@@ -100,17 +103,17 @@ export function ProducerScaleDetails() {
   return (
     <Container>
       <header>
-        <h3>
-          VISÃO DETALHADA
-        </h3>
+        <h3>VISÃO DETALHADA</h3>
         <Select
           options={producersOptions}
           value={selectedProducerDetail}
           onChange={(value: string) => {
-            dispatch(change({
-              name: 'selectedProducerDetail',
-              value,
-            }));
+            dispatch(
+              change({
+                name: 'selectedProducerDetail',
+                value,
+              }),
+            );
           }}
           width="320px"
           height="40px"
@@ -122,7 +125,10 @@ export function ProducerScaleDetails() {
           <div className="total">
             <span>
               <strong>Saldo Anterior: </strong>
-              {formatNumber(selectedProducerBeansStock.saldoAnterior || 0, ' Kg')}
+              {formatNumber(
+                selectedProducerBeansStock.saldoAnterior || 0,
+                ' Kg',
+              )}
             </span>
             <span>
               <strong>Saldo Final: </strong>
@@ -130,35 +136,69 @@ export function ProducerScaleDetails() {
             </span>
           </div>
           <button onClick={handleSaveChart} data-html2canvas-ignore>
-            <DownloadSimple size={24} color="#F7FBFE" weight='regular' />
+            <DownloadSimple size={24} color="#F7FBFE" weight="regular" />
           </button>
         </header>
         <section>
           <h4>Entradas</h4>
-          <Table
-            value={[selectedProducerBeansStock.entradas]}
-          >
-            <Column header="Peso (Bruto - Tara)" body={(rowData) => formatNumber(rowData?.peso, ' Kg')} />
-            <Column header="Desc. Classific." body={(rowData) => formatNumber(rowData?.descontoClassificacao, ' Kg')} />
-            <Column header="Taxa Recepção" body={(rowData) => formatNumber(rowData?.taxaRecepcao, ' Kg')} />
-            <Column header="Cota Capital" body={(rowData) => formatNumber(rowData?.cotaCapital, ' Kg')} />
-            <Column header="Taxa Armazenamento" body={(rowData) => formatNumber(rowData?.taxaArmazenamento, ' Kg')} />
-            <Column header="Quebra Técnica" body={(rowData) => formatNumber(rowData?.quebraTecnica, ' Kg')} />
-            <Column style={{ minWidth: 120 }} header="Peso Liquido" body={
-              (rowData) => <strong>{formatNumber(rowData?.pesoLiquido, ' Kg')}</strong>
-            } />
+          <Table value={[selectedProducerBeansStock.entradas]}>
+            <Column
+              header="Peso (Bruto - Tara)"
+              body={(rowData) => formatNumber(rowData?.peso, ' Kg')}
+            />
+            <Column
+              header="Desc. Classific."
+              body={(rowData) =>
+                formatNumber(rowData?.descontoClassificacao, ' Kg')
+              }
+            />
+            <Column
+              header="Taxa Recepção"
+              body={(rowData) => formatNumber(rowData?.taxaRecepcao, ' Kg')}
+            />
+            <Column
+              header="Cota Capital"
+              body={(rowData) => formatNumber(rowData?.cotaCapital, ' Kg')}
+            />
+            <Column
+              header="Taxa Armazenamento"
+              body={(rowData) =>
+                formatNumber(rowData?.taxaArmazenamento, ' Kg')
+              }
+            />
+            <Column
+              header="Quebra Técnica"
+              body={(rowData) => formatNumber(rowData?.quebraTecnica, ' Kg')}
+            />
+            <Column
+              style={{ minWidth: 120 }}
+              header="Peso Liquido"
+              body={(rowData) => (
+                <strong>{formatNumber(rowData?.pesoLiquido, ' Kg')}</strong>
+              )}
+            />
           </Table>
         </section>
         <section>
           <h4>Saidas</h4>
-          <Table
-            value={[selectedProducerBeansStock.saidas]}
-          >
-            <Column header="Peso (Bruto - Tara)" body={(rowData) => formatNumber(rowData?.peso, ' Kg')} />
-            <Column header="Desc. Classific." body={(rowData) => formatNumber(rowData?.descontoClassificacao, ' Kg')} />
-            <Column style={{ minWidth: 120 }} header="Peso Liquido" body={
-              (rowData) => <strong>{formatNumber(rowData?.pesoLiquido, ' Kg')}</strong>
-            } />
+          <Table value={[selectedProducerBeansStock.saidas]}>
+            <Column
+              header="Peso (Bruto - Tara)"
+              body={(rowData) => formatNumber(rowData?.peso, ' Kg')}
+            />
+            <Column
+              header="Desc. Classific."
+              body={(rowData) =>
+                formatNumber(rowData?.descontoClassificacao, ' Kg')
+              }
+            />
+            <Column
+              style={{ minWidth: 120 }}
+              header="Peso Liquido"
+              body={(rowData) => (
+                <strong>{formatNumber(rowData?.pesoLiquido, ' Kg')}</strong>
+              )}
+            />
           </Table>
         </section>
       </div>

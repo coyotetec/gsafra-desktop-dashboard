@@ -32,11 +32,11 @@ export const Container = styled.div`
       border: none;
       transition: all 0.3s ease-in-out;
 
-      &[aria-label="página anterior"]:hover {
+      &[aria-label='página anterior']:hover {
         transform: translateX(-4px);
       }
 
-      &[aria-label="próxima página"]:hover {
+      &[aria-label='próxima página']:hover {
         transform: translateX(4px);
       }
     }

@@ -13,7 +13,7 @@ export interface PatrimoniesListState {
 
 const initialState: PatrimoniesListState = {
   options: [],
-  lastFetch: null
+  lastFetch: null,
 };
 
 export const patrimoniesListSlice = createSlice({
@@ -24,7 +24,7 @@ export const patrimoniesListSlice = createSlice({
       state.options = action.payload;
       state.lastFetch = new Date();
     },
-  }
+  },
 });
 
 export const { setPatrimoniesData } = patrimoniesListSlice.actions;

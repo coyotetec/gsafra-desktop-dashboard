@@ -1,4 +1,11 @@
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from 'react';
 import { Link } from 'react-router-dom';
 import { Container, Content, Loader } from './styles';
 import PlanoContaService from '../../../../services/PlanoContaService';
@@ -33,7 +40,7 @@ export const ChartAccounts = forwardRef<componentsRefType>((props, ref) => {
     financialFilters: {
       chartAccountsCreditRangeDates: {
         startDate: creditStartDate,
-        endDate: creditEndDate
+        endDate: creditEndDate,
       },
       chartAccountsDebitRangeDates: {
         startDate: debitStartDate,
@@ -44,10 +51,7 @@ export const ChartAccounts = forwardRef<componentsRefType>((props, ref) => {
       lastSelectedSafras: safras,
     },
     chartAccountsList,
-    financialChartAccountsData: {
-      credit,
-      debit
-    }
+    financialChartAccountsData: { credit, debit },
   } = useSelector((state: RootState) => state);
   const dispatch = useDispatch();
 
@@ -73,20 +77,26 @@ export const ChartAccounts = forwardRef<componentsRefType>((props, ref) => {
 
       if (creditEndDate && creditStartDate && creditEndDate < creditStartDate) {
         setCreditTotalIsLoading(false);
-        dispatch(setData({
-          type: 'credit',
-          data: [],
-          labels: [],
-        }));
+        dispatch(
+          setData({
+            type: 'credit',
+            data: [],
+            labels: [],
+          }),
+        );
         toast({
           type: 'danger',
-          text: 'Data final precisa ser maior que inicial!'
+          text: 'Data final precisa ser maior que inicial!',
         });
         return;
       }
 
-      const startDateParsed = creditStartDate ? format(creditStartDate, 'dd-MM-yyyy') : '';
-      const endDateParsed = creditEndDate ? format(creditEndDate, 'dd-MM-yyyy') : '';
+      const startDateParsed = creditStartDate
+        ? format(creditStartDate, 'dd-MM-yyyy')
+        : '';
+      const endDateParsed = creditEndDate
+        ? format(creditEndDate, 'dd-MM-yyyy')
+        : '';
 
       const creditTotalData = await PlanoContaService.findPlanoContasTotal(
         String(selectedCredit),
@@ -95,16 +105,25 @@ export const ChartAccounts = forwardRef<componentsRefType>((props, ref) => {
         safras.length > 0 ? safras.join(',') : undefined,
       );
 
-      dispatch(setData({
-        type: 'credit',
-        data: creditTotalData.map((item) => item.total),
-        labels: creditTotalData.map((item) => item.descricao),
-      }));
+      dispatch(
+        setData({
+          type: 'credit',
+          data: creditTotalData.map((item) => item.total),
+          labels: creditTotalData.map((item) => item.descricao),
+        }),
+      );
     }
 
     setCreditTotalIsLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [creditEndDate, creditStartDate, dispatch, hasPermission, safras, selectedCredit]);
+  }, [
+    creditEndDate,
+    creditStartDate,
+    dispatch,
+    hasPermission,
+    safras,
+    selectedCredit,
+  ]);
 
   const loadDebitTotal = useCallback(async () => {
     if (hasPermission('debitos_compensados')) {
@@ -126,20 +145,26 @@ export const ChartAccounts = forwardRef<componentsRefType>((props, ref) => {
 
       if (debitEndDate && debitStartDate && debitEndDate < debitStartDate) {
         setDebitTotalIsLoading(false);
-        dispatch(setData({
-          type: 'debit',
-          data: [],
-          labels: [],
-        }));
+        dispatch(
+          setData({
+            type: 'debit',
+            data: [],
+            labels: [],
+          }),
+        );
         toast({
           type: 'danger',
-          text: 'Data final precisa ser maior que inicial!'
+          text: 'Data final precisa ser maior que inicial!',
         });
         return;
       }
 
-      const startDateParsed = debitStartDate ? format(debitStartDate, 'dd-MM-yyyy') : '';
-      const endDateParsed = debitEndDate ? format(debitEndDate, 'dd-MM-yyyy') : '';
+      const startDateParsed = debitStartDate
+        ? format(debitStartDate, 'dd-MM-yyyy')
+        : '';
+      const endDateParsed = debitEndDate
+        ? format(debitEndDate, 'dd-MM-yyyy')
+        : '';
 
       const debitTotalData = await PlanoContaService.findPlanoContasTotal(
         String(selectedDebit),
@@ -148,25 +173,38 @@ export const ChartAccounts = forwardRef<componentsRefType>((props, ref) => {
         safras.length > 0 ? safras.join(',') : undefined,
       );
 
-      dispatch(setData({
-        type: 'debit',
-        data: debitTotalData.map((item) => item.total),
-        labels: debitTotalData.map((item) => item.descricao),
-      }));
+      dispatch(
+        setData({
+          type: 'debit',
+          data: debitTotalData.map((item) => item.total),
+          labels: debitTotalData.map((item) => item.descricao),
+        }),
+      );
     }
 
     setDebitTotalIsLoading(false);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debitEndDate, debitStartDate, dispatch, hasPermission, safras, selectedDebit]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    debitEndDate,
+    debitStartDate,
+    dispatch,
+    hasPermission,
+    safras,
+    selectedDebit,
+  ]);
 
   const loadData = useCallback(() => {
     loadCreditTotal();
     loadDebitTotal();
   }, [loadCreditTotal, loadDebitTotal]);
 
-  useImperativeHandle(ref, () => ({
-    loadData
-  }), [loadData]);
+  useImperativeHandle(
+    ref,
+    () => ({
+      loadData,
+    }),
+    [loadData],
+  );
 
   useEffect(() => {
     loadData();
@@ -175,26 +213,37 @@ export const ChartAccounts = forwardRef<componentsRefType>((props, ref) => {
   useEffect(() => {
     async function loadPlanoContas() {
       if (hasToFetch(chartAccountsList.lastFetch)) {
-        const [creditChartAccountsData, debitChartAccountsData] = await Promise.all([
-          PlanoContaService.findPlanoContas('receita', 'sintetica'),
-          PlanoContaService.findPlanoContas('despesa', 'sintetica'),
-        ]);
+        const [creditChartAccountsData, debitChartAccountsData] =
+          await Promise.all([
+            PlanoContaService.findPlanoContas('receita', 'sintetica'),
+            PlanoContaService.findPlanoContas('despesa', 'sintetica'),
+          ]);
 
-        const creditChartAccountsTree = parseChartAccounts(creditChartAccountsData);
-        const debitChartAccountsTree = parseChartAccounts(debitChartAccountsData);
+        const creditChartAccountsTree = parseChartAccounts(
+          creditChartAccountsData,
+        );
+        const debitChartAccountsTree = parseChartAccounts(
+          debitChartAccountsData,
+        );
 
-        dispatch(setChartAccountsData({
-          credit: creditChartAccountsTree,
-          debit: debitChartAccountsTree,
-        }));
-        dispatch(change({
-          name: 'chartAccountsCreditSelected',
-          value: creditChartAccountsTree[0]?.key || null,
-        }));
-        dispatch(change({
-          name: 'chartAccountsDebitSelected',
-          value: debitChartAccountsTree[0]?.key || null,
-        }));
+        dispatch(
+          setChartAccountsData({
+            credit: creditChartAccountsTree,
+            debit: debitChartAccountsTree,
+          }),
+        );
+        dispatch(
+          change({
+            name: 'chartAccountsCreditSelected',
+            value: creditChartAccountsTree[0]?.key || null,
+          }),
+        );
+        dispatch(
+          change({
+            name: 'chartAccountsDebitSelected',
+            value: debitChartAccountsTree[0]?.key || null,
+          }),
+        );
       }
     }
 
@@ -202,12 +251,16 @@ export const ChartAccounts = forwardRef<componentsRefType>((props, ref) => {
   }, [chartAccountsList.lastFetch, dispatch]);
 
   function handleSaveChart(type: 'credit' | 'debit') {
-    const chartElement = type === 'credit' ? creditChartRef.current : debitChartRef.current;
-    const fileName = type === 'credit'
-      ? `CRÉDITOS COMPENSADOS ${creditStartDate ? format(creditStartDate, 'dd-MM-yyyy') : '-'
-      } À ${creditEndDate ? format(creditEndDate, 'dd-MM-yyyy') : '-'}`
-      : `DÉBITOS COMPENSADOS ${debitStartDate ? format(debitStartDate, 'dd-MM-yyyy') : '-'
-      } À ${debitEndDate ? format(debitEndDate, 'dd-MM-yyyy') : '-'}`;
+    const chartElement =
+      type === 'credit' ? creditChartRef.current : debitChartRef.current;
+    const fileName =
+      type === 'credit'
+        ? `CRÉDITOS COMPENSADOS ${
+            creditStartDate ? format(creditStartDate, 'dd-MM-yyyy') : '-'
+          } À ${creditEndDate ? format(creditEndDate, 'dd-MM-yyyy') : '-'}`
+        : `DÉBITOS COMPENSADOS ${
+            debitStartDate ? format(debitStartDate, 'dd-MM-yyyy') : '-'
+          } À ${debitEndDate ? format(debitEndDate, 'dd-MM-yyyy') : '-'}`;
 
     if (!chartElement) {
       return;
@@ -233,27 +286,33 @@ export const ChartAccounts = forwardRef<componentsRefType>((props, ref) => {
           <div>
             <DateInput
               onChangeDate={(date) => {
-                dispatch(change({
-                  name: 'chartAccountsDebitRangeDates', value: {
-                    startDate: date,
-                    endDate: debitEndDate
-                  }
-                }));
+                dispatch(
+                  change({
+                    name: 'chartAccountsDebitRangeDates',
+                    value: {
+                      startDate: date,
+                      endDate: debitEndDate,
+                    },
+                  }),
+                );
               }}
-              placeholder='Data Inicial'
+              placeholder="Data Inicial"
               defaultDate={debitStartDate}
             />
             <strong>à</strong>
             <DateInput
               onChangeDate={(date) => {
-                dispatch(change({
-                  name: 'chartAccountsDebitRangeDates', value: {
-                    startDate: debitStartDate,
-                    endDate: date
-                  }
-                }));
+                dispatch(
+                  change({
+                    name: 'chartAccountsDebitRangeDates',
+                    value: {
+                      startDate: debitStartDate,
+                      endDate: date,
+                    },
+                  }),
+                );
               }}
-              placeholder='Data Final'
+              placeholder="Data Final"
               defaultDate={debitEndDate}
             />
           </div>
@@ -266,21 +325,16 @@ export const ChartAccounts = forwardRef<componentsRefType>((props, ref) => {
             </Loader>
           )}
           {hasPermission('debitos_compensados') && (
-            <ChartAccountsSelect type='debit' />
+            <ChartAccountsSelect type="debit" />
           )}
-          <ChartAccountsChart
-            labels={debit.labels}
-            data={debit.data}
-          />
+          <ChartAccountsChart labels={debit.labels} data={debit.data} />
           {debit.data.length > 0 && (
             <footer data-html2canvas-ignore>
-              <Link
-                to={'movimento-contas/analitica?type=debit'}
-              >
+              <Link to={'movimento-contas/analitica?type=debit'}>
                 Visão Detalhada
               </Link>
               <button onClick={() => handleSaveChart('debit')}>
-                <DownloadSimple size={24} color="#F7FBFE" weight='regular' />
+                <DownloadSimple size={24} color="#F7FBFE" weight="regular" />
               </button>
             </footer>
           )}
@@ -292,27 +346,33 @@ export const ChartAccounts = forwardRef<componentsRefType>((props, ref) => {
           <div>
             <DateInput
               onChangeDate={(date) => {
-                dispatch(change({
-                  name: 'chartAccountsCreditRangeDates', value: {
-                    startDate: date,
-                    endDate: creditEndDate
-                  }
-                }));
+                dispatch(
+                  change({
+                    name: 'chartAccountsCreditRangeDates',
+                    value: {
+                      startDate: date,
+                      endDate: creditEndDate,
+                    },
+                  }),
+                );
               }}
-              placeholder='Data Inicial'
+              placeholder="Data Inicial"
               defaultDate={creditStartDate}
             />
             <strong>à</strong>
             <DateInput
               onChangeDate={(date) => {
-                dispatch(change({
-                  name: 'chartAccountsCreditRangeDates', value: {
-                    startDate: creditStartDate,
-                    endDate: date
-                  }
-                }));
+                dispatch(
+                  change({
+                    name: 'chartAccountsCreditRangeDates',
+                    value: {
+                      startDate: creditStartDate,
+                      endDate: date,
+                    },
+                  }),
+                );
               }}
-              placeholder='Data Final'
+              placeholder="Data Final"
               defaultDate={creditEndDate}
             />
           </div>
@@ -325,21 +385,16 @@ export const ChartAccounts = forwardRef<componentsRefType>((props, ref) => {
             </Loader>
           )}
           {hasPermission('creditos_compensados') && (
-            <ChartAccountsSelect type='credit' />
+            <ChartAccountsSelect type="credit" />
           )}
-          <ChartAccountsChart
-            labels={credit.labels}
-            data={credit.data}
-          />
+          <ChartAccountsChart labels={credit.labels} data={credit.data} />
           {credit.data.length > 0 && (
             <footer data-html2canvas-ignore>
-              <Link
-                to={'movimento-contas/analitica?type=credit'}
-              >
+              <Link to={'movimento-contas/analitica?type=credit'}>
                 Visão Detalhada
               </Link>
               <button onClick={() => handleSaveChart('credit')}>
-                <DownloadSimple size={24} color="#F7FBFE" weight='regular' />
+                <DownloadSimple size={24} color="#F7FBFE" weight="regular" />
               </button>
             </footer>
           )}
@@ -348,3 +403,5 @@ export const ChartAccounts = forwardRef<componentsRefType>((props, ref) => {
     </Container>
   );
 });
+
+ChartAccounts.displayName = 'ChartAccounts';

@@ -26,7 +26,9 @@ type optionType = {
 export function FuelingMonthlyDetails() {
   const [isLoading, setIsLoading] = useState(false);
   const [monthlyDetails, setMonthlyDetails] = useState<DetailsData[]>([]);
-  const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
+  const [expandedRows, setExpandedRows] = useState<
+    any[] | DataTableExpandedRows
+  >([]);
   const custos: optionType = [
     { value: 'medio', label: 'Custo Médio' },
     { value: 'atual', label: 'Custo Atual' },
@@ -45,23 +47,33 @@ export function FuelingMonthlyDetails() {
     async function loadData() {
       setIsLoading(true);
 
-      if (filters.rangeDates.endDate && filters.rangeDates.startDate && filters.rangeDates.endDate < filters.rangeDates.startDate) {
+      if (
+        filters.rangeDates.endDate &&
+        filters.rangeDates.startDate &&
+        filters.rangeDates.endDate < filters.rangeDates.startDate
+      ) {
         setIsLoading(false);
         toast({
           type: 'danger',
-          text: 'Data final precisa ser maior que inicial!'
+          text: 'Data final precisa ser maior que inicial!',
         });
         return;
       }
 
       const monthlyDetailsData = await AbastecimentoService.findDetails({
         custo: filters.cost,
-        startDate: filters.rangeDates.startDate ? format(filters.rangeDates.startDate, 'dd-MM-yyyy') : '',
-        endDate: filters.rangeDates.endDate ? format(filters.rangeDates.endDate, 'dd-MM-yyyy') : '',
+        startDate: filters.rangeDates.startDate
+          ? format(filters.rangeDates.startDate, 'dd-MM-yyyy')
+          : '',
+        endDate: filters.rangeDates.endDate
+          ? format(filters.rangeDates.endDate, 'dd-MM-yyyy')
+          : '',
         idPatrimonio: filters.patrimony !== '_' ? filters.patrimony : undefined,
         idProdutoAlmoxarifado: filters.fuel !== '_' ? filters.fuel : undefined,
-        idAlmoxarifado: filters.storeroom !== '_' ? filters.storeroom : undefined,
-        idTipoPatrimonio: filters.patrimonyType !== '_' ? filters.patrimonyType : undefined,
+        idAlmoxarifado:
+          filters.storeroom !== '_' ? filters.storeroom : undefined,
+        idTipoPatrimonio:
+          filters.patrimonyType !== '_' ? filters.patrimonyType : undefined,
       });
 
       setMonthlyDetails(monthlyDetailsData);
@@ -77,7 +89,7 @@ export function FuelingMonthlyDetails() {
     filters.patrimony,
     filters.fuel,
     filters.storeroom,
-    filters.patrimonyType
+    filters.patrimonyType,
   ]);
 
   function formatNumber(number: number) {
@@ -85,17 +97,19 @@ export function FuelingMonthlyDetails() {
   }
 
   function handleExportExcel() {
-    import('xlsx').then(xlsx => {
-      const worksheet = xlsx.utils.json_to_sheet(monthlyDetails.map(i => ({
-        'DATA': format(new Date(i.data), 'dd/MM/yyyy'),
-        'NUMERO REQUISICAO': i.numeroRequisicao,
-        'PATRIMONIO': i.patrimonio,
-        'COMBUSTIVEL': i.combustivel,
-        'LOCAL DE SAIDA': i.localSaida,
-        'LITROS': i.quantidade,
-        'CUSTO POR LITRO': i.custoIndividual,
-        'TOTAL': i.total,
-      })));
+    import('xlsx').then((xlsx) => {
+      const worksheet = xlsx.utils.json_to_sheet(
+        monthlyDetails.map((i) => ({
+          DATA: format(new Date(i.data), 'dd/MM/yyyy'),
+          'NUMERO REQUISICAO': i.numeroRequisicao,
+          PATRIMONIO: i.patrimonio,
+          COMBUSTIVEL: i.combustivel,
+          'LOCAL DE SAIDA': i.localSaida,
+          LITROS: i.quantidade,
+          'CUSTO POR LITRO': i.custoIndividual,
+          TOTAL: i.total,
+        })),
+      );
 
       for (let i = 2; i <= monthlyDetails.length + 1; i++) {
         worksheet[`A${i}`].z = 'dd"/"mm"/"yyyy';
@@ -110,22 +124,29 @@ export function FuelingMonthlyDetails() {
       workbook.Props = {
         Author: 'GSafra Software',
       };
-      const excelBuffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'array' });
+      const excelBuffer = xlsx.write(workbook, {
+        bookType: 'xlsx',
+        type: 'array',
+      });
       saveAsExcelFile(
         excelBuffer,
-        `RESUMO MENSAL DE ABASTECIMENTO ${filters.rangeDates.startDate ? format(filters.rangeDates.startDate, 'dd-MM-yyyy') : '-'
-        } À ${filters.rangeDates.endDate ? format(filters.rangeDates.endDate, 'dd-MM-yyyy') : '-'}`
+        `RESUMO MENSAL DE ABASTECIMENTO ${
+          filters.rangeDates.startDate
+            ? format(filters.rangeDates.startDate, 'dd-MM-yyyy')
+            : '-'
+        } À ${filters.rangeDates.endDate ? format(filters.rangeDates.endDate, 'dd-MM-yyyy') : '-'}`,
       );
     });
   }
 
   function saveAsExcelFile(buffer: any, fileName: string) {
-    import('file-saver').then(module => {
+    import('file-saver').then((module) => {
       if (module && module.default) {
-        const EXCEL_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
+        const EXCEL_TYPE =
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
         const EXCEL_EXTENSION = '.xlsx';
         const data = new Blob([buffer], {
-          type: EXCEL_TYPE
+          type: EXCEL_TYPE,
         });
 
         module.default.saveAs(data, fileName + EXCEL_EXTENSION);
@@ -145,14 +166,17 @@ export function FuelingMonthlyDetails() {
         <div className="date-filter">
           <DateInput
             onChangeDate={(date) => {
-              dispatch(change({
-                name: 'rangeDates', value: {
-                  startDate: date,
-                  endDate: filters.rangeDates.endDate
-                }
-              }));
+              dispatch(
+                change({
+                  name: 'rangeDates',
+                  value: {
+                    startDate: date,
+                    endDate: filters.rangeDates.endDate,
+                  },
+                }),
+              );
             }}
-            placeholder='Data Inicial'
+            placeholder="Data Inicial"
             defaultDate={filters.rangeDates.startDate}
             height="48px"
             width="100%"
@@ -163,14 +187,17 @@ export function FuelingMonthlyDetails() {
           <strong>à</strong>
           <DateInput
             onChangeDate={(date) => {
-              dispatch(change({
-                name: 'rangeDates', value: {
-                  startDate: filters.rangeDates.startDate,
-                  endDate: date
-                }
-              }));
+              dispatch(
+                change({
+                  name: 'rangeDates',
+                  value: {
+                    startDate: filters.rangeDates.startDate,
+                    endDate: date,
+                  },
+                }),
+              );
             }}
-            placeholder='Data Final'
+            placeholder="Data Final"
             defaultDate={filters.rangeDates.endDate}
             height="48px"
             width="100%"
@@ -181,13 +208,16 @@ export function FuelingMonthlyDetails() {
         </div>
 
         <Select
-          options={[{
-            value: '_',
-            label: 'Todos',
-          }, ...patrimoniesList.options]}
+          options={[
+            {
+              value: '_',
+              label: 'Todos',
+            },
+            ...patrimoniesList.options,
+          ]}
           value={filters.patrimony}
           onChange={(value: string) => {
-            dispatch(change({ name: 'patrimony', value: value }));
+            dispatch(change({ name: 'patrimony', value }));
           }}
           placeholder="Patrimonio"
           label="Patrimonio"
@@ -195,13 +225,16 @@ export function FuelingMonthlyDetails() {
           width="100%"
         />
         <Select
-          options={[{
-            value: '_',
-            label: 'Todos',
-          }, ...fuelsList.options]}
+          options={[
+            {
+              value: '_',
+              label: 'Todos',
+            },
+            ...fuelsList.options,
+          ]}
           value={filters.fuel}
           onChange={(value: string) => {
-            dispatch(change({ name: 'fuel', value: value }));
+            dispatch(change({ name: 'fuel', value }));
           }}
           placeholder="Combustível"
           label="Combustível"
@@ -209,13 +242,16 @@ export function FuelingMonthlyDetails() {
           width="100%"
         />
         <Select
-          options={[{
-            value: '_',
-            label: 'Todos',
-          }, ...storeroomsList.options]}
+          options={[
+            {
+              value: '_',
+              label: 'Todos',
+            },
+            ...storeroomsList.options,
+          ]}
           value={filters.storeroom}
           onChange={(value: string) => {
-            dispatch(change({ name: 'storeroom', value: value }));
+            dispatch(change({ name: 'storeroom', value }));
           }}
           placeholder="Local de Saída"
           label="Local de Saída"
@@ -226,20 +262,23 @@ export function FuelingMonthlyDetails() {
           options={custos}
           value={filters.cost}
           onChange={(value: string) => {
-            dispatch(change({ name: 'cost', value: value }));
+            dispatch(change({ name: 'cost', value }));
           }}
           placeholder="Custo do Combustível"
           label="Custo do Combustível"
           width="100%"
         />
         <Select
-          options={[{
-            value: '_',
-            label: 'Todos',
-          }, ...patrimonyTypesList.options]}
+          options={[
+            {
+              value: '_',
+              label: 'Todos',
+            },
+            ...patrimonyTypesList.options,
+          ]}
           value={filters.patrimonyType}
           onChange={(value: string) => {
-            dispatch(change({ name: 'patrimonyType', value: value }));
+            dispatch(change({ name: 'patrimonyType', value }));
           }}
           placeholder="Tipo de Patrimônio"
           label="Tipo de Patrimônio"
@@ -258,18 +297,32 @@ export function FuelingMonthlyDetails() {
         expandableRowGroups
         expandedRows={expandedRows}
         onRowToggle={(e) => setExpandedRows(e.data)}
-        rowGroupHeaderTemplate={(data) => (
-          <strong>{data.mes}</strong>
-        )}
+        rowGroupHeaderTemplate={(data) => <strong>{data.mes}</strong>}
         emptyMessage="Nenhum dado encontrado"
       >
-        <Column field="data" header="Data" body={(rowData) => format(new Date(rowData.data), 'dd/MM/yyyy')} />
+        <Column
+          field="data"
+          header="Data"
+          body={(rowData) => format(new Date(rowData.data), 'dd/MM/yyyy')}
+        />
         <Column field="patrimonio" header="Patrimônio" />
         <Column field="combustivel" header="Combustível" />
         <Column field="localSaida" header="Local" />
-        <Column field="quantidade" header="Litros" body={(rowData) => formatNumber(rowData.quantidade)} />
-        <Column field="custoIndividual" header="Custo por Litro" body={(rowData) => currencyFormat(rowData.custoIndividual)} />
-        <Column field="total" header="Total" body={(rowData) => currencyFormat(rowData.total)} />
+        <Column
+          field="quantidade"
+          header="Litros"
+          body={(rowData) => formatNumber(rowData.quantidade)}
+        />
+        <Column
+          field="custoIndividual"
+          header="Custo por Litro"
+          body={(rowData) => currencyFormat(rowData.custoIndividual)}
+        />
+        <Column
+          field="total"
+          header="Total"
+          body={(rowData) => currencyFormat(rowData.total)}
+        />
       </Table>
     </Container>
   );

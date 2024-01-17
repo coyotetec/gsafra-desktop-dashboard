@@ -1,6 +1,15 @@
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from 'react';
 import { Spinner } from '../../../../components/Spinner';
-import ColheitaService, { descontoType } from '../../../../services/ColheitaService';
+import ColheitaService, {
+  descontoType,
+} from '../../../../services/ColheitaService';
 import { Container, Loader } from './styles';
 import { Switch } from '../../../../components/Switch';
 import { Select } from '../../../../components/Select';
@@ -17,7 +26,7 @@ import { componentsRefType } from '../../../../types/Types';
 type optionType = {
   value: descontoType;
   label: string;
-}[]
+}[];
 
 export const Discount = forwardRef<componentsRefType>((props, ref) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -38,9 +47,7 @@ export const Discount = forwardRef<componentsRefType>((props, ref) => {
       discount: selectedDiscount,
       safra,
     },
-    productionData: {
-      discount
-    }
+    productionData: { discount },
   } = useSelector((state: RootState) => state);
   const dispatch = useDispatch();
 
@@ -64,13 +71,17 @@ export const Discount = forwardRef<componentsRefType>((props, ref) => {
         return;
       }
 
-      const discountTotalData = await ColheitaService
-        .findDescontoTotal(safra, selectedDiscount as descontoType);
+      const discountTotalData = await ColheitaService.findDescontoTotal(
+        safra,
+        selectedDiscount as descontoType,
+      );
 
-      dispatch(setData({
-        name: 'discount',
-        data: discountTotalData,
-      }));
+      dispatch(
+        setData({
+          name: 'discount',
+          data: discountTotalData,
+        }),
+      );
     }
     setIsLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -80,12 +91,16 @@ export const Discount = forwardRef<componentsRefType>((props, ref) => {
     loadData();
   }, [loadData]);
 
-  useImperativeHandle(ref, () => ({
-    loadData
-  }), [loadData]);
+  useImperativeHandle(
+    ref,
+    () => ({
+      loadData,
+    }),
+    [loadData],
+  );
 
   function formatNumber(number: number, sufix?: string) {
-    return `${new Intl.NumberFormat('id').format(number)}${sufix ? sufix : ''}`;
+    return `${new Intl.NumberFormat('id').format(number)}${sufix || ''}`;
   }
 
   return (
@@ -95,10 +110,14 @@ export const Discount = forwardRef<componentsRefType>((props, ref) => {
         <Select
           options={discountOptions}
           value={selectedDiscount}
-          onChange={(value: string) => dispatch(change({
-            name: 'discount',
-            value: value
-          }))}
+          onChange={(value: string) =>
+            dispatch(
+              change({
+                name: 'discount',
+                value,
+              }),
+            )
+          }
           width="240px"
           height="40px"
         />
@@ -117,7 +136,14 @@ export const Discount = forwardRef<componentsRefType>((props, ref) => {
               {formatNumber(discount.totalDescontoRealSafra, ' Kg')}
             </span>
             <span>
-              <strong>Média {discountOptions.find((i) => i.value === selectedDiscount)?.label}: </strong>
+              <strong>
+                Média{' '}
+                {
+                  discountOptions.find((i) => i.value === selectedDiscount)
+                    ?.label
+                }
+                :{' '}
+              </strong>
               {formatNumber(discount.porcentagemDescontoSafra, '%')}
             </span>
           </div>
@@ -125,18 +151,26 @@ export const Discount = forwardRef<componentsRefType>((props, ref) => {
             leftLabel="%"
             rightLabel="Kg"
             isToggled={unit === 'kg'}
-            onToggle={(e) => dispatch(change({
-              name: 'discountsUnit',
-              value: e.target.checked ? 'kg' : 'sacks'
-            }))}
+            onToggle={(e) =>
+              dispatch(
+                change({
+                  name: 'discountsUnit',
+                  value: e.target.checked ? 'kg' : 'sacks',
+                }),
+              )
+            }
           />
         </header>
         <DiscountChart
-          labels={discount.talhoesDescontoTotal.map(i => i.talhao)}
-          data={discount.talhoesDescontoTotal.map(i => unit === 'percent' ? i.descontoPorcentagem : i.descontoReal)}
+          labels={discount.talhoesDescontoTotal.map((i) => i.talhao)}
+          data={discount.talhoesDescontoTotal.map((i) =>
+            unit === 'percent' ? i.descontoPorcentagem : i.descontoReal,
+          )}
           unit={unit}
         />
       </div>
     </Container>
   );
 });
+
+Discount.displayName = 'Discount';

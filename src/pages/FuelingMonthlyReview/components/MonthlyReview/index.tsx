@@ -10,7 +10,7 @@ import { Container, Loader } from './styles';
 
 interface MonthlyReviewProps {
   title: string;
-  isLoading: boolean
+  isLoading: boolean;
   total: number;
   labels: string[];
   data: number[];
@@ -18,7 +18,15 @@ interface MonthlyReviewProps {
   color?: string;
 }
 
-export function MonthlyReview({ title, total, labels, data, isCurrency, color, isLoading }: MonthlyReviewProps) {
+export function MonthlyReview({
+  title,
+  total,
+  labels,
+  data,
+  isCurrency,
+  color,
+  isLoading,
+}: MonthlyReviewProps) {
   const chartRef = useRef(null);
   const { hasPermission } = useUserContext();
 
@@ -59,10 +67,12 @@ export function MonthlyReview({ title, total, labels, data, isCurrency, color, i
         <header>
           <div>
             <strong>Total: </strong>
-            <span>{isCurrency ? currencyFormat(total) : formatNumber(total)}</span>
+            <span>
+              {isCurrency ? currencyFormat(total) : formatNumber(total)}
+            </span>
           </div>
           <button onClick={handleSaveChart} data-html2canvas-ignore>
-            <DownloadSimple size={24} color="#F7FBFE" weight='regular' />
+            <DownloadSimple size={24} color="#F7FBFE" weight="regular" />
           </button>
         </header>
         <MonthlyReviewChart

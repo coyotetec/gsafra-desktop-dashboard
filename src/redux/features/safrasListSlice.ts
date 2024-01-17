@@ -13,7 +13,7 @@ export interface SafrasListState {
 
 const initialState: SafrasListState = {
   options: [],
-  lastFetch: null
+  lastFetch: null,
 };
 
 export const safrasListSlice = createSlice({
@@ -23,8 +23,8 @@ export const safrasListSlice = createSlice({
     setSafrasData: (state, action: PayloadAction<optionType>) => {
       state.options = action.payload;
       state.lastFetch = new Date();
-    }
-  }
+    },
+  },
 });
 
 export const { setSafrasData } = safrasListSlice.actions;

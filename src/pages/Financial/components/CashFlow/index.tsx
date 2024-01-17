@@ -1,4 +1,11 @@
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from 'react';
 import { format } from 'date-fns';
 
 import { Container, Header } from './styles';
@@ -13,7 +20,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../../redux/store';
 import { change } from '../../../../redux/features/financialFiltersSlice';
 import { hasToFetch } from '../../../../utils/hasToFetch';
-import { setData, setLabels } from '../../../../redux/features/financialCashFlowDataSlice';
+import {
+  setData,
+  setLabels,
+} from '../../../../redux/features/financialCashFlowDataSlice';
 import { componentsRefType } from '../../../../types/Types';
 
 export const CashFlow = forwardRef<componentsRefType>((props, ref) => {
@@ -21,8 +31,12 @@ export const CashFlow = forwardRef<componentsRefType>((props, ref) => {
   const isFirstRender = useRef(true);
 
   const {
-    financialFilters: { cashFlowRangeDates: { startDate, endDate }, lastSelectedSafras: safras, status },
-    financialCashFlowData: cashFlow
+    financialFilters: {
+      cashFlowRangeDates: { startDate, endDate },
+      lastSelectedSafras: safras,
+      status,
+    },
+    financialCashFlowData: cashFlow,
   } = useSelector((state: RootState) => state);
   const dispatch = useDispatch();
 
@@ -43,40 +57,44 @@ export const CashFlow = forwardRef<componentsRefType>((props, ref) => {
 
       if (!startDate || !endDate) {
         setIsLoading(false);
-        dispatch(setData({
-          currentBalance: 0,
-          cashFlowBalance: [],
-          cashFlowBalancePlan: [],
-          cashFlowCredits: [],
-          cashFlowCreditsPlan: [],
-          cashFlowDebits: [],
-          cashFlowDebitsPlan: [],
-          hasError: false,
-        }));
+        dispatch(
+          setData({
+            currentBalance: 0,
+            cashFlowBalance: [],
+            cashFlowBalancePlan: [],
+            cashFlowCredits: [],
+            cashFlowCreditsPlan: [],
+            cashFlowDebits: [],
+            cashFlowDebitsPlan: [],
+            hasError: false,
+          }),
+        );
         dispatch(setLabels([]));
         toast({
           type: 'danger',
-          text: 'Datas inicial e final são obrigatórias!'
+          text: 'Datas inicial e final são obrigatórias!',
         });
         return;
       }
 
       if (startDate > endDate) {
         setIsLoading(false);
-        dispatch(setData({
-          currentBalance: 0,
-          cashFlowBalance: [],
-          cashFlowBalancePlan: [],
-          cashFlowCredits: [],
-          cashFlowCreditsPlan: [],
-          cashFlowDebits: [],
-          cashFlowDebitsPlan: [],
-          hasError: false,
-        }));
+        dispatch(
+          setData({
+            currentBalance: 0,
+            cashFlowBalance: [],
+            cashFlowBalancePlan: [],
+            cashFlowCredits: [],
+            cashFlowCreditsPlan: [],
+            cashFlowDebits: [],
+            cashFlowDebitsPlan: [],
+            hasError: false,
+          }),
+        );
         dispatch(setLabels([]));
         toast({
           type: 'danger',
-          text: 'Data final precisa ser maior que inicial!'
+          text: 'Data final precisa ser maior que inicial!',
         });
         return;
       }
@@ -96,12 +114,16 @@ export const CashFlow = forwardRef<componentsRefType>((props, ref) => {
     }
 
     setIsLoading(false);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasPermission, startDate, endDate, safras, dispatch, status]);
 
-  useImperativeHandle(ref, () => ({
-    loadData
-  }), [loadData]);
+  useImperativeHandle(
+    ref,
+    () => ({
+      loadData,
+    }),
+    [loadData],
+  );
 
   useEffect(() => {
     loadData();
@@ -114,27 +136,33 @@ export const CashFlow = forwardRef<componentsRefType>((props, ref) => {
         <div>
           <DateInput
             onChangeDate={(date) => {
-              dispatch(change({
-                name: 'cashFlowRangeDates', value: {
-                  startDate: date,
-                  endDate
-                }
-              }));
+              dispatch(
+                change({
+                  name: 'cashFlowRangeDates',
+                  value: {
+                    startDate: date,
+                    endDate,
+                  },
+                }),
+              );
             }}
-            placeholder='Data Inicial'
+            placeholder="Data Inicial"
             defaultDate={startDate}
           />
           <strong>à</strong>
           <DateInput
             onChangeDate={(date) => {
-              dispatch(change({
-                name: 'cashFlowRangeDates', value: {
-                  startDate,
-                  endDate: date
-                }
-              }));
+              dispatch(
+                change({
+                  name: 'cashFlowRangeDates',
+                  value: {
+                    startDate,
+                    endDate: date,
+                  },
+                }),
+              );
             }}
-            placeholder='Data Final'
+            placeholder="Data Final"
             defaultDate={endDate}
           />
         </div>
@@ -150,3 +178,5 @@ export const CashFlow = forwardRef<componentsRefType>((props, ref) => {
     </Container>
   );
 });
+
+CashFlow.displayName = 'CashFlow';

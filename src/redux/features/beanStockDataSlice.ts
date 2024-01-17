@@ -1,12 +1,15 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
-import { EstoqueGraosProdutorTotal, EstoqueGraosTotal } from '../../types/EstoqueGraos';
+import {
+  EstoqueGraosProdutorTotal,
+  EstoqueGraosTotal,
+} from '../../types/EstoqueGraos';
 
 export interface BeanStockDataState {
   beanStock: EstoqueGraosTotal;
   beanStcokLastFetch: Date | null;
   beanStockProducer: EstoqueGraosProdutorTotal;
-  beanStockProducerLastFetch: Date | null
+  beanStockProducerLastFetch: Date | null;
 }
 
 const initialState: BeanStockDataState = {
@@ -24,14 +27,14 @@ const initialState: BeanStockDataState = {
     saidas: {
       peso: 0,
       descontoClassificacao: 0,
-      pesoLiquido: 0
+      pesoLiquido: 0,
     },
     saldoFinal: 0,
   },
   beanStcokLastFetch: null,
   beanStockProducer: {
     estoqueGraosProdutor: [],
-    saldoFinal: []
+    saldoFinal: [],
   },
   beanStockProducerLastFetch: null,
 };
@@ -44,12 +47,16 @@ export const beanStockDataSlice = createSlice({
       state.beanStock = payload;
       state.beanStcokLastFetch = new Date();
     },
-    setBeanStockProducer: (state, { payload }: PayloadAction<EstoqueGraosProdutorTotal>) => {
+    setBeanStockProducer: (
+      state,
+      { payload }: PayloadAction<EstoqueGraosProdutorTotal>,
+    ) => {
       state.beanStockProducer = payload;
       state.beanStockProducerLastFetch = new Date();
     },
-  }
+  },
 });
 
-export const { setBeanStock, setBeanStockProducer } = beanStockDataSlice.actions;
+export const { setBeanStock, setBeanStockProducer } =
+  beanStockDataSlice.actions;
 export default beanStockDataSlice.reducer;

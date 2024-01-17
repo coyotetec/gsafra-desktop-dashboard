@@ -29,15 +29,11 @@ export function Sidebar() {
           <NavLink to="/indicadores">Indicadores</NavLink>
           <NavLink to="/contas-receber-pagar">Contas Receber x Pagar</NavLink>
           <p>ABASTECIMENTO</p>
-          <NavLink to="/abastecimento/resumo-mensal">
-            Mensal
-          </NavLink>
+          <NavLink to="/abastecimento/resumo-mensal">Mensal</NavLink>
           <NavLink to="/abastecimento/resumo-patrimonio">
             Tipo de Patrimonio
           </NavLink>
-          <NavLink to="/abastecimento/resumo-combustivel">
-            Combustível
-          </NavLink>
+          <NavLink to="/abastecimento/resumo-combustivel">Combustível</NavLink>
           <p>AGRIGULTURA</p>
           <NavLink to="/producao">Produção</NavLink>
           <NavLink to="/custo-producao">Custo Produção</NavLink>
@@ -45,7 +41,7 @@ export function Sidebar() {
           <NavLink to="/vendas">Vendas</NavLink>
           <NavLink to="/estoque-graos">Estoque de Grãos</NavLink>
         </nav>
-        <button type='button' onClick={handleExit}>
+        <button type="button" onClick={handleExit}>
           Sair
           <SignOut size={20} color="#F7FBFE" weight="bold" />
         </button>

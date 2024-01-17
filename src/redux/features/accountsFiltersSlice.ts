@@ -28,7 +28,11 @@ export const accountsFiltersSlice = createSlice({
   initialState,
   reducers: {
     change: (state, action: PayloadAction<ChangePayload>) => {
-      state[action.payload.name] = action.payload.value as string & string[] & boolean & Date & null;
+      state[action.payload.name] = action.payload.value as string &
+        string[] &
+        boolean &
+        Date &
+        null;
     },
   },
 });

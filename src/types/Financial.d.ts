@@ -2,13 +2,13 @@ export interface Total {
   quantity: number;
   total: number;
   totalNextSeven: {
-    quantity: number,
-    total: number,
-  },
+    quantity: number;
+    total: number;
+  };
   totalNextFifteen: {
-    quantity: number,
-    total: number
-  }
+    quantity: number;
+    total: number;
+  };
 }
 
 export interface CashFlowPattern {

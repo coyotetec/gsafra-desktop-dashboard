@@ -41,16 +41,15 @@ export const Container = styled.main`
 export const Table = styled(TreeTable)`
   margin-top: 8px;
   font-family: 'Montserrat', sans-serif;
-  color: #CFD4D6 !important;
+  color: #cfd4d6 !important;
   font-size: 14px;
   border-radius: 8px !important;
   overflow: hidden;
-  background: #30454C !important;
+  background: #30454c !important;
 
   .p-treetable-scrollable-body {
-
     &::-webkit-scrollbar-corner {
-      background: #30454C;
+      background: #30454c;
     }
 
     &::-webkit-scrollbar {
@@ -59,13 +58,13 @@ export const Table = styled(TreeTable)`
     }
 
     &::-webkit-scrollbar-track {
-      background: #30454C;
+      background: #30454c;
     }
 
     &::-webkit-scrollbar-thumb {
       background-color: #506167;
       border-radius: 999px;
-      border: 3px solid #30454C;
+      border: 3px solid #30454c;
     }
   }
 
@@ -87,7 +86,7 @@ export const Table = styled(TreeTable)`
     tr {
       th {
         border: none !important;
-        color: #CFD4D6;
+        color: #cfd4d6;
         background: #506167;
         padding: 8px 12px;
         font-weight: 600;
@@ -97,8 +96,8 @@ export const Table = styled(TreeTable)`
 
   .p-treetable-tbody {
     tr {
-      color: #CFD4D6;
-      background: #30454C;
+      color: #cfd4d6;
+      background: #30454c;
       outline: none !important;
 
       td {
@@ -108,7 +107,7 @@ export const Table = styled(TreeTable)`
     }
 
     .p-treetable-toggler {
-      color: #9FA9AC !important;
+      color: #9fa9ac !important;
       width: 16px !important;
       height: 16px !important;
       margin-right: 8px !important;
@@ -118,7 +117,9 @@ export const Table = styled(TreeTable)`
         font-size: 12px !important;
       }
 
-      &:hover, &:active, &:focus {
+      &:hover,
+      &:active,
+      &:focus {
         background: transparent !important;
         border: none !important;
         box-shadow: none !important;
@@ -140,7 +141,7 @@ export const Table = styled(TreeTable)`
     tr {
       td {
         border: none !important;
-        color: #CFD4D6;
+        color: #cfd4d6;
         background: #445359;
         padding: 10px 8px;
         font-weight: 600;
@@ -150,7 +151,7 @@ export const Table = styled(TreeTable)`
 
   .p-treetable-footer {
     border: none !important;
-    color: #CFD4D6;
+    color: #cfd4d6;
     background: #506167;
     padding: 12px 16px;
     display: flex;
@@ -183,4 +184,3 @@ export const Loader = styled.div`
   z-index: 999;
   border-radius: 8px;
 `;
-

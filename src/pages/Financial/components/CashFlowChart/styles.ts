@@ -2,7 +2,7 @@ import styled from 'styled-components';
 
 export const Container = styled.div`
   padding: 16px;
-  background: #30454C;
+  background: #30454c;
   border-radius: 8px;
   border: 1px solid #506167;
   margin-top: 8px;
@@ -57,7 +57,7 @@ export const Container = styled.div`
   .chart-container {
     width: 100%;
     height: 400px;
-    position: relative
+    position: relative;
   }
 `;
 

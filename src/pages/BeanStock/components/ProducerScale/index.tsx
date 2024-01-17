@@ -1,7 +1,14 @@
 import { format } from 'date-fns';
 import html2canvas from 'html2canvas';
 import { DownloadSimple } from 'phosphor-react';
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { NotAllowed } from '../../../../components/NotAllowed';
 import { Spinner } from '../../../../components/Spinner';
@@ -33,10 +40,7 @@ export const ProducerScale = forwardRef<componentsRefType>((props, ref) => {
       safra,
       producerStockUnit: unit,
     },
-    beanStockData: {
-      beanStockProducer,
-      beanStockProducerLastFetch,
-    }
+    beanStockData: { beanStockProducer, beanStockProducerLastFetch },
   } = useSelector((state: RootState) => state);
   const dispatch = useDispatch();
 
@@ -60,29 +64,40 @@ export const ProducerScale = forwardRef<componentsRefType>((props, ref) => {
         return;
       }
 
-      if (rangeDates.endDate && rangeDates.startDate && rangeDates.endDate < rangeDates.startDate) {
+      if (
+        rangeDates.endDate &&
+        rangeDates.startDate &&
+        rangeDates.endDate < rangeDates.startDate
+      ) {
         setIsLoading(false);
         toast({
           type: 'danger',
-          text: 'Data final precisa ser maior que inicial!'
+          text: 'Data final precisa ser maior que inicial!',
         });
         return;
       }
 
       const produtorIdParsed = producer !== '_' ? Number(producer) : undefined;
-      const armazenamentoIdParsed = storage !== '_' ? Number(storage) : undefined;
+      const armazenamentoIdParsed =
+        storage !== '_' ? Number(storage) : undefined;
       const safraIdParsed = safra !== '_' ? Number(safra) : undefined;
-      const startDateParsed = rangeDates.startDate ? format(rangeDates.startDate, 'dd-MM-yyyy') : '';
-      const endDateParsed = rangeDates.endDate ? format(rangeDates.endDate, 'dd-MM-yyyy') : '';
+      const startDateParsed = rangeDates.startDate
+        ? format(rangeDates.startDate, 'dd-MM-yyyy')
+        : '';
+      const endDateParsed = rangeDates.endDate
+        ? format(rangeDates.endDate, 'dd-MM-yyyy')
+        : '';
 
-      const beanStockProducerData = await EstoqueGraosService.findProducerTotal({
-        culturaId: Number(crop),
-        startDate: startDateParsed,
-        endDate: endDateParsed,
-        produtorId: produtorIdParsed,
-        armazenamentoId: armazenamentoIdParsed,
-        safraId: safraIdParsed
-      });
+      const beanStockProducerData = await EstoqueGraosService.findProducerTotal(
+        {
+          culturaId: Number(crop),
+          startDate: startDateParsed,
+          endDate: endDateParsed,
+          produtorId: produtorIdParsed,
+          armazenamentoId: armazenamentoIdParsed,
+          safraId: safraIdParsed,
+        },
+      );
 
       dispatch(setBeanStockProducer(beanStockProducerData));
 
@@ -90,15 +105,28 @@ export const ProducerScale = forwardRef<componentsRefType>((props, ref) => {
     }
     setIsLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [crop, dispatch, hasPermission, producer, rangeDates.endDate, rangeDates.startDate, safra, storage]);
+  }, [
+    crop,
+    dispatch,
+    hasPermission,
+    producer,
+    rangeDates.endDate,
+    rangeDates.startDate,
+    safra,
+    storage,
+  ]);
 
   useEffect(() => {
     loadData();
   }, [loadData]);
 
-  useImperativeHandle(ref, () => ({
-    loadData
-  }), [loadData]);
+  useImperativeHandle(
+    ref,
+    () => ({
+      loadData,
+    }),
+    [loadData],
+  );
 
   function handleSaveChart() {
     const chartElement = chartRef.current;
@@ -137,19 +165,25 @@ export const ProducerScale = forwardRef<componentsRefType>((props, ref) => {
             leftLabel="Kg"
             rightLabel="Sacas"
             isToggled={unit === 'sacks'}
-            onToggle={(e) => dispatch(change({
-              name: 'producerStockUnit',
-              value: e.target.checked ? 'sacks' : 'kg'
-            }))}
+            onToggle={(e) =>
+              dispatch(
+                change({
+                  name: 'producerStockUnit',
+                  value: e.target.checked ? 'sacks' : 'kg',
+                }),
+              )
+            }
           />
           <button onClick={handleSaveChart}>
-            <DownloadSimple size={24} color="#F7FBFE" weight='regular' />
+            <DownloadSimple size={24} color="#F7FBFE" weight="regular" />
           </button>
         </header>
         <ProducerScaleChart
           requestId={requestId}
           labels={beanStockProducer.saldoFinal.map((item) => item.produtor)}
-          data={beanStockProducer.saldoFinal.map((item) => unit === 'kg' ? item.saldo : item.saldoSacas)}
+          data={beanStockProducer.saldoFinal.map((item) =>
+            unit === 'kg' ? item.saldo : item.saldoSacas,
+          )}
           unit={unit}
         />
       </div>
@@ -159,3 +193,5 @@ export const ProducerScale = forwardRef<componentsRefType>((props, ref) => {
     </Container>
   );
 });
+
+ProducerScale.displayName = 'ProducerScale';

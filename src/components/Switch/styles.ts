@@ -44,7 +44,7 @@ export const Container = styled.label`
       width: 16px;
       left: 4px;
       bottom: 4px;
-      background: #F7FBFE;
+      background: #f7fbfe;
       transition: all 0.3s ease-in-out;
       border-radius: 999px;
     }

@@ -1,7 +1,8 @@
 import { api } from './utils/api';
 import { ColheitaTotal, ColheitaDescontoTotal } from '../types/Colheita';
 
-export type descontoType = 'umidade'
+export type descontoType =
+  | 'umidade'
   | 'impureza'
   | 'avariados'
   | 'quebrados'
@@ -14,8 +15,13 @@ class ColheitaService {
     return api.get(`/colheita/total?idSafra=${safraId}`);
   }
 
-  findDescontoTotal(safraId: string, desconto: descontoType): Promise<ColheitaDescontoTotal> {
-    return api.get(`/colheita/desconto?idSafra=${safraId}&desconto=${desconto}`);
+  findDescontoTotal(
+    safraId: string,
+    desconto: descontoType,
+  ): Promise<ColheitaDescontoTotal> {
+    return api.get(
+      `/colheita/desconto?idSafra=${safraId}&desconto=${desconto}`,
+    );
   }
 }
 

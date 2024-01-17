@@ -7,7 +7,12 @@ interface SwitchProps {
   onToggle: React.ChangeEventHandler<HTMLInputElement>;
 }
 
-export function Switch({ leftLabel, rightLabel, isToggled, onToggle }: SwitchProps) {
+export function Switch({
+  leftLabel,
+  rightLabel,
+  isToggled,
+  onToggle,
+}: SwitchProps) {
   return (
     <Wrapper>
       {leftLabel && <strong>{leftLabel}</strong>}

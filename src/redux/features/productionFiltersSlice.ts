@@ -19,7 +19,7 @@ const initialState: ProductionFiltersState = {
   productionUnit: 'sacks',
   productivityUnit: 'sacks',
   discountsUnit: 'percent',
-  discount: 'umidade'
+  discount: 'umidade',
 };
 
 export const productionFiltersSlice = createSlice({
@@ -33,7 +33,7 @@ export const productionFiltersSlice = createSlice({
       if (state.safra === '_') {
         state.safra = action.payload;
       }
-    }
+    },
   },
 });
 

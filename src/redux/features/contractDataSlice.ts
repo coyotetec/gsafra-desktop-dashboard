@@ -33,7 +33,7 @@ export const contractDataSlice = createSlice({
         if (item.totalEntregue > 0) {
           result.push({
             value: String(item.id),
-            label: `${item.cliente} - ${item.numeroContrato}`
+            label: `${item.cliente} - ${item.numeroContrato}`,
           });
         }
 
@@ -44,8 +44,8 @@ export const contractDataSlice = createSlice({
     setPackingList: (state, { payload }: PayloadAction<Romaneio[]>) => {
       state.packingList = payload;
       state.packingListLastFetch = new Date();
-    }
-  }
+    },
+  },
 });
 
 export const { setContracts, setPackingList } = contractDataSlice.actions;

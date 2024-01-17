@@ -17,7 +17,7 @@ type groupedOptionsType = {
   items: {
     label: string;
     value: string;
-  }[]
+  }[];
 }[];
 
 export interface ProductionCostFiltersState {
@@ -36,7 +36,13 @@ export interface ProductionCostFiltersState {
 
 interface ChangePayload {
   name: keyof ProductionCostFiltersState;
-  value: string | string[] | RangeDates | null | optionType | groupedOptionsType;
+  value:
+    | string
+    | string[]
+    | RangeDates
+    | null
+    | optionType
+    | groupedOptionsType;
 }
 
 const initialState: ProductionCostFiltersState = {
@@ -53,7 +59,7 @@ const initialState: ProductionCostFiltersState = {
   activityUnit: 'parent',
   maintenanceUnit: 'parent',
   fuelingUnit: 'parent',
-  talhaoSelectedSafra: '_'
+  talhaoSelectedSafra: '_',
 };
 
 export const productionCostFiltersSlice = createSlice({
@@ -61,18 +67,17 @@ export const productionCostFiltersSlice = createSlice({
   initialState,
   reducers: {
     change: (state, action: PayloadAction<ChangePayload>) => {
-      state[action.payload.name] = action.payload.value as
-      RangeDates &
-      string &
-      string[] &
-      optionType &
-      groupedOptionsType;
+      state[action.payload.name] = action.payload.value as RangeDates &
+        string &
+        string[] &
+        optionType &
+        groupedOptionsType;
     },
     setFirstSafra: (state, action: PayloadAction<string | null>) => {
       if (state.safras.length === 0 && action.payload) {
         state.safras = [action.payload];
       }
-    }
+    },
   },
 });
 

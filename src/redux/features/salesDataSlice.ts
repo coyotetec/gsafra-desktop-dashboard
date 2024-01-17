@@ -19,7 +19,7 @@ const initialState: salesDataState = {
   monthlyAvarage: {
     mediaSafraKg: 0,
     mediaSafraSaca: 0,
-    mediaMes: []
+    mediaMes: [],
   },
   monthlyAvarageLastFetch: null,
 };
@@ -39,9 +39,10 @@ export const salesDataSlice = createSlice({
     setMonthlyAvarage: (state, { payload }: PayloadAction<MediaMes>) => {
       state.monthlyAvarage = payload;
       state.monthlyAvarageLastFetch = new Date();
-    }
-  }
+    },
+  },
 });
 
-export const { setSales, setClientAvarage, setMonthlyAvarage } = salesDataSlice.actions;
+export const { setSales, setClientAvarage, setMonthlyAvarage } =
+  salesDataSlice.actions;
 export default salesDataSlice.reducer;

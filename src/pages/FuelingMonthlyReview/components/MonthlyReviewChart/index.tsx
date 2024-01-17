@@ -11,7 +11,12 @@ interface MonthlyReviewChartProps {
   color?: string;
 }
 
-export function MonthlyReviewChart({ labels, data, isCurrency = false, color = '#2979ff' }: MonthlyReviewChartProps) {
+export function MonthlyReviewChart({
+  labels,
+  data,
+  isCurrency = false,
+  color = '#2979ff',
+}: MonthlyReviewChartProps) {
   function formatNumber(number: number) {
     return `${new Intl.NumberFormat('id').format(number)} lts`;
   }
@@ -19,7 +24,7 @@ export function MonthlyReviewChart({ labels, data, isCurrency = false, color = '
   return (
     <Container>
       {data.length === 0 ? (
-        <div className='empty'>
+        <div className="empty">
           <img src={emptyIllustration} alt="Ilustração de vazio" />
           <strong>Nenhum dado encontrado</strong>
           <span>Tente inserir outro intervalo de datas.</span>
@@ -32,8 +37,8 @@ export function MonthlyReviewChart({ labels, data, isCurrency = false, color = '
               {
                 data,
                 backgroundColor: color,
-              }
-            ]
+              },
+            ],
           }}
           options={{
             responsive: true,
@@ -43,7 +48,9 @@ export function MonthlyReviewChart({ labels, data, isCurrency = false, color = '
                 beginAtZero: true,
                 ticks: {
                   callback(this, tickValue) {
-                    return isCurrency ? currencyFormat(Number(tickValue), 3) : formatNumber(Number(tickValue));
+                    return isCurrency
+                      ? currencyFormat(Number(tickValue), 3)
+                      : formatNumber(Number(tickValue));
                   },
                 },
               },
@@ -61,11 +68,13 @@ export function MonthlyReviewChart({ labels, data, isCurrency = false, color = '
                       label += ': ';
                     }
                     if (context.parsed.y !== null) {
-                      label += isCurrency ? currencyFormat(context.parsed.y, 3) : formatNumber(context.parsed.y);
+                      label += isCurrency
+                        ? currencyFormat(context.parsed.y, 3)
+                        : formatNumber(context.parsed.y);
                     }
                     return label;
-                  }
-                }
+                  },
+                },
               },
             },
           }}

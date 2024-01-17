@@ -30,13 +30,13 @@ export const Container = styled.header`
 
   h1 {
     font-size: 24px;
-    color: #F7FBFE;
+    color: #f7fbfe;
     font-weight: 600;
   }
 
   h2 {
     font-size: 14px;
-    color: #CFD4D6;
+    color: #cfd4d6;
     letter-spacing: 0.02em;
     font-weight: 600;
   }

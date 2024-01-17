@@ -24,7 +24,9 @@ type optionType = {
 
 export function SalesPackingList() {
   const [isLoading, setIsLoading] = useState(false);
-  const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
+  const [expandedRows, setExpandedRows] = useState<
+    any[] | DataTableExpandedRows
+  >([]);
   const [packingList, setPackingList] = useState<Romaneio[]>([]);
   const deliveryStatusOptions: optionType = [
     { value: '_', label: 'Todos' },
@@ -35,11 +37,7 @@ export function SalesPackingList() {
 
   const {
     safrasList,
-    salesFilters: {
-      safra,
-      deliveryStatus,
-      rangeDates,
-    }
+    salesFilters: { safra, deliveryStatus, rangeDates },
   } = useSelector((state: RootState) => state);
   const dispatch = useDispatch();
 
@@ -52,18 +50,26 @@ export function SalesPackingList() {
         return;
       }
 
-      if (rangeDates.endDate && rangeDates.startDate && rangeDates.endDate < rangeDates.startDate) {
+      if (
+        rangeDates.endDate &&
+        rangeDates.startDate &&
+        rangeDates.endDate < rangeDates.startDate
+      ) {
         setIsLoading(false);
         toast({
           type: 'danger',
-          text: 'Data final precisa ser maior que inicial!'
+          text: 'Data final precisa ser maior que inicial!',
         });
         return;
       }
 
       const deliveryStatusParsed = deliveryStatus !== '_' ? deliveryStatus : '';
-      const startDateParsed = rangeDates.startDate ? format(rangeDates.startDate, 'dd-MM-yyyy') : '';
-      const endDateParsed = rangeDates.endDate ? format(rangeDates.endDate, 'dd-MM-yyyy') : '';
+      const startDateParsed = rangeDates.startDate
+        ? format(rangeDates.startDate, 'dd-MM-yyyy')
+        : '';
+      const endDateParsed = rangeDates.endDate
+        ? format(rangeDates.endDate, 'dd-MM-yyyy')
+        : '';
 
       const clientAvarageData = await VendaService.findRomaneios({
         safraId: Number(safra),
@@ -82,20 +88,22 @@ export function SalesPackingList() {
   function formatNumber(number: number, sufix?: string) {
     return `${new Intl.NumberFormat('id', {
       maximumFractionDigits: 2,
-    }).format(number)}${sufix ? sufix : ''}`;
+    }).format(number)}${sufix || ''}`;
   }
 
   function handleExportExcel() {
-    import('xlsx').then(xlsx => {
-      const worksheet = xlsx.utils.json_to_sheet(packingList.map(i => ({
-        'CLIENTE': i.cliente,
-        'DATA': format(new Date(i.data), 'dd/MM/yyyy'),
-        'NUMERO ROMANEIO': i.numeroOrdem,
-        'QUANTIDADE': i.quantidade,
-        'LOCAL DE SAIDA': i.localSaida,
-        'MOTORISTA': i.motorista,
-        'PLACA': i.placa,
-      })));
+    import('xlsx').then((xlsx) => {
+      const worksheet = xlsx.utils.json_to_sheet(
+        packingList.map((i) => ({
+          CLIENTE: i.cliente,
+          DATA: format(new Date(i.data), 'dd/MM/yyyy'),
+          'NUMERO ROMANEIO': i.numeroOrdem,
+          QUANTIDADE: i.quantidade,
+          'LOCAL DE SAIDA': i.localSaida,
+          MOTORISTA: i.motorista,
+          PLACA: i.placa,
+        })),
+      );
 
       for (let i = 2; i <= packingList.length + 1; i++) {
         worksheet[`B${i}`].z = 'dd"/"mm"/"yyyy';
@@ -108,21 +116,25 @@ export function SalesPackingList() {
       workbook.Props = {
         Author: 'GSafra Software',
       };
-      const excelBuffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'array' });
+      const excelBuffer = xlsx.write(workbook, {
+        bookType: 'xlsx',
+        type: 'array',
+      });
       saveAsExcelFile(
         excelBuffer,
-        `ROMANEIOS DA SAFRA ${safrasList.options.find((i) => i.value === safra)?.label}`
+        `ROMANEIOS DA SAFRA ${safrasList.options.find((i) => i.value === safra)?.label}`,
       );
     });
   }
 
   function saveAsExcelFile(buffer: any, fileName: string) {
-    import('file-saver').then(module => {
+    import('file-saver').then((module) => {
       if (module && module.default) {
-        const EXCEL_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
+        const EXCEL_TYPE =
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
         const EXCEL_EXTENSION = '.xlsx';
         const data = new Blob([buffer], {
-          type: EXCEL_TYPE
+          type: EXCEL_TYPE,
         });
 
         module.default.saveAs(data, fileName + EXCEL_EXTENSION);
@@ -143,7 +155,7 @@ export function SalesPackingList() {
           options={safrasList.options}
           value={safra}
           onChange={(value: string) => {
-            dispatch(change({ name: 'safra', value: value }));
+            dispatch(change({ name: 'safra', value }));
           }}
           placeholder="Safra"
           label="Safra"
@@ -154,7 +166,7 @@ export function SalesPackingList() {
           options={deliveryStatusOptions}
           value={deliveryStatus}
           onChange={(value: string) => {
-            dispatch(change({ name: 'deliveryStatus', value: value }));
+            dispatch(change({ name: 'deliveryStatus', value }));
           }}
           placeholder="Situação de Entrega"
           label="Situação de Entrega"
@@ -163,14 +175,17 @@ export function SalesPackingList() {
         <div className="date-filter">
           <DateInput
             onChangeDate={(date) => {
-              dispatch(change({
-                name: 'rangeDates', value: {
-                  startDate: date,
-                  endDate: rangeDates.endDate
-                }
-              }));
+              dispatch(
+                change({
+                  name: 'rangeDates',
+                  value: {
+                    startDate: date,
+                    endDate: rangeDates.endDate,
+                  },
+                }),
+              );
             }}
-            placeholder='Data Inicial'
+            placeholder="Data Inicial"
             defaultDate={rangeDates.startDate}
             height="48px"
             width="100%"
@@ -181,14 +196,17 @@ export function SalesPackingList() {
           <strong>à</strong>
           <DateInput
             onChangeDate={(date) => {
-              dispatch(change({
-                name: 'rangeDates', value: {
-                  startDate: rangeDates.startDate,
-                  endDate: date
-                }
-              }));
+              dispatch(
+                change({
+                  name: 'rangeDates',
+                  value: {
+                    startDate: rangeDates.startDate,
+                    endDate: date,
+                  },
+                }),
+              );
             }}
-            placeholder='Data Final'
+            placeholder="Data Final"
             defaultDate={rangeDates.endDate}
             height="48px"
             width="100%"
@@ -209,14 +227,20 @@ export function SalesPackingList() {
         expandableRowGroups
         expandedRows={expandedRows}
         onRowToggle={(e) => setExpandedRows(e.data)}
-        rowGroupHeaderTemplate={(data) => (
-          <strong>{data.cliente}</strong>
-        )}
+        rowGroupHeaderTemplate={(data) => <strong>{data.cliente}</strong>}
         emptyMessage="Nenhum dado encontrado"
       >
-        <Column field="data" header="Data" body={(rowData) => format(new Date(rowData.data), 'dd/MM/yyyy')} />
+        <Column
+          field="data"
+          header="Data"
+          body={(rowData) => format(new Date(rowData.data), 'dd/MM/yyyy')}
+        />
         <Column field="numeroOrdem" header="Romaneio" />
-        <Column field="quantidade" header="Quantidade" body={(rowData) => formatNumber(rowData.quantidade, ' Kg')} />
+        <Column
+          field="quantidade"
+          header="Quantidade"
+          body={(rowData) => formatNumber(rowData.quantidade, ' Kg')}
+        />
         <Column field="localSaida" header="Local de Saída" />
         <Column field="motorista" header="Motorista" />
         <Column field="placa" header="Placa" />

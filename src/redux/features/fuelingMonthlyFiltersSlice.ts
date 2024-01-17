@@ -30,7 +30,7 @@ const initialState: FuelingMonthlyFiltersState = {
   fuel: '_',
   storeroom: '_',
   cost: 'medio',
-  patrimonyType: '_'
+  patrimonyType: '_',
 };
 
 export const fuelingMonthlyFiltersSlice = createSlice({

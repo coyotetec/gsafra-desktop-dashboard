@@ -49,9 +49,11 @@ export const Overlay = styled.div<OverlayProps>`
   z-index: 999;
   animation: ${fadeIn} 0.3s;
 
-  ${({ isLeaving }) => isLeaving && css`
-    animation: ${fadeOut} 0.3s forwards;
-  `}
+  ${({ isLeaving }) =>
+    isLeaving &&
+    css`
+      animation: ${fadeOut} 0.3s forwards;
+    `}
 
   .spinner {
     animation: ${rotate} 2s linear infinite;
@@ -64,7 +66,7 @@ export const Overlay = styled.div<OverlayProps>`
   }
 
   .spinner .path {
-    stroke: #00D47E;
+    stroke: #00d47e;
     stroke-linecap: round;
     animation: ${dash} 1.5s ease-in-out infinite;
   }

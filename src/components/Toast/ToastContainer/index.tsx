@@ -14,7 +14,7 @@ export function ToastContainer() {
     function handleAddToast({ type, text, duration }: ToastPayload) {
       setMessages((prevState) => [
         ...prevState,
-        { id: Math.random(), type, text, duration, },
+        { id: Math.random(), type, text, duration },
       ]);
     }
 
@@ -26,9 +26,9 @@ export function ToastContainer() {
   }, []);
 
   const handleRemoveMessage = useCallback((id: number) => {
-    setMessages((prevState) => prevState.filter(
-      (message) => message.id !== id,
-    ));
+    setMessages((prevState) =>
+      prevState.filter((message) => message.id !== id),
+    );
   }, []);
 
   return (

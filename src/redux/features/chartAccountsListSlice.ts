@@ -16,19 +16,22 @@ interface SetChartAccountsDataPayload {
 const initialState: ChartAccountsState = {
   credit: [],
   debit: [],
-  lastFetch: null
+  lastFetch: null,
 };
 
 export const chartAccountsSlice = createSlice({
   name: 'chartAccounts',
   initialState,
   reducers: {
-    setChartAccountsData: (state, { payload }: PayloadAction<SetChartAccountsDataPayload>) => {
+    setChartAccountsData: (
+      state,
+      { payload }: PayloadAction<SetChartAccountsDataPayload>,
+    ) => {
       state.credit = payload.credit;
       state.debit = payload.debit;
       state.lastFetch = new Date();
     },
-  }
+  },
 });
 
 export const { setChartAccountsData } = chartAccountsSlice.actions;

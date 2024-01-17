@@ -14,7 +14,9 @@ export function FinancialViews() {
   const [isLoading, setIsLoading] = useState(true);
   const isFirstRender = useRef(true);
 
-  const { financialViewsData: { lastFetch, views } } = useSelector((state: RootState) => state);
+  const {
+    financialViewsData: { lastFetch, views },
+  } = useSelector((state: RootState) => state);
   const dispatch = useDispatch();
 
   const { hasPermission } = useUserContext();
@@ -37,7 +39,7 @@ export function FinancialViews() {
     }
 
     setIsLoading(false);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, hasPermission]);
 
   useEffect(() => {
@@ -48,31 +50,29 @@ export function FinancialViews() {
     <Container>
       <Loader isLoading={isLoading} />
       <Header
-        title='Indicadores Financeiros'
+        title="Indicadores Financeiros"
         subtitle={`${views.length} ${views.length === 1 ? 'INDICADOR ENCONTRADO' : 'INDICADORES ENCONTRADOS'}`}
         refreshData={loadData}
       />
 
       <div className="views-grid">
-        {hasPermission('indicadores_financeiros') ?
-          views.map((view) => (
-            <FinancialView key={view.id} {...view} />
-          ))
-          : (
-            <FinancialView
-              id={1}
-              nome="Indicador"
-              situacao={1}
-              periodoPadraoMeses={12}
-              lastFetch={null}
-              rangeDates={{
-                startDate: null,
-                endDate: null
-              }}
-              total={[]}
-              totalizers={[]}
-            />
-          )}
+        {hasPermission('indicadores_financeiros') ? (
+          views.map((view) => <FinancialView key={view.id} {...view} />)
+        ) : (
+          <FinancialView
+            id={1}
+            nome="Indicador"
+            situacao={1}
+            periodoPadraoMeses={12}
+            lastFetch={null}
+            rangeDates={{
+              startDate: null,
+              endDate: null,
+            }}
+            total={[]}
+            totalizers={[]}
+          />
+        )}
       </div>
     </Container>
   );

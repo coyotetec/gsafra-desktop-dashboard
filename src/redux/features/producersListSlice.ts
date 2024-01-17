@@ -13,7 +13,7 @@ export interface ProducersListState {
 
 const initialState: ProducersListState = {
   options: [],
-  lastFetch: null
+  lastFetch: null,
 };
 
 export const producersListSlice = createSlice({
@@ -24,7 +24,7 @@ export const producersListSlice = createSlice({
       state.options = action.payload;
       state.lastFetch = new Date();
     },
-  }
+  },
 });
 
 export const { setProducersData } = producersListSlice.actions;

@@ -8,7 +8,7 @@ import {
 class PlanoContasService {
   findPlanoContas(
     type?: 'receita' | 'despesa',
-    category?: 'sintetica' | 'analitica'
+    category?: 'sintetica' | 'analitica',
   ): Promise<PlanoContas[]> {
     return api.get(`/plano-conta?category=${category}&type=${type}`);
   }
@@ -17,12 +17,12 @@ class PlanoContasService {
     codigo: string,
     startDate: string,
     endDate: string,
-    safraId?: string
+    safraId?: string,
   ): Promise<PlanoContasTotal[]> {
     return api.get(
       safraId
         ? `/plano-conta/total/${codigo}?startDate=${startDate}&endDate=${endDate}&idSafra=${safraId}`
-        : `/plano-conta/total/${codigo}?startDate=${startDate}&endDate=${endDate}`
+        : `/plano-conta/total/${codigo}?startDate=${startDate}&endDate=${endDate}`,
     );
   }
 
@@ -35,10 +35,10 @@ class PlanoContasService {
   ): Promise<{
     total: number;
     data: PlanoContasFinancial[];
-    eachMonthTotal: number[]
+    eachMonthTotal: number[];
   }> {
     return api.get(
-      `/plano-conta/financeiro?options=${options}&showZeros=${showZeros}&startDate=${startDate}&endDate=${endDate}${status ? `&status=${status}` : ''}`
+      `/plano-conta/financeiro?options=${options}&showZeros=${showZeros}&startDate=${startDate}&endDate=${endDate}${status ? `&status=${status}` : ''}`,
     );
   }
 }

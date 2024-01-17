@@ -13,7 +13,7 @@ export interface PatrimonyTypesListState {
 
 const initialState: PatrimonyTypesListState = {
   options: [],
-  lastFetch: null
+  lastFetch: null,
 };
 
 export const patrimonyTypesListSlice = createSlice({
@@ -24,7 +24,7 @@ export const patrimonyTypesListSlice = createSlice({
       state.options = action.payload;
       state.lastFetch = new Date();
     },
-  }
+  },
 });
 
 export const { setPatrimonyTypesData } = patrimonyTypesListSlice.actions;

@@ -22,8 +22,8 @@ const initialState: ContractFiltersState = {
   selectedContract: '_',
   packingListRangeDates: {
     startDate: null,
-    endDate: null
-  }
+    endDate: null,
+  },
 };
 
 export const contractFiltersSlice = createSlice({
@@ -42,9 +42,10 @@ export const contractFiltersSlice = createSlice({
       if (state.selectedContract === '_') {
         state.selectedContract = action.payload;
       }
-    }
+    },
   },
 });
 
-export const { change, setFirstSafra, setFirstContract } = contractFiltersSlice.actions;
+export const { change, setFirstSafra, setFirstContract } =
+  contractFiltersSlice.actions;
 export default contractFiltersSlice.reducer;
