@@ -31,7 +31,7 @@ export const Fueling = forwardRef<componentsRefType>((props, ref) => {
     productionCostFilters: {
       unit: parentUnit,
       rangeDates,
-      lastSelectedSafras: safras,
+      selectedSafrasOptions,
       talhao,
       fuelingUnit: unit,
     },
@@ -54,7 +54,7 @@ export const Fueling = forwardRef<componentsRefType>((props, ref) => {
         }
       }
 
-      if (safras.length === 0) {
+      if (selectedSafrasOptions.length === 0) {
         setIsLoading(false);
         return;
       }
@@ -81,7 +81,7 @@ export const Fueling = forwardRef<componentsRefType>((props, ref) => {
 
       const fuelingCostData = await CustoProducaoService.findCustoAbastecimento(
         {
-          safraId: safras.join(','),
+          safraId: selectedSafrasOptions.map(({ value }) => value).join(','),
           talhaoId: talhao ? Number(talhao) : undefined,
           startDate: startDateParsed,
           endDate: endDateParsed,
@@ -102,7 +102,7 @@ export const Fueling = forwardRef<componentsRefType>((props, ref) => {
     hasPermission,
     rangeDates.endDate,
     rangeDates.startDate,
-    safras,
+    selectedSafrasOptions,
     talhao,
   ]);
 

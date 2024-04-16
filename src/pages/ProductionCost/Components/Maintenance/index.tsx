@@ -31,7 +31,7 @@ export const Maintenance = forwardRef<componentsRefType>((props, ref) => {
     productionCostFilters: {
       unit: parentUnit,
       rangeDates,
-      lastSelectedSafras: safras,
+      selectedSafrasOptions,
       talhao,
       maintenanceUnit: unit,
     },
@@ -54,7 +54,7 @@ export const Maintenance = forwardRef<componentsRefType>((props, ref) => {
         }
       }
 
-      if (safras.length === 0) {
+      if (selectedSafrasOptions.length === 0) {
         setIsLoading(false);
         return;
       }
@@ -81,7 +81,7 @@ export const Maintenance = forwardRef<componentsRefType>((props, ref) => {
 
       const maintenanceCostData =
         await CustoProducaoService.findCustoManutencao({
-          safraId: safras.join(','),
+          safraId: selectedSafrasOptions.map(({ value }) => value).join(','),
           talhaoId: talhao ? Number(talhao) : undefined,
           startDate: startDateParsed,
           endDate: endDateParsed,
@@ -101,7 +101,7 @@ export const Maintenance = forwardRef<componentsRefType>((props, ref) => {
     hasPermission,
     rangeDates.endDate,
     rangeDates.startDate,
-    safras,
+    selectedSafrasOptions,
     talhao,
   ]);
 

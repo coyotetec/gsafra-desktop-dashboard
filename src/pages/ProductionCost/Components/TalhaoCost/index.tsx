@@ -38,7 +38,6 @@ export const TalhaoCost = forwardRef<componentsRefType>((props, ref) => {
     productionCostFilters: {
       unit,
       rangeDates,
-      lastSelectedSafras: safras,
       selectedSafrasOptions,
       talhaoSelectedSafra: selectedSafra,
     },
@@ -61,7 +60,7 @@ export const TalhaoCost = forwardRef<componentsRefType>((props, ref) => {
         }
       }
 
-      if (safras.length === 0) {
+      if (selectedSafrasOptions.length === 0) {
         setIsLoading(false);
         return;
       }
@@ -87,7 +86,10 @@ export const TalhaoCost = forwardRef<componentsRefType>((props, ref) => {
         : '';
 
       const talhaoCostData = await CustoProducaoService.findCustoTalhao({
-        safraId: selectedSafra === '_' ? safras.join(',') : selectedSafra,
+        safraId:
+          selectedSafra === '_'
+            ? selectedSafrasOptions.map(({ value }) => value).join(',')
+            : selectedSafra,
         startDate: startDateParsed,
         endDate: endDateParsed,
       });
@@ -106,7 +108,7 @@ export const TalhaoCost = forwardRef<componentsRefType>((props, ref) => {
     hasPermission,
     rangeDates.endDate,
     rangeDates.startDate,
-    safras,
+    selectedSafrasOptions,
     selectedSafra,
   ]);
 
@@ -117,7 +119,7 @@ export const TalhaoCost = forwardRef<componentsRefType>((props, ref) => {
     }
 
     dispatch(change({ name: 'talhaoSelectedSafra', value: '_' }));
-  }, [safras, dispatch]);
+  }, [selectedSafrasOptions, dispatch]);
 
   useEffect(() => {
     loadData();

@@ -22,6 +22,8 @@ import { Fueling } from './Components/Fueling';
 import { Maintenance } from './Components/Maintenance';
 import { TalhaoCost } from './Components/TalhaoCost';
 import { Container, HectareCostMessage } from './styles';
+import { toast } from '../../utils/toast';
+import { compareSelectedSafras } from './utils/compareSelectedSafras';
 
 type optionType = {
   value: string;
@@ -36,27 +38,23 @@ type groupedOptionsType = {
   }[];
 }[];
 
+const componentsRefInitialState = {
+  loadData: () => null,
+};
+
 export function ProductionCost() {
   const unitOptions: optionType = [
     { value: 'cost', label: 'Custo (R$)' },
     { value: 'hectareCost', label: 'Custo por Hectare (R$/ha)' },
     { value: 'percent', label: 'Porcentagem (%)' },
   ];
-  const categoryCostRef = useRef<componentsRefType>({
-    loadData: () => null,
-  });
-  const talhaoCostRef = useRef<componentsRefType>({
-    loadData: () => null,
-  });
-  const activityCostRef = useRef<componentsRefType>({
-    loadData: () => null,
-  });
-  const maintenanceCostRef = useRef<componentsRefType>({
-    loadData: () => null,
-  });
-  const fuelingCostRef = useRef<componentsRefType>({
-    loadData: () => null,
-  });
+  const categoryCostRef = useRef<componentsRefType>(componentsRefInitialState);
+  const talhaoCostRef = useRef<componentsRefType>(componentsRefInitialState);
+  const activityCostRef = useRef<componentsRefType>(componentsRefInitialState);
+  const maintenanceCostRef = useRef<componentsRefType>(
+    componentsRefInitialState,
+  );
+  const fuelingCostRef = useRef<componentsRefType>(componentsRefInitialState);
 
   const {
     safrasList,
@@ -64,9 +62,10 @@ export function ProductionCost() {
       unit,
       rangeDates,
       safras,
+      selectedSafrasOptions,
       talhoesOptions,
       talhao,
-      lastSelectedSafras,
+      talhoesFetched,
     },
   } = useSelector((state: RootState) => state);
   const dispatch = useDispatch();
@@ -80,8 +79,8 @@ export function ProductionCost() {
   }, []);
 
   const hectareCostMessageVisible = useMemo(
-    () => unit === 'hectareCost' && lastSelectedSafras.length > 1,
-    [lastSelectedSafras, unit],
+    () => unit === 'hectareCost' && selectedSafrasOptions.length > 1,
+    [selectedSafrasOptions, unit],
   );
 
   const { shouldRender, animatedElementRef } = useAnimatedUnmount(
@@ -90,32 +89,37 @@ export function ProductionCost() {
 
   const loadTalhoes = useCallback(
     async (value: string[]) => {
-      dispatch(change({ name: 'talhao', value: null }));
-
-      if (JSON.stringify(lastSelectedSafras) === JSON.stringify(value)) {
+      if (value.length === 0) {
+        toast({
+          type: 'danger',
+          text: 'Selecione pelo menos uma safra!',
+        });
         return;
       }
 
-      const parsedSafras = value.join(',');
+      if (compareSelectedSafras(value, selectedSafrasOptions)) {
+        return;
+      }
 
-      dispatch(change({ name: 'lastSelectedSafras', value }));
+      const safrasOptions: optionType = [];
+
+      value.forEach((i) => {
+        const safra = safrasList.options.find((option) => option.value === i);
+
+        if (safra) {
+          safrasOptions.push(safra);
+        }
+      });
+
+      dispatch(change({ name: 'talhao', value: null }));
       dispatch(
         change({
           name: 'selectedSafrasOptions',
-          value: value.map((i) => {
-            const safra = safrasList.options.find(
-              (option) => option.value === i,
-            ) as {
-              value: string;
-              label: string;
-            };
-
-            return safra;
-          }),
+          value: safrasOptions,
         }),
       );
 
-      const talhoesData = await TalhaoService.findTalhoes(parsedSafras);
+      const talhoesData = await TalhaoService.findTalhoes(value);
 
       const groupedTalhoes = talhoesData.reduce((acc, curr) => {
         const safraIndex = acc.findIndex((i) => i.label === curr.safra);
@@ -142,13 +146,21 @@ export function ProductionCost() {
 
       dispatch(change({ name: 'talhoesOptions', value: groupedTalhoes }));
     },
-    [dispatch, lastSelectedSafras, safrasList.options],
+    [dispatch, safrasList.options, selectedSafrasOptions],
   );
+
+  useEffect(() => {
+    if (!talhoesFetched && safras.length > 0) {
+      loadTalhoes(safras);
+      dispatch(change({ name: 'talhoesFetched', value: true }));
+    }
+  }, [dispatch, loadTalhoes, safras, talhoesFetched]);
 
   useEffect(() => {
     async function loadSafras() {
       if (hasToFetch(safrasList.lastFetch)) {
         const safrasData = await SafraService.findSafras();
+
         dispatch(
           setSafrasData(
             safrasData.map((item) => ({
@@ -159,20 +171,11 @@ export function ProductionCost() {
         );
       }
 
-      dispatch(setFirstSafra(safrasList.options[0]?.value || null));
-      if (safrasList.options[0]?.value && talhoesOptions.length === 0) {
-        loadTalhoes([safrasList.options[0].value]);
-      }
+      dispatch(setFirstSafra(safrasList.options[1]));
     }
 
     loadSafras();
-  }, [
-    dispatch,
-    safrasList.lastFetch,
-    safrasList.options,
-    loadTalhoes,
-    talhoesOptions,
-  ]);
+  }, [dispatch, safrasList.lastFetch, safrasList.options]);
 
   return (
     <Container>

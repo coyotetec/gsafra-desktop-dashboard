@@ -31,7 +31,7 @@ export const Activity = forwardRef<componentsRefType>((props, ref) => {
     productionCostFilters: {
       unit: parentUnit,
       rangeDates,
-      lastSelectedSafras: safras,
+      selectedSafrasOptions,
       talhao,
       activityUnit: unit,
     },
@@ -54,7 +54,7 @@ export const Activity = forwardRef<componentsRefType>((props, ref) => {
         }
       }
 
-      if (safras.length === 0) {
+      if (selectedSafrasOptions.length === 0) {
         setIsLoading(false);
         return;
       }
@@ -80,7 +80,7 @@ export const Activity = forwardRef<componentsRefType>((props, ref) => {
         : '';
 
       const activityCostData = await CustoProducaoService.findCustoAtividade({
-        safraId: safras.join(','),
+        safraId: selectedSafrasOptions.map(({ value }) => value).join(','),
         talhaoId: talhao ? Number(talhao) : undefined,
         startDate: startDateParsed,
         endDate: endDateParsed,
@@ -100,7 +100,7 @@ export const Activity = forwardRef<componentsRefType>((props, ref) => {
     hasPermission,
     rangeDates.endDate,
     rangeDates.startDate,
-    safras,
+    selectedSafrasOptions,
     talhao,
   ]);
 

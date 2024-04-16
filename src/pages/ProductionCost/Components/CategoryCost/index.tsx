@@ -29,12 +29,7 @@ export const CategoryCost = forwardRef<componentsRefType>((props, ref) => {
   const isFirstRender = useRef(true);
 
   const {
-    productionCostFilters: {
-      unit,
-      rangeDates,
-      lastSelectedSafras: safras,
-      talhao,
-    },
+    productionCostFilters: { unit, rangeDates, selectedSafrasOptions, talhao },
     productionCostData: { categoryCost },
   } = useSelector((state: RootState) => state);
   const dispatch = useDispatch();
@@ -54,7 +49,7 @@ export const CategoryCost = forwardRef<componentsRefType>((props, ref) => {
         }
       }
 
-      if (safras.length === 0) {
+      if (selectedSafrasOptions.length === 0) {
         setIsLoading(false);
         return;
       }
@@ -80,7 +75,7 @@ export const CategoryCost = forwardRef<componentsRefType>((props, ref) => {
         : '';
 
       const categoryCostData = await CustoProducaoService.findCustoCategoria({
-        safraId: safras.join(','),
+        safraId: selectedSafrasOptions.map(({ value }) => value).join(','),
         talhaoId: talhao ? Number(talhao) : undefined,
         startDate: startDateParsed,
         endDate: endDateParsed,
@@ -100,7 +95,7 @@ export const CategoryCost = forwardRef<componentsRefType>((props, ref) => {
     hasPermission,
     rangeDates.endDate,
     rangeDates.startDate,
-    safras,
+    selectedSafrasOptions,
     talhao,
   ]);
 

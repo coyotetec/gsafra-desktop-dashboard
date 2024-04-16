@@ -9,6 +9,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useFirstRender } from '../hooks/useFirstRender';
 import UserService from '../services/UserService';
 import { PermissionType } from '../types/User';
+import { api, axiosApi } from '../services/utils/api';
 
 interface UserContextProviderProps {
   children: React.ReactNode;
@@ -30,17 +31,28 @@ export function UserContextProvider({ children }: UserContextProviderProps) {
   const isFirstRender = useFirstRender();
 
   const [query] = useSearchParams();
-  const idEmpresa = query.get('idEmpresa');
-  const idUsuario = query.get('idUsuario');
+  const idEmpresa = query.get('idEmpresa') || 'x';
+  const idUsuario = query.get('idUsuario') || '0';
   const databaseName = query.get('dbNome');
 
   useEffect(() => {
     async function loadData() {
       if (isFirstRender && idUsuario) {
+        if (import.meta.env.VITE_ENVIRONMENT === 'cloud' && idEmpresa) {
+          api.setDefaultHeaders({
+            'X-Id-Empresa': idEmpresa,
+          });
+          axiosApi.defaults.headers.common['X-Id-Empresa'] = idEmpresa;
+        }
+
+        api.setDefaultHeaders({
+          'X-Database-Name': databaseName || 'default',
+        });
+        axiosApi.defaults.headers.common['X-Database-Name'] =
+          databaseName || 'default';
+
         const permissionsData = await UserService.findPermissions(
           Number(idUsuario),
-          idEmpresa || undefined,
-          databaseName || undefined,
         );
         setPermissions([...permissionsData]);
       }
