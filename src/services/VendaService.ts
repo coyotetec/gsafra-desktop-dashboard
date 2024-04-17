@@ -9,48 +9,76 @@ interface FindVendaArgs {
 }
 
 class VendaService {
-  findVendas({
+  async findVendas({
     safraId,
     deliveryStatus,
     startDate,
     endDate,
-  }: FindVendaArgs): Promise<Venda[]> {
-    return api.get(
-      `/venda?idSafra=${safraId}&situacao=${deliveryStatus}&startDate=${startDate}&endDate=${endDate}`,
-    );
+  }: FindVendaArgs) {
+    const { data } = await api.get<Venda[]>('/venda', {
+      params: {
+        startDate,
+        endDate,
+        idSafra: safraId,
+        situacao: deliveryStatus,
+      },
+    });
+
+    return data;
   }
 
-  findRomaneios({
+  async findRomaneios({
     safraId,
     deliveryStatus,
     startDate,
     endDate,
-  }: FindVendaArgs): Promise<Romaneio[]> {
-    return api.get(
-      `/venda/romaneios?idSafra=${safraId}&situacao=${deliveryStatus}&startDate=${startDate}&endDate=${endDate}`,
-    );
+  }: FindVendaArgs) {
+    const { data } = await api.get<Romaneio[]>('/venda/romaneios', {
+      params: {
+        idSafra: safraId,
+        situacao: deliveryStatus,
+        startDate,
+        endDate,
+      },
+    });
+
+    return data;
   }
 
-  findMediaCliente({
+  async findMediaCliente({
     safraId,
     deliveryStatus,
     startDate,
     endDate,
-  }: FindVendaArgs): Promise<MediaCliente[]> {
-    return api.get(
-      `/venda/media-cliente?idSafra=${safraId}&situacao=${deliveryStatus}&startDate=${startDate}&endDate=${endDate}`,
-    );
+  }: FindVendaArgs) {
+    const { data } = await api.get<MediaCliente[]>('/venda/media-cliente', {
+      params: {
+        idSafra: safraId,
+        situacao: deliveryStatus,
+        startDate,
+        endDate,
+      },
+    });
+
+    return data;
   }
 
-  findMediaMes({
+  async findMediaMes({
     safraId,
     deliveryStatus,
     startDate,
     endDate,
-  }: FindVendaArgs): Promise<MediaMes> {
-    return api.get(
-      `/venda/media-mes?idSafra=${safraId}&situacao=${deliveryStatus}&startDate=${startDate}&endDate=${endDate}`,
-    );
+  }: FindVendaArgs) {
+    const { data } = await api.get<MediaMes>('/venda/media-mes', {
+      params: {
+        idSafra: safraId,
+        situacao: deliveryStatus,
+        startDate,
+        endDate,
+      },
+    });
+
+    return data;
   }
 }
 

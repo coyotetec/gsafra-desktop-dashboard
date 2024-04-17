@@ -1,4 +1,4 @@
-import { axiosApi } from './utils/api';
+import { api } from './utils/api';
 import {
   CustoIndividual,
   CustoCategoria,
@@ -19,7 +19,7 @@ class CustoProducaoService {
     startDate,
     endDate,
   }: FindCustoCategoriaArgs) {
-    const { data } = await axiosApi.get<CustoCategoria>(
+    const { data } = await api.get<CustoCategoria>(
       '/custo-producao/categoria',
       {
         params: {
@@ -40,7 +40,7 @@ class CustoProducaoService {
     startDate,
     endDate,
   }: FindCustoCategoriaArgs) {
-    const { data } = await axiosApi.get<CustoTalhao>('/custo-producao/talhao', {
+    const { data } = await api.get<CustoTalhao>('/custo-producao/talhao', {
       params: {
         startDate,
         endDate,
@@ -58,7 +58,7 @@ class CustoProducaoService {
     startDate,
     endDate,
   }: FindCustoCategoriaArgs) {
-    const { data } = await axiosApi.get<CustoIndividual>(
+    const { data } = await api.get<CustoIndividual>(
       '/atividade-agricola/custo-producao',
       {
         params: {
@@ -79,7 +79,7 @@ class CustoProducaoService {
     startDate,
     endDate,
   }: FindCustoCategoriaArgs) {
-    const { data } = await axiosApi.get<CustoIndividual>(
+    const { data } = await api.get<CustoIndividual>(
       '/manutencao/custo-producao',
       {
         params: {
@@ -100,7 +100,7 @@ class CustoProducaoService {
     startDate,
     endDate,
   }: FindCustoCategoriaArgs) {
-    const { data } = await axiosApi.get<CustoIndividual>(
+    const { data } = await api.get<CustoIndividual>(
       '/abastecimento/custo-producao',
       {
         params: {

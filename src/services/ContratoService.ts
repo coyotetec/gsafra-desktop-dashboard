@@ -8,18 +8,28 @@ interface FindRomaneiosArgs {
 }
 
 class ContratoService {
-  findContratos(safraId: number): Promise<Contrato[]> {
-    return api.get(`/contrato?idSafra=${safraId}`);
+  async findContratos(safraId: number) {
+    const { data } = await api.get<Contrato[]>('/contrato', {
+      params: {
+        idSafra: safraId,
+      },
+    });
+
+    return data;
   }
 
-  findRomaneios({
-    contratoId,
-    startDate,
-    endDate,
-  }: FindRomaneiosArgs): Promise<Romaneio[]> {
-    return api.get(
-      `/contrato/${contratoId}/romaneios?startDate=${startDate}&endDate=${endDate}`,
+  async findRomaneios({ contratoId, startDate, endDate }: FindRomaneiosArgs) {
+    const { data } = await api.get<Romaneio[]>(
+      `/contrato/${contratoId}/romaneios`,
+      {
+        params: {
+          startDate,
+          endDate,
+        },
+      },
     );
+
+    return data;
   }
 }
 

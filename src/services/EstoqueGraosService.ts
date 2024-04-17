@@ -14,42 +14,51 @@ interface EstoqueGraosArgs {
 }
 
 class EstoqueGraosService {
-  findTotal({
+  async findTotal({
     culturaId,
     startDate,
     endDate,
     produtorId,
     armazenamentoId,
     safraId,
-  }: EstoqueGraosArgs): Promise<EstoqueGraosTotal> {
-    return api.get(
-      `/estoque-graos/total?idCultura=${culturaId}&startDate=${startDate}&endDate=${endDate}
-    ${produtorId ? `&idProdutor=${produtorId}` : ''}
-    ${armazenamentoId ? `&idArmazenamento=${armazenamentoId}` : ''}
-    ${safraId ? `&idSafra=${safraId}` : ''}
-  `
-        .replace(/(\r\n|\n|\r)/gm, '')
-        .replace(/\s+/g, ''),
-    );
+  }: EstoqueGraosArgs) {
+    const { data } = await api.get<EstoqueGraosTotal>('/estoque-graos/total', {
+      params: {
+        startDate,
+        endDate,
+        idCultura: culturaId,
+        idProdutor: produtorId,
+        idAmazenamento: armazenamentoId,
+        idSafra: safraId,
+      },
+    });
+
+    return data;
   }
 
-  findProducerTotal({
+  async findProducerTotal({
     culturaId,
     startDate,
     endDate,
     produtorId,
     armazenamentoId,
     safraId,
-  }: EstoqueGraosArgs): Promise<EstoqueGraosProdutorTotal> {
-    return api.get(
-      `/estoque-graos/produtor?idCultura=${culturaId}&startDate=${startDate}&endDate=${endDate}
-    ${produtorId ? `&idProdutor=${produtorId}` : ''}
-    ${armazenamentoId ? `&idArmazenamento=${armazenamentoId}` : ''}
-    ${safraId ? `&idSafra=${safraId}` : ''}
-  `
-        .replace(/(\r\n|\n|\r)/gm, '')
-        .replace(/\s+/g, ''),
+  }: EstoqueGraosArgs) {
+    const { data } = await api.get<EstoqueGraosProdutorTotal>(
+      '/estoque-graos/produtor',
+      {
+        params: {
+          startDate,
+          endDate,
+          idCultura: culturaId,
+          idProdutor: produtorId,
+          idArmazenamento: armazenamentoId,
+          idSafra: safraId,
+        },
+      },
     );
+
+    return data;
   }
 }
 
