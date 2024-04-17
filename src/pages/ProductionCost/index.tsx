@@ -1,4 +1,4 @@
-import { Info } from 'phosphor-react';
+import { Info, MagnifyingGlass } from 'phosphor-react';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { DateInput } from '../../components/DateInput';
@@ -70,7 +70,7 @@ export function ProductionCost() {
   } = useSelector((state: RootState) => state);
   const dispatch = useDispatch();
 
-  const refreshData = useCallback(() => {
+  const loadData = useCallback(() => {
     categoryCostRef.current.loadData();
     talhaoCostRef.current.loadData();
     activityCostRef.current.loadData();
@@ -171,7 +171,7 @@ export function ProductionCost() {
         );
       }
 
-      dispatch(setFirstSafra(safrasList.options[1]));
+      dispatch(setFirstSafra(safrasList.options[0]));
     }
 
     loadSafras();
@@ -179,7 +179,7 @@ export function ProductionCost() {
 
   return (
     <Container>
-      <Header title="Custo da Produção" refreshData={refreshData} />
+      <Header title="Custo da Produção" />
       <div className="filters">
         <MultiSelect
           options={safrasList.options}
@@ -205,9 +205,27 @@ export function ProductionCost() {
           width="100%"
           isGrouped
         />
+        <Select
+          options={unitOptions}
+          placeholder="Unidade"
+          noOptionsMessage="0 unidades encontradas"
+          value={unit}
+          onChange={(value: string) => {
+            dispatch(change({ name: 'unit', value }));
+          }}
+          label="Unidade"
+          width="100%"
+        />
         <div className="date-filter">
           <DateInput
             onChangeDate={(date) => {
+              if (date && rangeDates.endDate && date > rangeDates.endDate) {
+                toast({
+                  type: 'danger',
+                  text: 'Data final precisa ser maior que inicial!',
+                });
+                return;
+              }
               dispatch(
                 change({
                   name: 'rangeDates',
@@ -229,6 +247,13 @@ export function ProductionCost() {
           <strong>à</strong>
           <DateInput
             onChangeDate={(date) => {
+              if (date && rangeDates.startDate && date < rangeDates.startDate) {
+                toast({
+                  type: 'danger',
+                  text: 'Data final precisa ser maior que inicial!',
+                });
+                return;
+              }
               dispatch(
                 change({
                   name: 'rangeDates',
@@ -248,17 +273,10 @@ export function ProductionCost() {
             label="Data Final"
           />
         </div>
-        <Select
-          options={unitOptions}
-          placeholder="Unidade"
-          noOptionsMessage="0 unidades encontradas"
-          value={unit}
-          onChange={(value: string) => {
-            dispatch(change({ name: 'unit', value }));
-          }}
-          label="Unidade"
-          width="100%"
-        />
+        <button type="button" onClick={loadData}>
+          <MagnifyingGlass size={20} color="#CFD4D6" weight="bold" />
+          Pesquisar
+        </button>
       </div>
       {shouldRender && (
         <HectareCostMessage

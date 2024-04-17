@@ -14,7 +14,6 @@ import { Spinner } from '../../../../components/Spinner';
 
 import CustoProducaoService from '../../../../services/CustoProducaoService';
 
-import { toast } from '../../../../utils/toast';
 import { currencyFormat } from '../../../../utils/currencyFormat';
 import { Select } from '../../../../components/Select';
 import { NotAllowed } from '../../../../components/NotAllowed';
@@ -65,19 +64,6 @@ export const TalhaoCost = forwardRef<componentsRefType>((props, ref) => {
         return;
       }
 
-      if (
-        rangeDates.endDate &&
-        rangeDates.startDate &&
-        rangeDates.endDate < rangeDates.startDate
-      ) {
-        setIsLoading(false);
-        toast({
-          type: 'danger',
-          text: 'Data final precisa ser maior que inicial!',
-        });
-        return;
-      }
-
       const startDateParsed = rangeDates.startDate
         ? format(rangeDates.startDate, 'dd-MM-yyyy')
         : '';
@@ -103,14 +89,7 @@ export const TalhaoCost = forwardRef<componentsRefType>((props, ref) => {
     }
     setIsLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    dispatch,
-    hasPermission,
-    rangeDates.endDate,
-    rangeDates.startDate,
-    selectedSafrasOptions,
-    selectedSafra,
-  ]);
+  }, [dispatch, hasPermission, selectedSafrasOptions, selectedSafra]);
 
   useEffect(() => {
     if (isFirstRender.current) {
