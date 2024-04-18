@@ -2,28 +2,36 @@ import { api } from './utils/api';
 import { Total } from '../types/Financial';
 
 class CheckService {
-  findPayableCheckTotal(
+  async findPayableCheckTotal(
     startDate: string,
     endDate: string,
     safraId?: string,
-  ): Promise<Total> {
-    return api.get(
-      safraId
-        ? `/financeiro/cheque/pagar/total?startDate=${startDate}&endDate=${endDate}&idSafra=${safraId}`
-        : `/financeiro/cheque/pagar/total?startDate=${startDate}&endDate=${endDate}`,
-    );
+  ) {
+    const { data } = await api.get<Total>('/financeiro/cheque/pagar/total', {
+      params: {
+        startDate,
+        endDate,
+        idSafra: safraId,
+      },
+    });
+
+    return data;
   }
 
-  findReceivableCheckTotal(
+  async findReceivableCheckTotal(
     startDate: string,
     endDate: string,
     safraId?: string,
-  ): Promise<Total> {
-    return api.get(
-      safraId
-        ? `/financeiro/cheque/receber/total?startDate=${startDate}&endDate=${endDate}&idSafra=${safraId}`
-        : `/financeiro/cheque/receber/total?startDate=${startDate}&endDate=${endDate}`,
-    );
+  ) {
+    const { data } = await api.get<Total>('/financeiro/cheque/receber/total', {
+      params: {
+        startDate,
+        endDate,
+        idSafra: safraId,
+      },
+    });
+
+    return data;
   }
 }
 

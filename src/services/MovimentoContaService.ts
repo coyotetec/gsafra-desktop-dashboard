@@ -2,17 +2,24 @@ import { api } from './utils/api';
 import { MovimentoContas } from '../types/MovimentoContas';
 
 class MovimentoContaService {
-  findMovimentoContas(
+  async findMovimentoContas(
     codigo: string,
     startDate: string,
     endDate: string,
     safraId?: string,
-  ): Promise<MovimentoContas[]> {
-    return api.get(
-      safraId
-        ? `/movimento-conta/${codigo}?startDate=${startDate}&endDate=${endDate}&idSafra=${safraId}`
-        : `/movimento-conta/${codigo}?startDate=${startDate}&endDate=${endDate}`,
+  ) {
+    const { data } = await api.get<MovimentoContas[]>(
+      `/movimento-conta/${codigo}`,
+      {
+        params: {
+          startDate,
+          endDate,
+          idSafra: safraId,
+        },
+      },
     );
+
+    return data;
   }
 }
 

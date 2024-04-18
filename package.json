@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "^1.9.3",
+    "axios": "^1.6.8",
     "chart.js": "^4.0.1",
     "chartjs-plugin-datalabels": "^2.2.0",
     "date-fns": "^2.29.3",

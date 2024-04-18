@@ -2,8 +2,10 @@ import { api } from './utils/api';
 import { Patrimonio } from '../types/Patrimonio';
 
 class PatrimonioService {
-  findPatrimonios(): Promise<Patrimonio[]> {
-    return api.get('/patrimonios');
+  async findPatrimonios() {
+    const { data } = await api.get<Patrimonio[]>('/patrimonios');
+
+    return data;
   }
 }
 

@@ -17,7 +17,7 @@ interface FindReviewArgs {
 }
 
 class AbastecimentoService {
-  findMonthlyReview({
+  async findMonthlyReview({
     custo,
     startDate,
     endDate,
@@ -25,21 +25,26 @@ class AbastecimentoService {
     idProdutoAlmoxarifado,
     idAlmoxarifado,
     idTipoPatrimonio,
-  }: FindReviewArgs): Promise<MonthlyReviewData> {
-    return api.get(
-      `
-      /abastecimento/resumo-mensal?custo=${custo}&startDate=${startDate}&endDate=${endDate}
-      ${idPatrimonio ? `&idPatrimonio=${idPatrimonio}` : ''}
-      ${idProdutoAlmoxarifado ? `&idProdutoAlmoxarifado=${idProdutoAlmoxarifado}` : ''}
-      ${idAlmoxarifado ? `&idAlmoxarifado=${idAlmoxarifado}` : ''}
-      ${idTipoPatrimonio ? `&idTipoPatrimonio=${idTipoPatrimonio}` : ''}
-    `
-        .replace(/(\r\n|\n|\r)/gm, '')
-        .replace(/\s+/g, ''),
+  }: FindReviewArgs) {
+    const { data } = await api.get<MonthlyReviewData>(
+      '/abastecimento/resumo-mensal',
+      {
+        params: {
+          custo,
+          startDate,
+          endDate,
+          idPatrimonio,
+          idProdutoAlmoxarifado,
+          idAlmoxarifado,
+          idTipoPatrimonio,
+        },
+      },
     );
+
+    return data;
   }
 
-  findDetails({
+  async findDetails({
     custo,
     startDate,
     endDate,
@@ -47,58 +52,70 @@ class AbastecimentoService {
     idProdutoAlmoxarifado,
     idAlmoxarifado,
     idTipoPatrimonio,
-  }: FindReviewArgs): Promise<DetailsData[]> {
-    return api.get(
-      `
-      /abastecimento/detalhes?custo=${custo}&startDate=${startDate}&endDate=${endDate}
-      ${idPatrimonio ? `&idPatrimonio=${idPatrimonio}` : ''}
-      ${idProdutoAlmoxarifado ? `&idProdutoAlmoxarifado=${idProdutoAlmoxarifado}` : ''}
-      ${idAlmoxarifado ? `&idAlmoxarifado=${idAlmoxarifado}` : ''}
-      ${idTipoPatrimonio ? `&idTipoPatrimonio=${idTipoPatrimonio}` : ''}
-    `
-        .replace(/(\r\n|\n|\r)/gm, '')
-        .replace(/\s+/g, ''),
-    );
+  }: FindReviewArgs) {
+    const { data } = await api.get<DetailsData[]>('/abastecimento/detalhes', {
+      params: {
+        custo,
+        startDate,
+        endDate,
+        idPatrimonio,
+        idProdutoAlmoxarifado,
+        idAlmoxarifado,
+        idTipoPatrimonio,
+      },
+    });
+
+    return data;
   }
 
-  findPatrimonyReview({
+  async findPatrimonyReview({
     custo,
     startDate,
     endDate,
     idPatrimonio,
     idProdutoAlmoxarifado,
     idAlmoxarifado,
-  }: FindReviewArgs): Promise<PatrimonyReviewData> {
-    return api.get(
-      `
-      /abastecimento/resumo-patrimonio?custo=${custo}&startDate=${startDate}&endDate=${endDate}
-      ${idPatrimonio ? `&idPatrimonio=${idPatrimonio}` : ''}
-      ${idProdutoAlmoxarifado ? `&idProdutoAlmoxarifado=${idProdutoAlmoxarifado}` : ''}
-      ${idAlmoxarifado ? `&idAlmoxarifado=${idAlmoxarifado}` : ''}
-    `
-        .replace(/(\r\n|\n|\r)/gm, '')
-        .replace(/\s+/g, ''),
+  }: FindReviewArgs) {
+    const { data } = await api.get<PatrimonyReviewData>(
+      '/abastecimento/resumo-patrimonio',
+      {
+        params: {
+          custo,
+          startDate,
+          endDate,
+          idPatrimonio,
+          idProdutoAlmoxarifado,
+          idAlmoxarifado,
+        },
+      },
     );
+
+    return data;
   }
 
-  findFuelReview({
+  async findFuelReview({
     custo,
     startDate,
     endDate,
     idPatrimonio,
     idAlmoxarifado,
     idTipoPatrimonio,
-  }: FindReviewArgs): Promise<FuelReviewData> {
-    return api.get(
-      `
-      /abastecimento/resumo-combustivel?custo=${custo}&startDate=${startDate}&endDate=${endDate}
-      ${idPatrimonio ? `&idPatrimonio=${idPatrimonio}` : ''}
-      ${idAlmoxarifado ? `&idAlmoxarifado=${idAlmoxarifado}` : ''}
-      ${idTipoPatrimonio ? `&idTipoPatrimonio=${idTipoPatrimonio}` : ''}
-    `
-        .replace(/(\r\n|\n|\r)/gm, '')
-        .replace(/\s+/g, ''),
+  }: FindReviewArgs) {
+    const { data } = await api.get<FuelReviewData>(
+      '/abastecimento/resumo-combustivel',
+      {
+        params: {
+          custo,
+          startDate,
+          endDate,
+          idPatrimonio,
+          idAlmoxarifado,
+          idTipoPatrimonio,
+        },
+      },
     );
+
+    return data;
   }
 }
 

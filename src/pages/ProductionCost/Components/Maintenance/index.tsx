@@ -1,17 +1,9 @@
-import {
-  forwardRef,
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useRef,
-  useState,
-} from 'react';
+import { forwardRef, useCallback, useImperativeHandle, useState } from 'react';
 import { Spinner } from '../../../../components/Spinner';
 import { Container, Loader } from './styles';
 import { ActivityChart } from '../ActivityChart';
 import CustoProducaoService from '../../../../services/CustoProducaoService';
 import { format } from 'date-fns';
-import { toast } from '../../../../utils/toast';
 import { currencyFormat } from '../../../../utils/currencyFormat';
 import { Switch } from '../../../../components/Switch';
 import { NotAllowed } from '../../../../components/NotAllowed';
@@ -19,19 +11,17 @@ import { useUserContext } from '../../../../contexts/UserContext';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../../redux/store';
 import { change } from '../../../../redux/features/productionCostFiltersSlice';
-import { hasToFetch } from '../../../../utils/hasToFetch';
 import { setData } from '../../../../redux/features/productionCostDataSlice';
 import { componentsRefType } from '../../../../types/Types';
 
 export const Maintenance = forwardRef<componentsRefType>((props, ref) => {
-  const [isLoading, setIsLoading] = useState(true);
-  const isFirstRender = useRef(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   const {
     productionCostFilters: {
       unit: parentUnit,
       rangeDates,
-      lastSelectedSafras: safras,
+      selectedSafrasOptions,
       talhao,
       maintenanceUnit: unit,
     },
@@ -45,30 +35,8 @@ export const Maintenance = forwardRef<componentsRefType>((props, ref) => {
     if (hasPermission('custo_producao_insumo_manutencao')) {
       setIsLoading(true);
 
-      if (isFirstRender.current) {
-        isFirstRender.current = false;
-
-        if (!hasToFetch(maintenanceCost.lastFetch)) {
-          setIsLoading(false);
-          return;
-        }
-      }
-
-      if (safras.length === 0) {
+      if (selectedSafrasOptions.length === 0) {
         setIsLoading(false);
-        return;
-      }
-
-      if (
-        rangeDates.endDate &&
-        rangeDates.startDate &&
-        rangeDates.endDate < rangeDates.startDate
-      ) {
-        setIsLoading(false);
-        toast({
-          type: 'danger',
-          text: 'Data final precisa ser maior que inicial!',
-        });
         return;
       }
 
@@ -81,7 +49,7 @@ export const Maintenance = forwardRef<componentsRefType>((props, ref) => {
 
       const maintenanceCostData =
         await CustoProducaoService.findCustoManutencao({
-          safraId: safras.join(','),
+          safraId: selectedSafrasOptions.map(({ value }) => value).join(','),
           talhaoId: talhao ? Number(talhao) : undefined,
           startDate: startDateParsed,
           endDate: endDateParsed,
@@ -95,19 +63,14 @@ export const Maintenance = forwardRef<componentsRefType>((props, ref) => {
       );
     }
     setIsLoading(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    dispatch,
-    hasPermission,
     rangeDates.endDate,
     rangeDates.startDate,
-    safras,
+    selectedSafrasOptions,
     talhao,
+    dispatch,
+    hasPermission,
   ]);
-
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
 
   useImperativeHandle(
     ref,
@@ -138,11 +101,13 @@ export const Maintenance = forwardRef<componentsRefType>((props, ref) => {
                   : 'Custo Total: '}
               </strong>
               {parentUnit === 'hectareCost' &&
-                currencyFormat(maintenanceCost.inputsTotalPorHectareSafra)}
+                currencyFormat(
+                  maintenanceCost?.inputsTotalPorHectareSafra || 0,
+                )}
               {parentUnit === 'cost' &&
-                currencyFormat(maintenanceCost.inputsTotalSafra)}
+                currencyFormat(maintenanceCost?.inputsTotalSafra || 0)}
               {parentUnit === 'percent' &&
-                currencyFormat(maintenanceCost.inputsTotalSafra)}
+                currencyFormat(maintenanceCost?.inputsTotalSafra || 0)}
             </span>
           </div>
           <Switch
@@ -166,17 +131,19 @@ export const Maintenance = forwardRef<componentsRefType>((props, ref) => {
           />
         </header>
         <ActivityChart
-          labels={maintenanceCost.inputsTotal.map((i) => i.insumo)}
-          units={maintenanceCost.inputsTotal.map((i) => i.unidade)}
-          data={maintenanceCost.inputsTotal.map((i) =>
-            unit === 'qty'
-              ? i.quantidade
-              : parentUnit === 'cost'
-                ? i.total
-                : parentUnit === 'hectareCost'
-                  ? i.totalPorHectare
-                  : i.porcentagem,
-          )}
+          labels={maintenanceCost?.inputsTotal.map((i) => i.insumo) || []}
+          units={maintenanceCost?.inputsTotal.map((i) => i.unidade) || []}
+          data={
+            maintenanceCost?.inputsTotal.map((i) =>
+              unit === 'qty'
+                ? i.quantidade
+                : parentUnit === 'cost'
+                  ? i.total
+                  : parentUnit === 'hectareCost'
+                    ? i.totalPorHectare
+                    : i.porcentagem,
+            ) || []
+          }
           unit={unit === 'parent' ? parentUnit : unit}
         />
       </div>

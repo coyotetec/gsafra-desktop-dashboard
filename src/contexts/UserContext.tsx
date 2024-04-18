@@ -9,6 +9,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useFirstRender } from '../hooks/useFirstRender';
 import UserService from '../services/UserService';
 import { PermissionType } from '../types/User';
+import { api } from '../services/utils/api';
 
 interface UserContextProviderProps {
   children: React.ReactNode;
@@ -37,10 +38,15 @@ export function UserContextProvider({ children }: UserContextProviderProps) {
   useEffect(() => {
     async function loadData() {
       if (isFirstRender && idUsuario) {
+        if (import.meta.env.VITE_ENVIRONMENT === 'cloud' && idEmpresa) {
+          api.defaults.headers.common['X-Id-Empresa'] = idEmpresa;
+        }
+
+        api.defaults.headers.common['X-Database-Name'] =
+          databaseName || 'default';
+
         const permissionsData = await UserService.findPermissions(
           Number(idUsuario),
-          idEmpresa || undefined,
-          databaseName || undefined,
         );
         setPermissions([...permissionsData]);
       }

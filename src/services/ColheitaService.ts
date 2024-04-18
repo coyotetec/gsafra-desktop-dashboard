@@ -11,17 +11,28 @@ export type descontoType =
   | 'cota';
 
 class ColheitaService {
-  findTotal(safraId: string): Promise<ColheitaTotal> {
-    return api.get(`/colheita/total?idSafra=${safraId}`);
+  async findTotal(safraId: string) {
+    const { data } = await api.get<ColheitaTotal>('/colheita/total', {
+      params: {
+        idSafra: safraId,
+      },
+    });
+
+    return data;
   }
 
-  findDescontoTotal(
-    safraId: string,
-    desconto: descontoType,
-  ): Promise<ColheitaDescontoTotal> {
-    return api.get(
-      `/colheita/desconto?idSafra=${safraId}&desconto=${desconto}`,
+  async findDescontoTotal(safraId: string, desconto: descontoType) {
+    const { data } = await api.get<ColheitaDescontoTotal>(
+      '/colheita/desconto',
+      {
+        params: {
+          idSafra: safraId,
+          desconto,
+        },
+      },
     );
+
+    return data;
   }
 }
 

@@ -12,28 +12,38 @@ interface ViewTotalReturn {
 }
 
 class FinancialViewsService {
-  findViews(): Promise<View[]> {
-    return api.get('/financeiro-views');
+  async findViews() {
+    const { data } = await api.get<View[]>('/financeiro-views');
+
+    return data;
   }
 
-  findViewTotal(
-    viewId: number,
-    startDate: string,
-    endDate: string,
-  ): Promise<ViewTotalReturn> {
-    return api.get(
-      `/financeiro-views/${viewId}?startDate=${startDate}&endDate=${endDate}`,
+  async findViewTotal(viewId: number, startDate: string, endDate: string) {
+    const { data } = await api.get<ViewTotalReturn>(
+      `/financeiro-views/${viewId}`,
+      {
+        params: {
+          startDate,
+          endDate,
+        },
+      },
     );
+
+    return data;
   }
 
-  findViewDetails(
-    viewId: number,
-    startDate: string,
-    endDate: string,
-  ): Promise<ViewDetail[]> {
-    return api.get(
-      `/financeiro-views/${viewId}/detalhes?startDate=${startDate}&endDate=${endDate}`,
+  async findViewDetails(viewId: number, startDate: string, endDate: string) {
+    const { data } = await api.get<ViewDetail[]>(
+      `/financeiro-views/${viewId}`,
+      {
+        params: {
+          startDate,
+          endDate,
+        },
+      },
     );
+
+    return data;
   }
 }
 

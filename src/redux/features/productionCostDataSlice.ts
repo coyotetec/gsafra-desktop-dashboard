@@ -7,21 +7,11 @@ import {
 } from '../../types/CustoProducao';
 
 export interface ProductionCostDataState {
-  categoryCost: CustoCategoria & {
-    lastFetch: Date | null;
-  };
-  talhaoCost: CustoTalhao & {
-    lastFetch: Date | null;
-  };
-  activityCost: CustoIndividual & {
-    lastFetch: Date | null;
-  };
-  maintenanceCost: CustoIndividual & {
-    lastFetch: Date | null;
-  };
-  fuelingCost: CustoIndividual & {
-    lastFetch: Date | null;
-  };
+  categoryCost: CustoCategoria | null;
+  talhaoCost: CustoTalhao | null;
+  activityCost: CustoIndividual | null;
+  maintenanceCost: CustoIndividual | null;
+  fuelingCost: CustoIndividual | null;
 }
 
 interface SetDataPayload {
@@ -30,36 +20,11 @@ interface SetDataPayload {
 }
 
 const initialState: ProductionCostDataState = {
-  categoryCost: {
-    totalCusto: 0,
-    totalCustoPorHectare: 0,
-    totalCustoCategoria: [],
-    lastFetch: null,
-  },
-  talhaoCost: {
-    totalCusto: 0,
-    totalCustoPorHectare: 0,
-    totalCustoTalhao: [],
-    lastFetch: null,
-  },
-  activityCost: {
-    inputsTotalSafra: 0,
-    inputsTotalPorHectareSafra: 0,
-    inputsTotal: [],
-    lastFetch: null,
-  },
-  maintenanceCost: {
-    inputsTotalSafra: 0,
-    inputsTotalPorHectareSafra: 0,
-    inputsTotal: [],
-    lastFetch: null,
-  },
-  fuelingCost: {
-    inputsTotalSafra: 0,
-    inputsTotalPorHectareSafra: 0,
-    inputsTotal: [],
-    lastFetch: null,
-  },
+  categoryCost: null,
+  talhaoCost: null,
+  activityCost: null,
+  maintenanceCost: null,
+  fuelingCost: null,
 };
 
 export const productionCostDataSlice = createSlice({
@@ -69,10 +34,7 @@ export const productionCostDataSlice = createSlice({
     setData: (state, { payload }: PayloadAction<SetDataPayload>) => {
       state[payload.name] = {
         ...payload.data,
-        lastFetch: new Date(),
-      } as CustoCategoria &
-        CustoTalhao &
-        CustoIndividual & { lastFetch: Date | null };
+      } as CustoCategoria & CustoTalhao & CustoIndividual;
     },
   },
 });

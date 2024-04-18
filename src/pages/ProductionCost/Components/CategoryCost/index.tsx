@@ -1,7 +1,6 @@
 import {
   forwardRef,
   useCallback,
-  useEffect,
   useImperativeHandle,
   useRef,
   useState,
@@ -9,7 +8,6 @@ import {
 import { Spinner } from '../../../../components/Spinner';
 import { Container, Loader } from './styles';
 import CustoProducaoService from '../../../../services/CustoProducaoService';
-import { toast } from '../../../../utils/toast';
 import { format } from 'date-fns';
 import { currencyFormat } from '../../../../utils/currencyFormat';
 import { CategoryCostChart } from '../CategoryCostChart';
@@ -19,22 +17,15 @@ import { DownloadSimple } from 'phosphor-react';
 import { useUserContext } from '../../../../contexts/UserContext';
 import { RootState } from '../../../../redux/store';
 import { useDispatch, useSelector } from 'react-redux';
-import { hasToFetch } from '../../../../utils/hasToFetch';
 import { setData } from '../../../../redux/features/productionCostDataSlice';
 import { componentsRefType } from '../../../../types/Types';
 
 export const CategoryCost = forwardRef<componentsRefType>((props, ref) => {
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const chartRef = useRef(null);
-  const isFirstRender = useRef(true);
 
   const {
-    productionCostFilters: {
-      unit,
-      rangeDates,
-      lastSelectedSafras: safras,
-      talhao,
-    },
+    productionCostFilters: { unit, rangeDates, selectedSafrasOptions, talhao },
     productionCostData: { categoryCost },
   } = useSelector((state: RootState) => state);
   const dispatch = useDispatch();
@@ -45,30 +36,8 @@ export const CategoryCost = forwardRef<componentsRefType>((props, ref) => {
     if (hasPermission('custo_producao_categoria')) {
       setIsLoading(true);
 
-      if (isFirstRender.current) {
-        isFirstRender.current = false;
-
-        if (!hasToFetch(categoryCost.lastFetch)) {
-          setIsLoading(false);
-          return;
-        }
-      }
-
-      if (safras.length === 0) {
+      if (selectedSafrasOptions.length === 0) {
         setIsLoading(false);
-        return;
-      }
-
-      if (
-        rangeDates.endDate &&
-        rangeDates.startDate &&
-        rangeDates.endDate < rangeDates.startDate
-      ) {
-        setIsLoading(false);
-        toast({
-          type: 'danger',
-          text: 'Data final precisa ser maior que inicial!',
-        });
         return;
       }
 
@@ -80,7 +49,7 @@ export const CategoryCost = forwardRef<componentsRefType>((props, ref) => {
         : '';
 
       const categoryCostData = await CustoProducaoService.findCustoCategoria({
-        safraId: safras.join(','),
+        safraId: selectedSafrasOptions.map(({ value }) => value).join(','),
         talhaoId: talhao ? Number(talhao) : undefined,
         startDate: startDateParsed,
         endDate: endDateParsed,
@@ -94,19 +63,14 @@ export const CategoryCost = forwardRef<componentsRefType>((props, ref) => {
       );
     }
     setIsLoading(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    dispatch,
-    hasPermission,
-    rangeDates.endDate,
+    selectedSafrasOptions,
     rangeDates.startDate,
-    safras,
+    rangeDates.endDate,
     talhao,
+    hasPermission,
+    dispatch,
   ]);
-
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
 
   useImperativeHandle(
     ref,
@@ -135,7 +99,6 @@ export const CategoryCost = forwardRef<componentsRefType>((props, ref) => {
       a.click();
     });
   }
-
   return (
     <Container>
       <header>
@@ -155,9 +118,10 @@ export const CategoryCost = forwardRef<componentsRefType>((props, ref) => {
                 {unit === 'hectareCost' ? 'Custo Total/ha: ' : 'Custo Total: '}
               </strong>
               {unit === 'hectareCost' &&
-                currencyFormat(categoryCost.totalCustoPorHectare)}
-              {unit === 'cost' && currencyFormat(categoryCost.totalCusto)}
-              {unit === 'percent' && currencyFormat(categoryCost.totalCusto)}
+                currencyFormat(categoryCost?.totalCustoPorHectare || 0)}
+              {unit === 'cost' && currencyFormat(categoryCost?.totalCusto || 0)}
+              {unit === 'percent' &&
+                currencyFormat(categoryCost?.totalCusto || 0)}
             </span>
           </div>
           <button onClick={handleSaveChart} data-html2canvas-ignore>
@@ -165,13 +129,17 @@ export const CategoryCost = forwardRef<componentsRefType>((props, ref) => {
           </button>
         </header>
         <CategoryCostChart
-          labels={categoryCost.totalCustoCategoria.map((i) => i.categoria)}
-          data={categoryCost.totalCustoCategoria.map((i) =>
-            unit === 'hectareCost' ? i.totalPorHectare : i.total,
-          )}
-          percentages={categoryCost.totalCustoCategoria.map(
-            (i) => i.porcentagem,
-          )}
+          labels={
+            categoryCost?.totalCustoCategoria.map((i) => i.categoria) || []
+          }
+          data={
+            categoryCost?.totalCustoCategoria.map((i) =>
+              unit === 'hectareCost' ? i.totalPorHectare : i.total,
+            ) || []
+          }
+          percentages={
+            categoryCost?.totalCustoCategoria.map((i) => i.porcentagem) || []
+          }
           unit={unit}
         />
       </div>

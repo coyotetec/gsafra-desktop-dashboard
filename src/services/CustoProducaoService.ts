@@ -13,84 +13,106 @@ interface FindCustoCategoriaArgs {
 }
 
 class CustoProducaoService {
-  findCustoCategoria({
+  async findCustoCategoria({
     safraId,
     talhaoId,
     startDate,
     endDate,
-  }: FindCustoCategoriaArgs): Promise<CustoCategoria> {
-    return api.get(
-      `
-      /custo-producao/categoria?idSafra=${safraId}&startDate=${startDate}&endDate=${endDate}
-      ${talhaoId ? `&idTalhao=${talhaoId}` : ''}
-    `
-        .replace(/(\r\n|\n|\r)/gm, '')
-        .replace(/\s+/g, ''),
+  }: FindCustoCategoriaArgs) {
+    const { data } = await api.get<CustoCategoria>(
+      '/custo-producao/categoria',
+      {
+        params: {
+          startDate,
+          endDate,
+          idSafra: safraId,
+          idTalhao: talhaoId,
+        },
+      },
     );
+
+    return data;
   }
 
-  findCustoTalhao({
+  async findCustoTalhao({
     safraId,
     talhaoId,
     startDate,
     endDate,
-  }: FindCustoCategoriaArgs): Promise<CustoTalhao> {
-    return api.get(
-      `
-      /custo-producao/talhao?idSafra=${safraId}&startDate=${startDate}&endDate=${endDate}
-      ${talhaoId ? `&idTalhao=${talhaoId}` : ''}
-    `
-        .replace(/(\r\n|\n|\r)/gm, '')
-        .replace(/\s+/g, ''),
-    );
+  }: FindCustoCategoriaArgs) {
+    const { data } = await api.get<CustoTalhao>('/custo-producao/talhao', {
+      params: {
+        startDate,
+        endDate,
+        idSafra: safraId,
+        idTalhao: talhaoId,
+      },
+    });
+
+    return data;
   }
 
-  findCustoAtividade({
+  async findCustoAtividade({
     safraId,
     talhaoId,
     startDate,
     endDate,
-  }: FindCustoCategoriaArgs): Promise<CustoIndividual> {
-    return api.get(
-      `
-      /atividade-agricola/custo-producao?idSafra=${safraId}&startDate=${startDate}&endDate=${endDate}
-      ${talhaoId ? `&idTalhao=${talhaoId}` : ''}
-    `
-        .replace(/(\r\n|\n|\r)/gm, '')
-        .replace(/\s+/g, ''),
+  }: FindCustoCategoriaArgs) {
+    const { data } = await api.get<CustoIndividual>(
+      '/atividade-agricola/custo-producao',
+      {
+        params: {
+          startDate,
+          endDate,
+          idSafra: safraId,
+          idTalhao: talhaoId,
+        },
+      },
     );
+
+    return data;
   }
 
-  findCustoManutencao({
+  async findCustoManutencao({
     safraId,
     talhaoId,
     startDate,
     endDate,
-  }: FindCustoCategoriaArgs): Promise<CustoIndividual> {
-    return api.get(
-      `
-      /manutencao/custo-producao?idSafra=${safraId}&startDate=${startDate}&endDate=${endDate}
-      ${talhaoId ? `&idTalhao=${talhaoId}` : ''}
-    `
-        .replace(/(\r\n|\n|\r)/gm, '')
-        .replace(/\s+/g, ''),
+  }: FindCustoCategoriaArgs) {
+    const { data } = await api.get<CustoIndividual>(
+      '/manutencao/custo-producao',
+      {
+        params: {
+          startDate,
+          endDate,
+          idSafra: safraId,
+          idTalhao: talhaoId,
+        },
+      },
     );
+
+    return data;
   }
 
-  findCustoAbastecimento({
+  async findCustoAbastecimento({
     safraId,
     talhaoId,
     startDate,
     endDate,
-  }: FindCustoCategoriaArgs): Promise<CustoIndividual> {
-    return api.get(
-      `
-      /abastecimento/custo-producao?idSafra=${safraId}&startDate=${startDate}&endDate=${endDate}
-      ${talhaoId ? `&idTalhao=${talhaoId}` : ''}
-    `
-        .replace(/(\r\n|\n|\r)/gm, '')
-        .replace(/\s+/g, ''),
+  }: FindCustoCategoriaArgs) {
+    const { data } = await api.get<CustoIndividual>(
+      '/abastecimento/custo-producao',
+      {
+        params: {
+          startDate,
+          endDate,
+          idSafra: safraId,
+          idTalhao: talhaoId,
+        },
+      },
     );
+
+    return data;
   }
 }
 

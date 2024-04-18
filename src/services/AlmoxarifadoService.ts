@@ -2,8 +2,10 @@ import { api } from './utils/api';
 import { Almoxarifado } from '../types/Almoxarifado';
 
 class AlmoxarifadoService {
-  findAlmoxarifados(): Promise<Almoxarifado[]> {
-    return api.get('/almoxarifados');
+  async findAlmoxarifados() {
+    const { data } = await api.get<Almoxarifado[]>('/almoxarifados');
+
+    return data;
   }
 }
 

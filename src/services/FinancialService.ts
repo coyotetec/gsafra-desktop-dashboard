@@ -2,43 +2,58 @@ import { api } from './utils/api';
 import { CashFlow, Total } from '../types/Financial';
 
 class FinancialService {
-  findPayableTotal(
+  async findPayableTotal(
     startDate: string,
     endDate: string,
     safraId?: string,
     status?: string,
-  ): Promise<Total> {
-    return api.get(
-      safraId
-        ? `/financeiro/pagar/total?startDate=${startDate}&endDate=${endDate}&idSafra=${safraId}${status ? `&status=${status}` : ''}`
-        : `/financeiro/pagar/total?startDate=${startDate}&endDate=${endDate}${status ? `&status=${status}` : ''}`,
-    );
+  ) {
+    const { data } = await api.get<Total>('/financeiro/pagar/total', {
+      params: {
+        startDate,
+        endDate,
+        status,
+        idSafra: safraId,
+      },
+    });
+
+    return data;
   }
 
-  findReceivableTotal(
+  async findReceivableTotal(
     startDate: string,
     endDate: string,
     safraId?: string,
     status?: string,
-  ): Promise<Total> {
-    return api.get(
-      safraId
-        ? `/financeiro/receber/total?startDate=${startDate}&endDate=${endDate}&idSafra=${safraId}${status ? `&status=${status}` : ''}`
-        : `/financeiro/receber/total?startDate=${startDate}&endDate=${endDate}${status ? `&status=${status}` : ''}`,
-    );
+  ) {
+    const { data } = await api.get<Total>('/financeiro/receber/total', {
+      params: {
+        startDate,
+        endDate,
+        status,
+        idSafra: safraId,
+      },
+    });
+
+    return data;
   }
 
-  findCashFlow(
+  async findCashFlow(
     startDate: string,
     endDate: string,
     safraId?: string,
     status?: string,
-  ): Promise<CashFlow> {
-    return api.get(
-      safraId
-        ? `/financeiro/fluxo-caixa?startDate=${startDate}&endDate=${endDate}&idSafra=${safraId}${status ? `&status=${status}` : ''}`
-        : `/financeiro/fluxo-caixa?startDate=${startDate}&endDate=${endDate}${status ? `&status=${status}` : ''}`,
-    );
+  ) {
+    const { data } = await api.get<CashFlow>('/financeiro/fluxo-caixa', {
+      params: {
+        startDate,
+        endDate,
+        status,
+        idSafra: safraId,
+      },
+    });
+
+    return data;
   }
 }
 

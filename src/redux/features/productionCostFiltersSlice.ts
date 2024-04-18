@@ -7,7 +7,7 @@ interface RangeDates {
   endDate: Date | null;
 }
 
-type optionType = {
+export type optionType = {
   value: string;
   label: string;
 }[];
@@ -23,10 +23,10 @@ type groupedOptionsType = {
 export interface ProductionCostFiltersState {
   rangeDates: RangeDates;
   talhoesOptions: groupedOptionsType;
+  talhoesFetched: boolean;
   talhao: string | null;
   unit: string;
   safras: string[];
-  lastSelectedSafras: string[];
   selectedSafrasOptions: optionType;
   activityUnit: string;
   maintenanceUnit: string;
@@ -39,6 +39,7 @@ interface ChangePayload {
   value:
     | string
     | string[]
+    | boolean
     | RangeDates
     | null
     | optionType
@@ -52,9 +53,9 @@ const initialState: ProductionCostFiltersState = {
   },
   talhao: null,
   talhoesOptions: [],
+  talhoesFetched: false,
   unit: 'cost',
   safras: [],
-  lastSelectedSafras: [],
   selectedSafrasOptions: [],
   activityUnit: 'parent',
   maintenanceUnit: 'parent',
@@ -70,12 +71,23 @@ export const productionCostFiltersSlice = createSlice({
       state[action.payload.name] = action.payload.value as RangeDates &
         string &
         string[] &
+        boolean &
         optionType &
         groupedOptionsType;
     },
-    setFirstSafra: (state, action: PayloadAction<string | null>) => {
-      if (state.safras.length === 0 && action.payload) {
-        state.safras = [action.payload];
+    setFirstSafra: (
+      state,
+      action: PayloadAction<{
+        value: string;
+        label: string;
+      } | null>,
+    ) => {
+      if (
+        state.safras.length === 0 &&
+        state.selectedSafrasOptions.length === 0 &&
+        action.payload
+      ) {
+        state.safras = [action.payload.value];
       }
     },
   },

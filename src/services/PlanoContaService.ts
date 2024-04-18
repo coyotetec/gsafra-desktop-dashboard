@@ -6,40 +6,62 @@ import {
 } from '../types/PlanoContas';
 
 class PlanoContasService {
-  findPlanoContas(
+  async findPlanoContas(
     type?: 'receita' | 'despesa',
     category?: 'sintetica' | 'analitica',
-  ): Promise<PlanoContas[]> {
-    return api.get(`/plano-conta?category=${category}&type=${type}`);
+  ) {
+    const { data } = await api.get<PlanoContas[]>('/plano-conta', {
+      params: {
+        category,
+        type,
+      },
+    });
+
+    return data;
   }
 
-  findPlanoContasTotal(
+  async findPlanoContasTotal(
     codigo: string,
     startDate: string,
     endDate: string,
     safraId?: string,
-  ): Promise<PlanoContasTotal[]> {
-    return api.get(
-      safraId
-        ? `/plano-conta/total/${codigo}?startDate=${startDate}&endDate=${endDate}&idSafra=${safraId}`
-        : `/plano-conta/total/${codigo}?startDate=${startDate}&endDate=${endDate}`,
+  ) {
+    const { data } = await api.get<PlanoContasTotal[]>(
+      `/plano-conta/total/${codigo}`,
+      {
+        params: {
+          startDate,
+          endDate,
+          idSafra: safraId,
+        },
+      },
     );
+
+    return data;
   }
 
-  findPlanoContasFinancial(
+  async findPlanoContasFinancial(
     options: string,
     showZeros: boolean,
     startDate: string,
     endDate: string,
     status?: string,
-  ): Promise<{
-    total: number;
-    data: PlanoContasFinancial[];
-    eachMonthTotal: number[];
-  }> {
-    return api.get(
-      `/plano-conta/financeiro?options=${options}&showZeros=${showZeros}&startDate=${startDate}&endDate=${endDate}${status ? `&status=${status}` : ''}`,
-    );
+  ) {
+    const { data } = await api.get<{
+      total: number;
+      data: PlanoContasFinancial[];
+      eachMonthTotal: number[];
+    }>('/plano-conta/financeiro', {
+      params: {
+        options,
+        showZeros,
+        startDate,
+        endDate,
+        status,
+      },
+    });
+
+    return data;
   }
 }
 

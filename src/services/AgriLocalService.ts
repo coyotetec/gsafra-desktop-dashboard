@@ -2,8 +2,12 @@ import { api } from './utils/api';
 import { LocalArmazenamento } from '../types/AgriLocal';
 
 class AgriLocalService {
-  findLocaisArmazenamento(): Promise<LocalArmazenamento[]> {
-    return api.get('/locais-armazenamento');
+  async findLocaisArmazenamento() {
+    const { data } = await api.get<LocalArmazenamento[]>(
+      '/locais-armazenamento',
+    );
+
+    return data;
   }
 }
 
