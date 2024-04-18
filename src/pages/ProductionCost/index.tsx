@@ -1,5 +1,5 @@
 import { Info, MagnifyingGlass } from 'phosphor-react';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { DateInput } from '../../components/DateInput';
 import { Header } from '../../components/Header';
@@ -43,6 +43,7 @@ const componentsRefInitialState = {
 };
 
 export function ProductionCost() {
+  const [canSubmit, setCanSubmit] = useState(true);
   const unitOptions: optionType = [
     { value: 'cost', label: 'Custo (R$)' },
     { value: 'hectareCost', label: 'Custo por Hectare (R$/ha)' },
@@ -145,8 +146,9 @@ export function ProductionCost() {
       }, [] as groupedOptionsType);
 
       dispatch(change({ name: 'talhoesOptions', value: groupedTalhoes }));
+      loadData();
     },
-    [dispatch, safrasList.options, selectedSafrasOptions],
+    [dispatch, safrasList.options, selectedSafrasOptions, loadData],
   );
 
   useEffect(() => {
@@ -180,7 +182,15 @@ export function ProductionCost() {
   return (
     <Container>
       <Header title="Custo da Produção" />
-      <div className="filters">
+      <form
+        className="filters"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (canSubmit) {
+            loadData();
+          }
+        }}
+      >
         <MultiSelect
           options={safrasList.options}
           onChange={(value: string[]) => {
@@ -200,6 +210,9 @@ export function ProductionCost() {
           value={talhao}
           onChange={(value: string | null) => {
             dispatch(change({ name: 'talhao', value }));
+            setTimeout(() => {
+              loadData();
+            }, 300);
           }}
           label="Talhão"
           width="100%"
@@ -224,8 +237,10 @@ export function ProductionCost() {
                   type: 'danger',
                   text: 'Data final precisa ser maior que inicial!',
                 });
+                setCanSubmit(false);
                 return;
               }
+              setCanSubmit(true);
               dispatch(
                 change({
                   name: 'rangeDates',
@@ -252,8 +267,10 @@ export function ProductionCost() {
                   type: 'danger',
                   text: 'Data final precisa ser maior que inicial!',
                 });
+                setCanSubmit(false);
                 return;
               }
+              setCanSubmit(true);
               dispatch(
                 change({
                   name: 'rangeDates',
@@ -273,11 +290,11 @@ export function ProductionCost() {
             label="Data Final"
           />
         </div>
-        <button type="button" onClick={loadData}>
+        <button type="submit">
           <MagnifyingGlass size={20} color="#CFD4D6" weight="bold" />
           Pesquisar
         </button>
-      </div>
+      </form>
       {shouldRender && (
         <HectareCostMessage
           ref={animatedElementRef}

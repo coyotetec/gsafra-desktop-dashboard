@@ -1,11 +1,4 @@
-import {
-  forwardRef,
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useRef,
-  useState,
-} from 'react';
+import { forwardRef, useCallback, useImperativeHandle, useState } from 'react';
 import { Spinner } from '../../../../components/Spinner';
 import { Container, Loader } from './styles';
 import { ActivityChart } from '../ActivityChart';
@@ -18,13 +11,11 @@ import { useUserContext } from '../../../../contexts/UserContext';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../../redux/store';
 import { change } from '../../../../redux/features/productionCostFiltersSlice';
-import { hasToFetch } from '../../../../utils/hasToFetch';
 import { setData } from '../../../../redux/features/productionCostDataSlice';
 import { componentsRefType } from '../../../../types/Types';
 
 export const Fueling = forwardRef<componentsRefType>((props, ref) => {
-  const [isLoading, setIsLoading] = useState(true);
-  const isFirstRender = useRef(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   const {
     productionCostFilters: {
@@ -43,15 +34,6 @@ export const Fueling = forwardRef<componentsRefType>((props, ref) => {
   const loadData = useCallback(async () => {
     if (hasPermission('custo_producao_insumo_abastecimento')) {
       setIsLoading(true);
-
-      if (isFirstRender.current) {
-        isFirstRender.current = false;
-
-        if (!hasToFetch(fuelingCost.lastFetch)) {
-          setIsLoading(false);
-          return;
-        }
-      }
 
       if (selectedSafrasOptions.length === 0) {
         setIsLoading(false);
@@ -82,12 +64,14 @@ export const Fueling = forwardRef<componentsRefType>((props, ref) => {
       );
     }
     setIsLoading(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, hasPermission, selectedSafrasOptions, talhao]);
-
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+  }, [
+    dispatch,
+    hasPermission,
+    rangeDates.endDate,
+    rangeDates.startDate,
+    selectedSafrasOptions,
+    talhao,
+  ]);
 
   useImperativeHandle(
     ref,
@@ -120,11 +104,11 @@ export const Fueling = forwardRef<componentsRefType>((props, ref) => {
                   : 'Custo Total: '}
               </strong>
               {parentUnit === 'hectareCost' &&
-                currencyFormat(fuelingCost.inputsTotalPorHectareSafra)}
+                currencyFormat(fuelingCost?.inputsTotalPorHectareSafra || 0)}
               {parentUnit === 'cost' &&
-                currencyFormat(fuelingCost.inputsTotalSafra)}
+                currencyFormat(fuelingCost?.inputsTotalSafra || 0)}
               {parentUnit === 'percent' &&
-                currencyFormat(fuelingCost.inputsTotalSafra)}
+                currencyFormat(fuelingCost?.inputsTotalSafra || 0)}
             </span>
           </div>
           <Switch
@@ -148,17 +132,19 @@ export const Fueling = forwardRef<componentsRefType>((props, ref) => {
           />
         </header>
         <ActivityChart
-          labels={fuelingCost.inputsTotal.map((i) => i.insumo)}
-          units={fuelingCost.inputsTotal.map((i) => i.unidade)}
-          data={fuelingCost.inputsTotal.map((i) =>
-            unit === 'qty'
-              ? i.quantidade
-              : parentUnit === 'cost'
-                ? i.total
-                : parentUnit === 'hectareCost'
-                  ? i.totalPorHectare
-                  : i.porcentagem,
-          )}
+          labels={fuelingCost?.inputsTotal.map((i) => i.insumo) || []}
+          units={fuelingCost?.inputsTotal.map((i) => i.unidade) || []}
+          data={
+            fuelingCost?.inputsTotal.map((i) =>
+              unit === 'qty'
+                ? i.quantidade
+                : parentUnit === 'cost'
+                  ? i.total
+                  : parentUnit === 'hectareCost'
+                    ? i.totalPorHectare
+                    : i.porcentagem,
+            ) || []
+          }
           unit={unit === 'parent' ? parentUnit : unit}
         />
       </div>
