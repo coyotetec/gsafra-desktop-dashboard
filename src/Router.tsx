@@ -21,7 +21,7 @@ import { ChartAccountsFinancial } from './pages/ChartAccountsFinancial';
 export function Router() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/custo-producao" />} />
+      <Route path="/" element={<Navigate to="/financeiro" />} />
       <Route path="/financeiro" element={<Financial />} />
       <Route
         path="/financeiro/movimento-contas/analitica"

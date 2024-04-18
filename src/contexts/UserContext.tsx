@@ -31,8 +31,8 @@ export function UserContextProvider({ children }: UserContextProviderProps) {
   const isFirstRender = useFirstRender();
 
   const [query] = useSearchParams();
-  const idEmpresa = query.get('idEmpresa') || 'x';
-  const idUsuario = query.get('idUsuario') || '0';
+  const idEmpresa = query.get('idEmpresa');
+  const idUsuario = query.get('idUsuario');
   const databaseName = query.get('dbNome');
 
   useEffect(() => {
