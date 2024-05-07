@@ -4,7 +4,6 @@ import { DownloadSimple } from 'phosphor-react';
 import {
   forwardRef,
   useCallback,
-  useEffect,
   useImperativeHandle,
   useRef,
   useState,
@@ -19,17 +18,14 @@ import { change } from '../../../../redux/features/beanStockFiltersSlice';
 import { RootState } from '../../../../redux/store';
 import EstoqueGraosService from '../../../../services/EstoqueGraosService';
 import { componentsRefType } from '../../../../types/Types';
-import { hasToFetch } from '../../../../utils/hasToFetch';
-import { toast } from '../../../../utils/toast';
 import { ProducerScaleChart } from '../ProducerScaleChart';
 import { ProducerScaleDetails } from '../ProducerScaleDetails';
 import { Container, Loader } from './styles';
 
 export const ProducerScale = forwardRef<componentsRefType>((props, ref) => {
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [requestId, setRequestId] = useState(1);
   const chartRef = useRef(null);
-  const isFirstRender = useRef(true);
 
   const {
     beanStockFilters: {
@@ -40,7 +36,7 @@ export const ProducerScale = forwardRef<componentsRefType>((props, ref) => {
       safra,
       producerStockUnit: unit,
     },
-    beanStockData: { beanStockProducer, beanStockProducerLastFetch },
+    beanStockData: { beanStockProducer },
   } = useSelector((state: RootState) => state);
   const dispatch = useDispatch();
 
@@ -50,30 +46,9 @@ export const ProducerScale = forwardRef<componentsRefType>((props, ref) => {
     if (hasPermission('estoque_graos_produtor')) {
       setIsLoading(true);
 
-      if (isFirstRender.current) {
-        isFirstRender.current = false;
-
-        if (!hasToFetch(beanStockProducerLastFetch)) {
-          setIsLoading(false);
-          return;
-        }
-      }
-
       if (crop === '_') {
+        console.log(3);
         setIsLoading(false);
-        return;
-      }
-
-      if (
-        rangeDates.endDate &&
-        rangeDates.startDate &&
-        rangeDates.endDate < rangeDates.startDate
-      ) {
-        setIsLoading(false);
-        toast({
-          type: 'danger',
-          text: 'Data final precisa ser maior que inicial!',
-        });
         return;
       }
 
@@ -104,7 +79,6 @@ export const ProducerScale = forwardRef<componentsRefType>((props, ref) => {
       setRequestId((prevState) => prevState + 1);
     }
     setIsLoading(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     crop,
     dispatch,
@@ -115,10 +89,6 @@ export const ProducerScale = forwardRef<componentsRefType>((props, ref) => {
     safra,
     storage,
   ]);
-
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
 
   useImperativeHandle(
     ref,

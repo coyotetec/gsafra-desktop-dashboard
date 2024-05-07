@@ -7,9 +7,7 @@ import {
 
 export interface BeanStockDataState {
   beanStock: EstoqueGraosTotal;
-  beanStcokLastFetch: Date | null;
   beanStockProducer: EstoqueGraosProdutorTotal;
-  beanStockProducerLastFetch: Date | null;
 }
 
 const initialState: BeanStockDataState = {
@@ -31,12 +29,10 @@ const initialState: BeanStockDataState = {
     },
     saldoFinal: 0,
   },
-  beanStcokLastFetch: null,
   beanStockProducer: {
     estoqueGraosProdutor: [],
     saldoFinal: [],
   },
-  beanStockProducerLastFetch: null,
 };
 
 export const beanStockDataSlice = createSlice({
@@ -45,14 +41,12 @@ export const beanStockDataSlice = createSlice({
   reducers: {
     setBeanStock: (state, { payload }: PayloadAction<EstoqueGraosTotal>) => {
       state.beanStock = payload;
-      state.beanStcokLastFetch = new Date();
     },
     setBeanStockProducer: (
       state,
       { payload }: PayloadAction<EstoqueGraosProdutorTotal>,
     ) => {
       state.beanStockProducer = payload;
-      state.beanStockProducerLastFetch = new Date();
     },
   },
 });

@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { DateInput } from '../../components/DateInput';
 import { Header } from '../../components/Header';
-import { Loader } from '../../components/Loader';
 import { Select } from '../../components/Select';
 import {
   change,
@@ -22,9 +21,11 @@ import { hasToFetch } from '../../utils/hasToFetch';
 import { ProducerScale } from './components/ProducerScale';
 import { Totalizers } from './components/Totalizers';
 import { Container } from './styles';
+import { MagnifyingGlass } from 'phosphor-react';
+import { toast } from '../../utils/toast';
 
 export function BeanStock() {
-  const [isLoading, setIsLoading] = useState(true);
+  const [canSubmit, setCanSubmit] = useState(true);
   const totalizersRef = useRef<componentsRefType>({
     loadData: () => null,
   });
@@ -41,13 +42,13 @@ export function BeanStock() {
   } = useSelector((state: RootState) => state);
   const dispatch = useDispatch();
 
-  const refreshData = useCallback(() => {
+  const loadData = useCallback(() => {
     totalizersRef.current.loadData();
     producerScaleRef.current.loadData();
   }, []);
 
   useEffect(() => {
-    async function loadData() {
+    async function loadCrops() {
       if (hasToFetch(cropsList.lastFetch)) {
         const cropsData = await CulturaService.findCulturas();
         dispatch(
@@ -68,8 +69,18 @@ export function BeanStock() {
             ),
           ),
         );
-      }
 
+        setTimeout(() => {
+          loadData();
+        }, 300);
+      }
+    }
+
+    loadCrops();
+  }, [cropsList.lastFetch, dispatch, loadData]);
+
+  useEffect(() => {
+    async function loadProducers() {
       if (hasToFetch(producersList.lastFetch)) {
         const producersData = await PessoaService.findProdutores();
         dispatch(
@@ -85,7 +96,13 @@ export function BeanStock() {
           ]),
         );
       }
+    }
 
+    loadProducers();
+  }, [dispatch, producersList.lastFetch]);
+
+  useEffect(() => {
+    async function loadStorages() {
       if (hasToFetch(storagesList.lastFetch)) {
         const storagesData = await AgriLocalService.findLocaisArmazenamento();
         dispatch(
@@ -101,7 +118,13 @@ export function BeanStock() {
           ]),
         );
       }
+    }
 
+    loadStorages();
+  }, [dispatch, storagesList.lastFetch]);
+
+  useEffect(() => {
+    async function loadSafras() {
       if (hasToFetch(safrasList.lastFetch)) {
         const safrasData = await SafraService.findSafras();
         dispatch(
@@ -113,67 +136,23 @@ export function BeanStock() {
           ),
         );
       }
-
-      setIsLoading(false);
     }
 
-    loadData();
-  }, [
-    dispatch,
-    cropsList.lastFetch,
-    producersList.lastFetch,
-    storagesList.lastFetch,
-    safrasList.lastFetch,
-  ]);
+    loadSafras();
+  }, [dispatch, safrasList.lastFetch]);
 
   return (
     <Container>
-      <Loader isLoading={isLoading} />
-      <Header title="Estoque de Grãos" refreshData={refreshData} />
-      <div className="filters">
-        <div className="date-filter">
-          <DateInput
-            onChangeDate={(date) => {
-              dispatch(
-                change({
-                  name: 'rangeDates',
-                  value: {
-                    startDate: date,
-                    endDate: filters.rangeDates.endDate,
-                  },
-                }),
-              );
-            }}
-            placeholder="Data Inicial"
-            defaultDate={filters.rangeDates.startDate}
-            height="48px"
-            width="100%"
-            fontSize="16px"
-            horizontalPadding="12px"
-            label="Data Inicial"
-          />
-          <strong>à</strong>
-          <DateInput
-            onChangeDate={(date) => {
-              dispatch(
-                change({
-                  name: 'rangeDates',
-                  value: {
-                    startDate: filters.rangeDates.startDate,
-                    endDate: date,
-                  },
-                }),
-              );
-            }}
-            placeholder="Data Final"
-            defaultDate={filters.rangeDates.endDate}
-            height="48px"
-            width="100%"
-            fontSize="16px"
-            horizontalPadding="12px"
-            label="Data Final"
-          />
-        </div>
+      <Header title="Estoque de Grãos" />
+      <form
+        className="filters"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (canSubmit) {
+            loadData();
+          }
+        }}
+      >
         <Select
           options={cropsList.options}
           placeholder="Cultura"
@@ -224,7 +203,80 @@ export function BeanStock() {
           label="Safra"
           width="100%"
         />
-      </div>
+        <div className="date-filter">
+          <DateInput
+            onChangeDate={(date) => {
+              if (
+                date &&
+                filters.rangeDates.endDate &&
+                date > filters.rangeDates.endDate
+              ) {
+                toast({
+                  type: 'danger',
+                  text: 'Data final precisa ser maior que inicial!',
+                });
+                setCanSubmit(false);
+                return;
+              }
+              setCanSubmit(true);
+              dispatch(
+                change({
+                  name: 'rangeDates',
+                  value: {
+                    startDate: date,
+                    endDate: filters.rangeDates.endDate,
+                  },
+                }),
+              );
+            }}
+            placeholder="Data Inicial"
+            defaultDate={filters.rangeDates.startDate}
+            height="48px"
+            width="100%"
+            fontSize="16px"
+            horizontalPadding="12px"
+            label="Data Inicial"
+          />
+          <strong>à</strong>
+          <DateInput
+            onChangeDate={(date) => {
+              if (
+                date &&
+                filters.rangeDates.startDate &&
+                date < filters.rangeDates.startDate
+              ) {
+                toast({
+                  type: 'danger',
+                  text: 'Data final precisa ser maior que inicial!',
+                });
+                setCanSubmit(false);
+                return;
+              }
+              setCanSubmit(true);
+              dispatch(
+                change({
+                  name: 'rangeDates',
+                  value: {
+                    startDate: filters.rangeDates.startDate,
+                    endDate: date,
+                  },
+                }),
+              );
+            }}
+            placeholder="Data Final"
+            defaultDate={filters.rangeDates.endDate}
+            height="48px"
+            width="100%"
+            fontSize="16px"
+            horizontalPadding="12px"
+            label="Data Final"
+          />
+        </div>
+        <button type="submit">
+          <MagnifyingGlass size={20} color="#CFD4D6" weight="bold" />
+          Pesquisar
+        </button>
+      </form>
       <Totalizers ref={totalizersRef} />
       <ProducerScale ref={producerScaleRef} />
     </Container>

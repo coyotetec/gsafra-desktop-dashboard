@@ -8,14 +8,7 @@ import {
   X,
 } from 'phosphor-react';
 import { Column } from 'primereact/column';
-import {
-  forwardRef,
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useRef,
-  useState,
-} from 'react';
+import { forwardRef, useCallback, useImperativeHandle, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { NotAllowed } from '../../../../components/NotAllowed';
 import { Spinner } from '../../../../components/Spinner';
@@ -25,18 +18,16 @@ import { setBeanStock } from '../../../../redux/features/beanStockDataSlice';
 import { RootState } from '../../../../redux/store';
 import EstoqueGraosService from '../../../../services/EstoqueGraosService';
 import { componentsRefType } from '../../../../types/Types';
-import { hasToFetch } from '../../../../utils/hasToFetch';
 import { Container, DetailWrapper, Loader, Table } from './styles';
 
 export const Totalizers = forwardRef<componentsRefType>((props, ref) => {
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [entriesIsVisible, setEntrieIsVisible] = useState(false);
   const [departuresIsVisible, setDepartureIsVisible] = useState(false);
-  const isFirstRender = useRef(true);
 
   const {
     beanStockFilters: { crop, rangeDates, producer, storage, safra },
-    beanStockData: { beanStock, beanStcokLastFetch },
+    beanStockData: { beanStock },
   } = useSelector((state: RootState) => state);
   const dispatch = useDispatch();
 
@@ -53,15 +44,6 @@ export const Totalizers = forwardRef<componentsRefType>((props, ref) => {
   const loadData = useCallback(async () => {
     if (hasPermission('resumo_estoque_graos')) {
       setIsLoading(true);
-
-      if (isFirstRender.current) {
-        isFirstRender.current = false;
-
-        if (!hasToFetch(beanStcokLastFetch)) {
-          setIsLoading(false);
-          return;
-        }
-      }
 
       if (crop === '_') {
         setIsLoading(false);
@@ -93,7 +75,6 @@ export const Totalizers = forwardRef<componentsRefType>((props, ref) => {
       setBeanStock(beanStockTotalData);
     }
     setIsLoading(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     crop,
     dispatch,
@@ -104,10 +85,6 @@ export const Totalizers = forwardRef<componentsRefType>((props, ref) => {
     safra,
     storage,
   ]);
-
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
 
   useImperativeHandle(
     ref,
