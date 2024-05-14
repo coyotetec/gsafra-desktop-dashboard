@@ -101,14 +101,16 @@ export function FuelingPatrimonyReview() {
 
       dispatch(
         setData({
-          labels: patrimonyReviewData.patrimonyValue.map(
-            (item) => item.tipoPatrimonio,
-          ),
-          values: patrimonyReviewData.patrimonyValue.map((item) => item.total),
+          labels: patrimonyReviewData.patrimonyValue
+            .sort((a, b) => b.total - a.total)
+            .map((item) => item.tipoPatrimonio),
+          values: patrimonyReviewData.patrimonyValue
+            .sort((a, b) => b.total - a.total)
+            .map((item) => item.total),
           valuesTotal: patrimonyReviewData.patrimonyValueTotal,
-          quantities: patrimonyReviewData.patrimonyQty.map(
-            (item) => item.total,
-          ),
+          quantities: patrimonyReviewData.patrimonyQty
+            .sort((a, b) => b.total - a.total)
+            .map((item) => item.total),
           quantitiesTotal: patrimonyReviewData.patrimonyQtyTotal,
         }),
       );
