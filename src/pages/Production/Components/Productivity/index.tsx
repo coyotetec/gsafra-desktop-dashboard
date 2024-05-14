@@ -7,6 +7,7 @@ import { useUserContext } from '../../../../contexts/UserContext';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../../redux/store';
 import { change } from '../../../../redux/features/productionFiltersSlice';
+import { useMemo } from 'react';
 
 interface ProductivityProps {
   isLoading: boolean;
@@ -26,6 +27,12 @@ export function Productivity({ isLoading }: ProductivityProps) {
   function formatNumber(number: number, sufix?: string) {
     return `${new Intl.NumberFormat('id').format(number)}${sufix || ''}`;
   }
+
+  const sortedTalhoes = useMemo(() => {
+    return talhoesTotal
+      .slice()
+      .sort((a, b) => b.sacasPorHectare - a.sacasPorHectare);
+  }, [talhoesTotal]);
 
   return (
     <Container>
@@ -63,8 +70,8 @@ export function Productivity({ isLoading }: ProductivityProps) {
           />
         </header>
         <ProductivityChart
-          labels={talhoesTotal.map((i) => i.talhao)}
-          data={talhoesTotal.map((i) =>
+          labels={sortedTalhoes.map((i) => i.talhao)}
+          data={sortedTalhoes.map((i) =>
             unit === 'sacks' ? i.sacasPorHectare : i.totalPorHectare,
           )}
           unit={unit}

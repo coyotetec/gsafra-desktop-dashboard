@@ -7,6 +7,7 @@ import { useUserContext } from '../../../../contexts/UserContext';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../../redux/store';
 import { change } from '../../../../redux/features/productionFiltersSlice';
+import { useMemo } from 'react';
 
 interface HarvestProps {
   isLoading: boolean;
@@ -26,6 +27,10 @@ export function Harvest({ isLoading }: HarvestProps) {
   function formatNumber(number: number, sufix?: string) {
     return `${new Intl.NumberFormat('id').format(number)}${sufix || ''}`;
   }
+
+  const sortedTalhoes = useMemo(() => {
+    return talhoesTotal.slice().sort((a, b) => b.sacas - a.sacas);
+  }, [talhoesTotal]);
 
   return (
     <Container>
@@ -63,8 +68,10 @@ export function Harvest({ isLoading }: HarvestProps) {
           />
         </header>
         <HarvestChart
-          labels={talhoesTotal.map((i) => i.talhao)}
-          data={talhoesTotal.map((i) => (unit === 'sacks' ? i.sacas : i.total))}
+          labels={sortedTalhoes.map((i) => i.talhao)}
+          data={sortedTalhoes.map((i) =>
+            unit === 'sacks' ? i.sacas : i.total,
+          )}
           unit={unit}
         />
       </div>
