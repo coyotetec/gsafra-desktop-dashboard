@@ -1,7 +1,7 @@
 import { format } from 'date-fns';
 import html2canvas from 'html2canvas';
 import { DownloadSimple } from 'phosphor-react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { DateInput } from '../../../../components/DateInput';
@@ -144,6 +144,10 @@ export function FinancialView({
     return new Intl.NumberFormat('id').format(number);
   }
 
+  const sortedTotal = useMemo(() => {
+    return total.slice().sort((a, b) => b.totalReal - a.totalReal);
+  }, [total]);
+
   return (
     <Container>
       <header>
@@ -192,14 +196,14 @@ export function FinancialView({
           </Loader>
         )}
         <FinancialViewChart
-          allData={total}
-          labels={total.reduce((result, item) => {
+          allData={sortedTotal}
+          labels={sortedTotal.reduce((result, item) => {
             if (item.visivel) {
               result.push(item.nome);
             }
             return result;
           }, [] as string[])}
-          data={total.reduce((result, item) => {
+          data={sortedTotal.reduce((result, item) => {
             if (item.visivel) {
               result.push(item.total);
             }

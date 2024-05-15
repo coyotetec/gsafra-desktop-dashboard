@@ -20,15 +20,16 @@ export function FinancialViewChart({
   labels,
   data,
 }: FinancialViewChartProps) {
-  const [currentPage, setCurrentPage] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
   const dataToShow = useMemo(
     () => ({
+      allData: allData.slice(currentPage * 7, currentPage * 7 + 7),
       labels: labels.slice(currentPage * 7, currentPage * 7 + 7),
       data: data.slice(currentPage * 7, currentPage * 7 + 7),
     }),
-    [currentPage, labels, data],
+    [currentPage, labels, data, allData],
   );
-
+  console.log(allData);
   useEffect(() => {
     setCurrentPage(0);
   }, [data]);
@@ -107,9 +108,9 @@ export function FinancialViewChart({
                   textAlign: 'left',
                   anchor: 'end',
                   color(context) {
-                    const item = allData[context.dataIndex];
+                    const item = dataToShow.allData[context.dataIndex];
 
-                    return item.totalReal < 0 ? '#FF5555' : '#CFD4D6';
+                    return Number(item.totalReal) < 0 ? '#FF5555' : '#CFD4D6';
                   },
                   font: {
                     weight: 600,
