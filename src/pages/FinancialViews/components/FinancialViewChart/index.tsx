@@ -29,7 +29,6 @@ export function FinancialViewChart({
     }),
     [currentPage, labels, data, allData],
   );
-  console.log(allData);
   useEffect(() => {
     setCurrentPage(0);
   }, [data]);
