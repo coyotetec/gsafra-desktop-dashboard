@@ -38,6 +38,17 @@ export const Container = styled.div`
     gap: 12px;
     font-size: 14px;
 
+    .value {
+      display: block;
+      margin-top: 4px;
+      font-size: 16px;
+    }
+
+    .saca-value {
+      display: block;
+      margin-top: 8px;
+    }
+
     .contract-progress {
       .progressbar {
         width: 100%;

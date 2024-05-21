@@ -7,6 +7,7 @@ import { Spinner } from '../../../../components/Spinner';
 import { useUserContext } from '../../../../contexts/UserContext';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../../redux/store';
+import { currencyFormat } from '../../../../utils/currencyFormat';
 
 interface TotalizersProps {
   isLoading: boolean;
@@ -58,7 +59,16 @@ export function Totalizers({ isLoading }: TotalizersProps) {
       ) : (
         contractsToShow.map((contract) => (
           <div key={contract.id} className="total-contract">
-            <span>{`${contract.cliente} - ${contract.numeroContrato}`}</span>
+            <div>
+              <span>{`${contract.cliente} - ${contract.numeroContrato}`}</span>
+              <strong className="value">
+                {currencyFormat(contract.valorContrato)}
+              </strong>
+              <span className="saca-value">
+                <strong>Valor da saca: </strong>
+                {currencyFormat(contract.valorSaca)}
+              </span>
+            </div>
             <div className="contract-progress">
               <div className="progressbar">
                 <div
@@ -98,6 +108,11 @@ export function Totalizers({ isLoading }: TotalizersProps) {
                     ' Sacas',
                   )}
                 </span>
+
+                {/* <span>
+                  <strong>Valor da saca:</strong>
+                  {currencyFormat(contract.valorSaca)}
+                </span> */}
               </div>
             </div>
             <div className="contract-value">
