@@ -5,6 +5,8 @@ export interface Contrato {
   totalContrato: number;
   totalEntregue: number;
   porcentagem: number;
+  valorContrato: number;
+  valorSaca: number;
 }
 
 export interface Romaneio {

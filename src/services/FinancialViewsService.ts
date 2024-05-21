@@ -34,7 +34,7 @@ class FinancialViewsService {
 
   async findViewDetails(viewId: number, startDate: string, endDate: string) {
     const { data } = await api.get<ViewDetail[]>(
-      `/financeiro-views/${viewId}`,
+      `/financeiro-views/${viewId}/detalhes`,
       {
         params: {
           startDate,

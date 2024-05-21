@@ -3,6 +3,7 @@ import {
   useCallback,
   useEffect,
   useImperativeHandle,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -103,6 +104,12 @@ export const Discount = forwardRef<componentsRefType>((props, ref) => {
     return `${new Intl.NumberFormat('id').format(number)}${sufix || ''}`;
   }
 
+  const sortedTalhoes = useMemo(() => {
+    return discount.talhoesDescontoTotal
+      .slice()
+      .sort((a, b) => b.descontoPorcentagem - a.descontoPorcentagem);
+  }, [discount.talhoesDescontoTotal]);
+
   return (
     <Container>
       <header>
@@ -155,15 +162,15 @@ export const Discount = forwardRef<componentsRefType>((props, ref) => {
               dispatch(
                 change({
                   name: 'discountsUnit',
-                  value: e.target.checked ? 'kg' : 'sacks',
+                  value: e.target.checked ? 'kg' : 'percent',
                 }),
               )
             }
           />
         </header>
         <DiscountChart
-          labels={discount.talhoesDescontoTotal.map((i) => i.talhao)}
-          data={discount.talhoesDescontoTotal.map((i) =>
+          labels={sortedTalhoes.map((i) => i.talhao)}
+          data={sortedTalhoes.map((i) =>
             unit === 'percent' ? i.descontoPorcentagem : i.descontoReal,
           )}
           unit={unit}
