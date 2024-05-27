@@ -8,6 +8,7 @@ import { useUserContext } from '../../../../contexts/UserContext';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../../redux/store';
 import { currencyFormat } from '../../../../utils/currencyFormat';
+import { formatDate } from '../../../../utils/formatDate';
 
 interface TotalizersProps {
   isLoading: boolean;
@@ -64,9 +65,13 @@ export function Totalizers({ isLoading }: TotalizersProps) {
               <strong className="value">
                 {currencyFormat(contract.valorContrato)}
               </strong>
-              <span className="saca-value">
-                <strong>Valor da saca: </strong>
+              <span className="contract-info">
+                <strong>Preço/Saca: </strong>
                 {currencyFormat(contract.valorSaca)}
+              </span>
+              <span>
+                <strong>Vencimento: </strong>
+                {formatDate(contract.dataVencimento)}
               </span>
             </div>
             <div className="contract-progress">
@@ -108,11 +113,6 @@ export function Totalizers({ isLoading }: TotalizersProps) {
                     ' Sacas',
                   )}
                 </span>
-
-                {/* <span>
-                  <strong>Valor da saca:</strong>
-                  {currencyFormat(contract.valorSaca)}
-                </span> */}
               </div>
             </div>
             <div className="contract-value">
