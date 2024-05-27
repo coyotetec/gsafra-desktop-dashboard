@@ -7,6 +7,7 @@ export interface Contrato {
   porcentagem: number;
   valorContrato: number;
   valorSaca: number;
+  dataVencimento: Date;
 }
 
 export interface Romaneio {

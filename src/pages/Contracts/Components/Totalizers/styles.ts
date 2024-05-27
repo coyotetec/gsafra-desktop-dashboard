@@ -5,7 +5,7 @@ export const Container = styled.div`
   margin-top: 32px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 32px;
   padding: 16px;
   background: #30454c;
   border-radius: 8px;
@@ -40,13 +40,13 @@ export const Container = styled.div`
 
     .value {
       display: block;
-      margin-top: 4px;
+      margin-top: 12px;
       font-size: 16px;
     }
 
-    .saca-value {
+    .contract-info {
       display: block;
-      margin-top: 8px;
+      margin-top: 2px;
     }
 
     .contract-progress {
